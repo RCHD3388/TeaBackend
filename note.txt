@@ -1,0 +1,6 @@
+- class-validator : create-...-dto
+- useClass : kalau misalnya mau custom class yang akan digunakan MockDbProvider / DbProvider
+- useValue : untuk constant value, misalnya app config
+- useFactory : config secara langsung
+
+- dataSource pada constructor (bisa digunakan pada appModule ketika connect dengan database)
