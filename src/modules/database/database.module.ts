@@ -3,7 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { typeOrmConfig } from 'src/configs/typeorm.config';
 import { DatabaseService } from './database.service';
-import { CustomLoggerModule } from 'src/custom-logger/custom-logger.module';
+import { CustomLoggerModule } from 'src/modules/custom-logger/custom-logger.module';
 
 @Module({
   imports: [

@@ -2,9 +2,9 @@ import { Module, OnModuleInit } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { DatabaseModule } from './database/database.module';
-import { CustomLoggerModule } from './custom-logger/custom-logger.module';
-import { CustomLoggerService } from './custom-logger/logger.service';
+import { DatabaseModule } from './modules/database/database.module';
+import { CustomLoggerModule } from './modules/custom-logger/custom-logger.module';
+import { CustomLoggerService } from './modules/custom-logger/logger.service';
 
 @Module({
   imports: [

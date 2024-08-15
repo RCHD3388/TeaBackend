@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { CustomLoggerService } from 'src/custom-logger/logger.service';
+import { CustomLoggerService } from 'src/modules/custom-logger/logger.service';
 import { DataSource } from 'typeorm';
 
 @Injectable()
