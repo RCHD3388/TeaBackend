@@ -5,12 +5,14 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { DatabaseModule } from './modules/database/database.module';
 import { CustomLoggerModule } from './modules/custom-logger/custom-logger.module';
 import { CustomLoggerService } from './modules/custom-logger/logger.service';
+import { UserModule } from './modules/user/user.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     DatabaseModule,
-    CustomLoggerModule
+    CustomLoggerModule,
+    UserModule
   ],
   controllers: [AppController],
   providers: [AppService],
