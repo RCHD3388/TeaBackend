@@ -1,7 +1,6 @@
 import { Module, OnModuleInit } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { typeOrmConfig } from 'src/configs/typeorm.config';
+import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { DatabaseService } from './database.service';
 import { CustomLoggerModule } from 'src/modules/custom-logger/custom-logger.module';
 
@@ -10,7 +9,17 @@ import { CustomLoggerModule } from 'src/modules/custom-logger/custom-logger.modu
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: typeOrmConfig
+      useFactory: (configService: ConfigService): TypeOrmModuleOptions => ({
+        type: configService.get<'postgres'|'mysql'|'mongodb'>(`DB_TYPE`),
+        host: configService.get<string>(`database.host`),
+        port: configService.get<number>(`database.port`),
+        username: configService.get<string>(`database.username`),
+        password: configService.get<string>(`database.password`),
+        database: configService.get<string>(`database.database`),
+        entities: [],
+        autoLoadEntities: true,
+        synchronize: false 
+    })
     }),
     CustomLoggerModule,
   ],
