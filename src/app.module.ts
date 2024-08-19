@@ -6,10 +6,14 @@ import { DatabaseModule } from './modules/database/database.module';
 import { CustomLoggerModule } from './modules/custom-logger/custom-logger.module';
 import { CustomLoggerService } from './modules/custom-logger/logger.service';
 import { UserModule } from './modules/user/user.module';
+import databaseConfig from './configs/database.config';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({ 
+      isGlobal: true, 
+      load: [databaseConfig]
+    }),
     DatabaseModule,
     CustomLoggerModule,
     UserModule
