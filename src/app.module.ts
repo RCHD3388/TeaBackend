@@ -7,12 +7,32 @@ import { CustomLoggerModule } from './modules/custom-logger/custom-logger.module
 import { CustomLoggerService } from './modules/custom-logger/logger.service';
 import { UserModule } from './modules/user/user.module';
 import databaseConfig from './configs/database.config';
+import { GraphQLModule } from '@nestjs/graphql';
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
+import { join } from 'path';
+import { DirectiveLocation, GraphQLDirective } from 'graphql';
+import { upperDirectiveTransformer } from './common/directives/upper-case.directive';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ 
-      isGlobal: true, 
+    ConfigModule.forRoot({
+      isGlobal: true,
       load: [databaseConfig]
+    }),
+    GraphQLModule.forRoot<ApolloDriverConfig>({
+      driver: ApolloDriver,
+      autoSchemaFile: 'schema.gql',
+      transformSchema: schema => upperDirectiveTransformer(schema, 'upper'),
+      installSubscriptionHandlers: true,
+      buildSchemaOptions: {
+        directives: [
+          new GraphQLDirective({
+            name: 'upper',
+            locations: [DirectiveLocation.FIELD_DEFINITION],
+          }),
+        ],
+      },
     }),
     DatabaseModule,
     CustomLoggerModule,

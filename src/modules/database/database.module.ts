@@ -15,7 +15,7 @@ import { CustomLoggerModule } from 'src/modules/custom-logger/custom-logger.modu
         port: configService.get<number>(`database.port`),
         username: configService.get<string>(`database.username`),
         password: configService.get<string>(`database.password`),
-        database: configService.get<string>(`database.database`),
+        database: configService.get<string>(`database.name`),
         entities: [],
         autoLoadEntities: true,
         synchronize: false 
