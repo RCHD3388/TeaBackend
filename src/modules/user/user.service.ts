@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
 import { JwtService } from '@nestjs/jwt';
+import { CreateUserInput } from './dto/create-user.dto';
 
 @Injectable()
 export class UserService {
@@ -28,5 +29,28 @@ export class UserService {
       return result;
     }
     return null;
+   }
+
+  async findAll(): Promise<User[]> {
+    return await this.userRepository.find();
+  }
+
+  async findOne(id: number): Promise<User> {
+    return await this.userRepository.findOneBy({ id });
+  }
+
+  async createUser(createUserInput: CreateUserInput): Promise<User> {
+    const { username, email, password, phone } = createUserInput;
+
+    // Hash the password before saving
+    const hashedPassword = password;
+
+    const user = this.userRepository.create({
+      username,
+      email,
+      password: hashedPassword,
+      phone,
+    });
+    return await this.userRepository.save(user);
   }
 }
