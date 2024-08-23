@@ -6,6 +6,7 @@ import { DatabaseModule } from './modules/database/database.module';
 import { CustomLoggerModule } from './modules/custom-logger/custom-logger.module';
 import { CustomLoggerService } from './modules/custom-logger/logger.service';
 import { UserModule } from './modules/user/user.module';
+import { GraphQLModule } from '@nestjs/graphql';
 import databaseConfig from './configs/database.config';
 
 @Module({
@@ -16,16 +17,22 @@ import databaseConfig from './configs/database.config';
     }),
     DatabaseModule,
     CustomLoggerModule,
-    UserModule
+    UserModule,
+    GraphQLModule.forRoot({
+      autoSchemaFile: true,
+      playground: true,
+    }),
   ],
   controllers: [AppController],
   providers: [AppService],
 })
+
 export class AppModule implements OnModuleInit {
   constructor(
     private readonly logger: CustomLoggerService,
     private readonly configService: ConfigService
   ) { }
+
   onModuleInit() {
     let appEnv: string = this.configService.get<string>("APP_ENV");
     this.logger.log(`App is running in \"${appEnv}\" mode`);
