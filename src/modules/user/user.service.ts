@@ -12,11 +12,11 @@ export class UserService {
   ) { }
 
   async findAll(): Promise<User[]> {
-    return this.userRepository.find();
+    return await this.userRepository.find();
   }
 
   async findOne(id: number): Promise<User> {
-    return this.userRepository.findOneBy({ id });
+    return await this.userRepository.findOneBy({ id });
   }
 
   async createUser(createUserInput: CreateUserInput): Promise<User> {
@@ -31,6 +31,6 @@ export class UserService {
       password: hashedPassword,
       phone,
     });
-    return this.userRepository.save(user);
+    return await this.userRepository.save(user);
   }
 }
