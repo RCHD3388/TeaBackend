@@ -6,12 +6,16 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { DirectiveLocation, GraphQLDirective } from 'graphql';
 import { upperDirectiveTransformer } from './common/directives/upper-case.directive';
+import { DatabaseModule } from './database/database.module';
+import { AppResolver } from './app.resolver';
+import databaseConfig from './configs/database.config';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       cache: true,
-      isGlobal: true
+      isGlobal: true,
+      load: [databaseConfig]
     }),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
@@ -27,10 +31,10 @@ import { upperDirectiveTransformer } from './common/directives/upper-case.direct
         ],
       },
     }),
+    DatabaseModule,
     CustomLoggerModule,
   ],
-  controllers: [],
-  providers: [],
+  providers: [AppResolver],
 })
 export class AppModule implements OnModuleInit {
   constructor(
