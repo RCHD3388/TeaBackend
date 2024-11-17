@@ -8,7 +8,6 @@ import { CustomLoggerService } from './modules/custom-logger/logger.service';
 import { UserModule } from './modules/user/user.module';
 import { GraphQLModule } from '@nestjs/graphql';
 import databaseConfig from './configs/database.config';
-import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
 import { join } from 'path';
@@ -38,10 +37,10 @@ import { upperDirectiveTransformer } from './common/directives/upper-case.direct
     DatabaseModule,
     CustomLoggerModule,
     UserModule,
-    GraphQLModule.forRoot({
-      autoSchemaFile: true,
-      playground: true,
-    }),
+    // GraphQLModule.forRoot({
+    //   autoSchemaFile: true,
+    //   playground: true,
+    // }),
   ],
   controllers: [AppController],
   providers: [AppService],
