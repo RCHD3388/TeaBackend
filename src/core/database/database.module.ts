@@ -3,19 +3,28 @@ import { Module, OnModuleInit } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { DatabaseService } from './database.service';
-import { CustomLoggerModule } from 'src/core/custom_logger/custom-logger.module';
+import { SeederService } from './seeder.service';
+import { CustomLoggerModule } from '../custom_logger/custom-logger.module';
+import { User, UserSchema } from '../../feature_module/user/user.schema'
+import databaseConfig from '../../common/configs/database.config';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      cache: true,
+      isGlobal: true,
+      load: [databaseConfig]
+    }),
     ConfigModule,
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: DatabaseService.createMongooseOptions,
       inject: [ConfigService],
     }),
+    MongooseModule.forFeature([{ name: User.name, schema: UserSchema}]),
     CustomLoggerModule
   ],
-  providers: [DatabaseService],
+  providers: [DatabaseService, SeederService],
   exports: [MongooseModule],
 })
 

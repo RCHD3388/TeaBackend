@@ -8,16 +8,10 @@ import { DirectiveLocation, GraphQLDirective } from 'graphql';
 import { upperDirectiveTransformer } from './common/directives/upper-case.directive';
 import { DatabaseModule } from './core/database/database.module';
 import { AppResolver } from './app.resolver';
-import { UsersModule } from './feature_module/users/users.module';
-import databaseConfig from './common/configs/database.config';
+import { UsersModule } from './feature_module/user/user.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      cache: true,
-      isGlobal: true,
-      load: [databaseConfig]
-    }),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: 'schema.gql',
