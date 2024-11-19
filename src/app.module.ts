@@ -1,7 +1,7 @@
 import { Module, OnModuleInit } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { CustomLoggerModule } from './core/custom-logger/custom-logger.module';
-import { CustomLoggerService } from './core/custom-logger/logger.service';
+import { CustomLoggerModule } from './core/custom_logger/custom-logger.module';
+import { CustomLoggerService } from './core/custom_logger/logger.service';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { DirectiveLocation, GraphQLDirective } from 'graphql';
