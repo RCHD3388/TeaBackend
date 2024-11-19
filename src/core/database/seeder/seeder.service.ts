@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { CustomLoggerService } from '../../custom-logger/logger.service';
+import { CustomLoggerService } from 'src/modules/custom-logger/logger.service';
 import { User } from './schemas/user.schema';
 
 @Injectable()

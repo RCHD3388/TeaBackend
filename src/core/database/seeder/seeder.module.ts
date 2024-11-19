@@ -3,8 +3,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { DatabaseService } from '../database.service';
 import { SeederService } from './seeder.service';
-import { CustomLoggerModule } from '../../custom-logger/custom-logger.module';
-import databaseConfig from '../../../common/configs/database.config';
+import { CustomLoggerModule } from 'src/modules/custom-logger/custom-logger.module';
+import databaseConfig from 'src/configs/database.config';
 import { UserSchema } from './schemas/user.schema';
 
 @Module({})
