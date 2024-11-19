@@ -1,23 +1,17 @@
 import { Module, OnModuleInit } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { CustomLoggerModule } from './core/custom-logger/custom-logger.module';
-import { CustomLoggerService } from './core/custom-logger/logger.service';
+import { CustomLoggerModule } from './core/custom_logger/custom-logger.module';
+import { CustomLoggerService } from './core/custom_logger/logger.service';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { DirectiveLocation, GraphQLDirective } from 'graphql';
 import { upperDirectiveTransformer } from './common/directives/upper-case.directive';
 import { DatabaseModule } from './core/database/database.module';
 import { AppResolver } from './app.resolver';
-import { UsersModule } from './feature_module/users/users.module';
-import databaseConfig from './common/configs/database.config';
+import { UsersModule } from './feature_module/user/user.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      cache: true,
-      isGlobal: true,
-      load: [databaseConfig]
-    }),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: 'schema.gql',
