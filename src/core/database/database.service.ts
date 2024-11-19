@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectConnection, MongooseModuleOptions } from '@nestjs/mongoose';
 import { Connection } from 'mongoose';
-import { CustomLoggerService } from 'src/core/custom-logger/logger.service';
+import { CustomLoggerService } from 'src/core/custom_logger/logger.service';
 
 @Injectable()
 export class DatabaseService {
