@@ -7,6 +7,10 @@ import { SeederService } from './seeder.service';
 import { CustomLoggerModule } from '../custom_logger/custom-logger.module';
 import { User, UserSchema } from '../../feature_module/user/user.schema'
 import databaseConfig from '../../common/configs/database.config';
+import { Person, PersonSchema } from 'src/feature_module/person/person.schema';
+import { Employee, EmployeeSchema } from 'src/feature_module/person/employee.schema';
+import { EmployeeRole, EmployeeRoleSchema } from 'src/feature_module/person/employee-role.schema';
+import { Supplier, SupplierSchema } from 'src/feature_module/person/supplier.schema';
 
 @Module({
   imports: [
@@ -21,7 +25,13 @@ import databaseConfig from '../../common/configs/database.config';
       useFactory: DatabaseService.createMongooseOptions,
       inject: [ConfigService],
     }),
-    MongooseModule.forFeature([{ name: User.name, schema: UserSchema}]),
+    MongooseModule.forFeature([
+      { name: User.name, schema: UserSchema },
+      { name: Person.name, schema: PersonSchema },
+      { name: Employee.name, schema: EmployeeSchema },
+      { name: EmployeeRole.name, schema: EmployeeRoleSchema },
+      { name: Supplier.name, schema: SupplierSchema },
+    ]),
     CustomLoggerModule
   ],
   providers: [DatabaseService, SeederService],

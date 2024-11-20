@@ -3,19 +3,20 @@ import { Schema, Document } from 'mongoose';
 export const PersonSchema = new Schema({
   name: {
     type: String,
-    required: true
+    required: true,
   },
   email: {
-    type: String, required: true,
-    unique: true
+    type: String,
+    required: true,
+    unique: true,
   },
   phone_number: {
     type: String,
-    required: true
+    required: true,
   },
   address: {
     type: String,
-    required: true
+    required: true,
   },
 });
 

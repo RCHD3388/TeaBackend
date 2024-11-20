@@ -18,17 +18,24 @@ export class DatabaseService {
     const password = configService.get<string>("database.password")
     const name = configService.get<string>("database.name");
 
-    let uri = url.replace("<USERNAME>", username).replace("<PASSWORD>", password).replace("<DATABASE>", name);
+    let uri = url;
+    if (url.includes('<USERNAME>') && url.includes('<PASSWORD>') && url.includes('<DATABASE>')) {
+      uri = url
+        .replace('<USERNAME>', username || '')
+        .replace('<PASSWORD>', password || '')
+        .replace('<DATABASE>', name);
+    }
 
     return {
-      uri 
+      uri,
     };
   }
-  checkConnection(){  
-    if(this.connection.readyState == 1){
-      this.logger.log(`MongoDB connection is successful to database ${this.connection.name} !`);
-    }else{
-      this.logger.log('MongoDB connection is successful!');
+
+  checkConnection() {  
+    if (this.connection.readyState === 1) {
+      this.logger.log(`MongoDB connection is successful to database ${this.connection.name}!`);
+    } else {
+      this.logger.log('MongoDB connection is not established!');
     }
   }
 }

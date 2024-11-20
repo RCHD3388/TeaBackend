@@ -1,24 +1,24 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
+import { Document, Types } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 
 @Schema()
-export class User {
-  @Prop({ required: true })
-  name: string;
+export class User extends Document {
+  @Prop({ type: String, required: true })
+  username: string;
 
-  @Prop({ required: true, unique: true })
-  email: string;
-
-  @Prop({ required: true })
+  @Prop({ type: String, required: true })
   password: string;
 
-  @Prop({ default: Date.now })
-  createdAt: Date;
+  @Prop({ type: String, required: true })
+  status: string;
+
+  @Prop({ type: Types.ObjectId, ref: 'Employee', required: true })
+  employee: Types.ObjectId; // Reference to Employee
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
 
-// Tambahkan pre-hook untuk hashing password
 UserSchema.pre('save', async function (next) {
   if (this.isModified('password')) {
     const salt = await bcrypt.genSalt(10);
