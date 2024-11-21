@@ -9,12 +9,14 @@ async function bootstrap() {
   const logger = new CustomLoggerService();
 
   try {
-    const app = await NestFactory.createApplicationContext(SeederModule.register());
+    const app = await NestFactory.createApplicationContext(
+      SeederModule.register()
+    );
     const seeder = app.get(SeederService);
-    
+
     await seeder.seed();
     logger.log('Seeding completed successfully');
-    
+
     await app.close();
     process.exit(0);
   } catch (error) {

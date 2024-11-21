@@ -1,6 +1,7 @@
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
-
+import { ObjectType, Field, ID } from '@nestjs/graphql';
+@ObjectType()
 @Schema({ timestamps: true })
 export class ProjectClosing extends Document {
   @Prop({ type: Types.ObjectId, ref: 'Employee', required: true })
@@ -16,4 +17,5 @@ export class ProjectClosing extends Document {
   tool_left: string[]; // Array of tool transactions
 }
 
-export const ProjectClosingSchema = SchemaFactory.createForClass(ProjectClosing);
+export const ProjectClosingSchema =
+  SchemaFactory.createForClass(ProjectClosing);

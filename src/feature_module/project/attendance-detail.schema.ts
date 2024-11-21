@@ -1,6 +1,7 @@
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
-
+import { ObjectType, Field, ID } from '@nestjs/graphql';
+@ObjectType()
 @Schema({ timestamps: true })
 export class AttendanceDetail extends Document {
   @Prop({ type: Types.ObjectId, ref: 'Employee', required: true })
@@ -16,4 +17,5 @@ export class AttendanceDetail extends Document {
   note: string; // Additional notes
 }
 
-export const AttendanceDetailSchema = SchemaFactory.createForClass(AttendanceDetail);
+export const AttendanceDetailSchema =
+  SchemaFactory.createForClass(AttendanceDetail);

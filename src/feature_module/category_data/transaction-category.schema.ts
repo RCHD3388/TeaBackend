@@ -1,6 +1,7 @@
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-
+import { ObjectType, Field, ID } from '@nestjs/graphql';
+@ObjectType()
 @Schema({ timestamps: true })
 export class TransactionCategory extends Document {
   @Prop({ type: String, required: true })
@@ -13,4 +14,5 @@ export class TransactionCategory extends Document {
   counter: number;
 }
 
-export const TransactionCategorySchema = SchemaFactory.createForClass(TransactionCategory);
+export const TransactionCategorySchema =
+  SchemaFactory.createForClass(TransactionCategory);

@@ -10,13 +10,18 @@ import { upperDirectiveTransformer } from './common/directives/upper-case.direct
 import { DatabaseModule } from './core/database/database.module';
 import { AppResolver } from './app.resolver';
 import { UsersModule } from './feature_module/user/user.module';
+import { ProjectModule } from './modules/project/project.module'; // Import your ProjectModule
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true, // Makes ConfigModule available throughout the app
+      load: [databaseConfig],
+    }),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: 'schema.gql',
-      transformSchema: schema => upperDirectiveTransformer(schema, 'upper'),
+      transformSchema: (schema) => upperDirectiveTransformer(schema, 'upper'),
       installSubscriptionHandlers: true,
       buildSchemaOptions: {
         directives: [
@@ -30,6 +35,7 @@ import { UsersModule } from './feature_module/user/user.module';
     DatabaseModule,
     CustomLoggerModule,
     UsersModule,
+    ProjectModule, // Add the ProjectModule to the imports array
   ],
   providers: [AppResolver],
 })
@@ -38,10 +44,10 @@ export class AppModule implements OnModuleInit {
   constructor(
     private readonly logger: CustomLoggerService,
     private readonly configService: ConfigService
-  ) { }
+  ) {}
 
   onModuleInit() {
-    let appEnv: string = this.configService.get<string>("APP_ENV");
-    this.logger.log(`App is running in \"${appEnv}\" mode`);
+    const appEnv: string = this.configService.get<string>('APP_ENV');
+    this.logger.log(`App is running in "${appEnv}" mode`);
   }
 }

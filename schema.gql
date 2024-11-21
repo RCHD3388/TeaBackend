@@ -4,6 +4,58 @@
 
 directive @upper on FIELD_DEFINITION
 
+type Project {
+  _id: ID!
+  name: String!
+  location: String!
+  description: String
+  target_date: DateTime
+  finished_at: DateTime
+  priority: String!
+  status: String!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
 type Query {
   getHello: String!
+  projects: [Project!]!
+  project(id: String!): Project!
+}
+
+type Mutation {
+  createProject(data: CreateProjectInput!): Project!
+  updateProject(id: String!, data: UpdateProjectInput!): Project!
+  deleteProject(id: String!): Boolean!
+}
+
+input CreateProjectInput {
+  name: String!
+  location: String!
+  description: String
+  target_date: DateTime
+  finished_at: DateTime
+  priority: String!
+  status: String!
+  project_leader: String
+  worker: [String!]
+  attendance: [String!]
+  project_closing: String
+}
+
+input UpdateProjectInput {
+  name: String
+  location: String
+  description: String
+  target_date: DateTime
+  finished_at: DateTime
+  priority: String
+  status: String
+  project_leader: String
+  worker: [String!]
+  attendance: [String!]
+  project_closing: String
 }

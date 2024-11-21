@@ -1,14 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { CustomLoggerService } from 'src/modules/custom-logger/logger.service';
+import { CustomLoggerService } from '../../custom_logger/logger.service';
 import { User } from './schemas/user.schema';
 
 @Injectable()
 export class SeederService {
   constructor(
     @InjectModel('User') private readonly userModel: Model<User>,
-    private readonly logger: CustomLoggerService,
+    private readonly logger: CustomLoggerService
   ) {}
 
   async seed() {
@@ -18,7 +18,6 @@ export class SeederService {
 
   private async seedUsers() {
     this.logger.log('Seeding users...');
-    
     const users = [
       {
         email: 'admin@example.com',

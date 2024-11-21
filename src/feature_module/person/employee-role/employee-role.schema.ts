@@ -1,17 +1,14 @@
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 import { ObjectType, Field, ID } from '@nestjs/graphql';
-@ObjectType()
-@Schema({ timestamps: true })
-export class CategoryData extends Document {
+
+@Schema()
+export class EmployeeRole extends Document {
   @Prop({ type: String, required: true })
   name: string;
 
-  @Prop({ type: String })
-  description: string;
-
   @Prop({ type: String, required: true })
-  type: string;
+  description: string;
 }
 
-export const CategoryDataSchema = SchemaFactory.createForClass(CategoryData);
+export const EmployeeRoleSchema = SchemaFactory.createForClass(EmployeeRole);

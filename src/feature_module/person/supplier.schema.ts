@@ -1,6 +1,7 @@
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
-
+import { ObjectType, Field, ID } from '@nestjs/graphql';
+@ObjectType()
 @Schema()
 export class Supplier extends Document {
   @Prop({ type: String, required: true })
