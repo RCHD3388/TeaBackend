@@ -2,8 +2,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { SeederModule } from './seeder.module';
 import { SeederService } from './seeder.service';
-import databaseConfig from 'src/configs/database.config';
-import { CustomLoggerService } from 'src/modules/custom-logger/logger.service';
+import databaseConfig from '../../../common/configs/database.config';
+import { CustomLoggerService } from '../../custom_logger/logger.service';
 
 async function bootstrap() {
   const logger = new CustomLoggerService();

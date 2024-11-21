@@ -12,6 +12,17 @@ export class Warehouse extends Document {
   @Prop({ type: String, required: true })
   type: string;
 
+  @Prop({
+    type: String,
+    required: true,
+    enum: ['active', 'inactive'],
+    default: 'active',
+  })
+  status: string;
+
+  @Prop({ type: String, required: true })
+  address: string;
+
   @Prop({ type: Types.ObjectId, ref: 'Project' })
   project: string;
 
