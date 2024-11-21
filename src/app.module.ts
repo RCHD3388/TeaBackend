@@ -9,9 +9,9 @@ import { DirectiveLocation, GraphQLDirective } from 'graphql';
 import { upperDirectiveTransformer } from './common/directives/upper-case.directive';
 import { DatabaseModule } from './core/database/database.module';
 import { AppResolver } from './app.resolver';
-import { UsersModule } from './feature_module/user/user.module';
 import { ProjectModule } from './modules/project/project.module'; // Import your ProjectModule
-
+import { BrandModule } from './feature_module/inventory/brand/brand.module';
+import { WarehouseModule } from './feature_module/inventory/warehouse/warehouse.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -33,8 +33,10 @@ import { ProjectModule } from './modules/project/project.module'; // Import your
       },
     }),
     DatabaseModule,
+    BrandModule,
+    WarehouseModule,
     CustomLoggerModule,
-    UsersModule,
+
     ProjectModule, // Add the ProjectModule to the imports array
   ],
   providers: [AppResolver],

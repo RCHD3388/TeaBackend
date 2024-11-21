@@ -20,16 +20,59 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+type Brand {
+  name: String!
+  description: String
+}
+
+type Warehouse {
+  name: String!
+  description: String
+  status: String!
+  address: String!
+  project: String
+  tool_transaction: [String!]!
+  material_transaction: [String!]!
+}
+
 type Query {
   getHello: String!
+  brands: [Brand!]!
+  warehouses: [Warehouse!]!
+  warehouse(id: String!): Warehouse!
   projects: [Project!]!
   project(id: String!): Project!
 }
 
 type Mutation {
+  createBrand(brand: CreateBrandInput!): Brand!
+  createWarehouse(createWarehouseInput: CreateWarehouseInput!): Warehouse!
+  updateWarehouse(id: String!, warehouse: UpdateWarehouseInput!): Warehouse!
+  deactivateWarehouse(id: String!): Warehouse!
   createProject(data: CreateProjectInput!): Project!
   updateProject(id: String!, data: UpdateProjectInput!): Project!
   deleteProject(id: String!): Boolean!
+}
+
+input CreateBrandInput {
+  name: String!
+  description: String
+}
+
+input CreateWarehouseInput {
+  name: String!
+  description: String
+  type: String!
+  project: String
+  address: String!
+}
+
+input UpdateWarehouseInput {
+  name: String!
+  description: String
+  type: String!
+  status: String
+  address: String!
 }
 
 input CreateProjectInput {

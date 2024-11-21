@@ -6,6 +6,7 @@ import { CreateBrandInput } from "./dto/create-brand.input";
 @Injectable()
 export class BrandService {
     constructor(@InjectModel(Brand.name) private readonly brandModel: Model<Brand>) {}
+
     async findAll(): Promise<Brand[]> {
         return await this.brandModel.find();
     }

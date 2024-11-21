@@ -3,6 +3,7 @@ import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import { Warehouse } from "./warehouse.schema";
 import { CreateWarehouseInput } from "./dto/create-warehouse.input";
+import { UpdateWarehouseInput } from "./dto/update-warehouse.input";
 @Injectable()
 export class WarehouseService {
     constructor(@InjectModel(Warehouse.name) private readonly warehouseModel: Model<Warehouse>) { }
@@ -19,7 +20,7 @@ export class WarehouseService {
         const newWarehouse = new this.warehouseModel({ ...createWarehouseInput });
         return newWarehouse.save();
     }
-    async update(id: string, warehouse: Warehouse): Promise<Warehouse> {
+    async update(id: string, warehouse: UpdateWarehouseInput): Promise<Warehouse> {
         return await this.warehouseModel.findByIdAndUpdate(id, warehouse, { new: true });
     }
 
