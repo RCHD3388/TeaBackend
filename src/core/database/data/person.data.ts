@@ -1,6 +1,6 @@
-import { User } from "../../../feature_module/user/user.schema";
+import { Person } from "src/feature_module/person/person.schema"
 
-export const userData: Partial<User>[] = [
-  { name: 'John Doe', email: 'john@example.com', password: 'password123' },
-  { name: 'Jane Doe', email: 'jane@example.com', password: 'password123' },
+export const userData: Partial<Person>[] = [
+  { name: 'John Doe', email: 'john@example.com',  },
+  { name: 'Jane Doe', email: 'jane@example.com', },
 ]
