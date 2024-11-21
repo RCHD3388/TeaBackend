@@ -10,9 +10,11 @@ export class CustomLoggerService implements LoggerService {
       format.timestamp(),
       format.printf(({ level, message, timestamp }) => {
         return `${timestamp} [${level}]: ${message}`;
-      })
+      }),
     ),
-    transports: [new transports.Console()],
+    transports: [
+      new transports.Console(), 
+    ],
   });
 
   log(message: string) {
