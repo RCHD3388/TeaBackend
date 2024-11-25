@@ -1,5 +1,0 @@
-type EmployeeRole {
-  _id: ID!
-  name: String!
-  description: String!
-}

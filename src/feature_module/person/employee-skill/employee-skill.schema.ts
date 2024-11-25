@@ -2,11 +2,13 @@ import { ObjectType, Field } from '@nestjs/graphql';
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 
+@ObjectType()
 @Schema()
 export class EmployeeSkill extends Document {
+  @Field()
   @Prop({ type: String, required: true })
   name: string;
-
+  @Field()
   @Prop({ type: String })
   description?: string;
 }

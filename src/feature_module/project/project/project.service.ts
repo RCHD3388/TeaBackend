@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Project } from '../../feature_module/project/project.schema';
+import { Project } from './project.schema';
 import { CreateProjectInput } from './dto/create-project.input';
 import { UpdateProjectInput } from './dto/update-project.input';
 
@@ -13,10 +13,7 @@ export class ProjectService {
 
   // Fetch all projects
   async findAll(): Promise<Project[]> {
-    return this.projectModel
-      .find()
-      .populate('project_leader worker attendance project_closing') // Populates referenced fields
-      .exec();
+    return this.projectModel.find();
   }
 
   // Fetch a single project by ID

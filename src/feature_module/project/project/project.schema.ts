@@ -22,6 +22,10 @@ export class Project extends Document {
 
   @Field({ nullable: true })
   @Prop({ type: Date })
+  created_at?: Date;
+
+  @Field({ nullable: true })
+  @Prop({ type: Date })
   target_date?: Date;
 
   @Field({ nullable: true })
@@ -29,13 +33,13 @@ export class Project extends Document {
   finished_at?: Date;
 
   @Field()
-  @Prop({ type: String, enum: ['low', 'medium', 'high'], required: true })
+  @Prop({ type: String, enum: ['Penting', 'Biasa', 'Sedang'], required: true })
   priority: string;
 
   @Field()
   @Prop({
     type: String,
-    enum: ['ongoing', 'completed', 'closed'],
+    enum: ['Selesai', 'Proses'],
     required: true,
   })
   status: string;

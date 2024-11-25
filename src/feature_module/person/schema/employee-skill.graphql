@@ -1,5 +1,0 @@
-type EmployeeSkill {
-  _id: ID!
-  name: String!
-  description: String
-}

@@ -23,7 +23,7 @@ import {
 import {
   Project,
   ProjectSchema,
-} from 'src/feature_module/project/project.schema';
+} from '../../feature_module/project/project/project.schema';
 
 @Module({
   imports: [

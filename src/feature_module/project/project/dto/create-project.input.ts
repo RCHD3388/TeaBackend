@@ -12,10 +12,13 @@ export class CreateProjectInput {
   description?: string;
 
   @Field({ nullable: true })
-  target_date?: Date;
+  created_at?: Date;
 
   @Field({ nullable: true })
   finished_at?: Date;
+
+  @Field({ nullable: true })
+  target_date?: Date;
 
   @Field()
   priority: 'low' | 'medium' | 'high';
@@ -23,15 +26,15 @@ export class CreateProjectInput {
   @Field()
   status: 'ongoing' | 'completed' | 'closed';
 
-  @Field({ nullable: true })
-  project_leader?: string;
+  // @Field({ nullable: true })
+  // project_leader?: string;
 
-  @Field(() => [String], { nullable: true })
-  worker?: string[];
+  // @Field(() => [String], { nullable: true })
+  // worker?: string[];
 
-  @Field(() => [String], { nullable: true })
-  attendance?: string[];
+  // @Field(() => [String], { nullable: true })
+  // attendance?: string[];
 
-  @Field({ nullable: true })
-  project_closing?: string;
+  // @Field({ nullable: true })
+  // project_closing?: string;
 }

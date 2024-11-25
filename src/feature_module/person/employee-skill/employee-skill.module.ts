@@ -11,9 +11,6 @@ import { GraphQLModule } from '@nestjs/graphql';
     MongooseModule.forFeature([
       { name: EmployeeSkill.name, schema: EmployeeSkillSchema },
     ]),
-    GraphQLModule.forRoot({
-      typePaths: [join(process.cwd(), '../schema/employee-skill.graphql')],
-    }),
   ],
   providers: [EmployeeSkillResolver, EmployeeSkillService],
 })

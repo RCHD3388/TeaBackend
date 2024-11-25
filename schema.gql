@@ -9,6 +9,7 @@ type Project {
   name: String!
   location: String!
   description: String
+  created_at: DateTime
   target_date: DateTime
   finished_at: DateTime
   priority: String!
@@ -36,26 +37,20 @@ input CreateProjectInput {
   name: String!
   location: String!
   description: String
-  target_date: DateTime
+  created_at: DateTime
   finished_at: DateTime
+  target_date: DateTime
   priority: String!
   status: String!
-  project_leader: String
-  worker: [String!]
-  attendance: [String!]
-  project_closing: String
 }
 
 input UpdateProjectInput {
   name: String
   location: String
   description: String
-  target_date: DateTime
+  created_at: DateTime
   finished_at: DateTime
+  target_date: DateTime
   priority: String
   status: String
-  project_leader: String
-  worker: [String!]
-  attendance: [String!]
-  project_closing: String
 }
