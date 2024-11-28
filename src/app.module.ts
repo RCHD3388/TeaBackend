@@ -10,6 +10,8 @@ import { upperDirectiveTransformer } from './common/directives/upper-case.direct
 import { DatabaseModule } from './core/database/database.module';
 import { AppResolver } from './app.resolver';
 import { UsersModule } from './feature_module/user/user.module';
+import { ProjectModule } from './feature_module/project/project.module';
+import { PersonModule } from './feature_module/person/person.module';
 
 @Module({
   imports: [
@@ -30,6 +32,8 @@ import { UsersModule } from './feature_module/user/user.module';
     DatabaseModule,
     CustomLoggerModule,
     UsersModule,
+    ProjectModule,
+    PersonModule,
   ],
   providers: [AppResolver],
 })
