@@ -4,6 +4,21 @@
 
 directive @upper on FIELD_DEFINITION
 
+type LoginResponse {
+  username: String!
+  access_token: String!
+}
+
 type Query {
   getHello: String!
+}
+
+type Mutation {
+  login(data: LoginInput!): LoginResponse!
+  create_project: String!
+}
+
+input LoginInput {
+  username: String!
+  password: String!
 }

@@ -27,6 +27,7 @@ import { PersonModule } from './feature_module/person/person.module';
           }),
         ],
       },
+      context: ({ req }) => ({ req })
     }),
     DatabaseModule,
     CustomLoggerModule,

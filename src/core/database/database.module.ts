@@ -16,7 +16,6 @@ import { Employee, EmployeeRole, EmployeeRoleSchema, EmployeeSchema, EmployeeSki
       isGlobal: true,
       load: [databaseConfig]
     }),
-    ConfigModule,
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: DatabaseService.createMongooseOptions,
