@@ -16,4 +16,7 @@ export class BrandResolver {
     async createBrand(@Args('brand') brand: CreateBrandInput): Promise<Brand> {
         return await this.brandService.create(brand);
     }
+    async brand(@Args('id') id: string): Promise<Brand> {
+        return await this.brandService.findById(id);
+    }
 }

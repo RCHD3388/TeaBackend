@@ -3,6 +3,8 @@ import { Document, Types } from 'mongoose';
 
 @Schema({ timestamps: true })
 export class Material extends Document {
+  @Prop({ type: String, required: true, unique: true })
+  id: string;
   @Prop({ type: String, required: true })
   name: string;
 

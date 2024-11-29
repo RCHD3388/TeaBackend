@@ -11,7 +11,11 @@ export class BrandService {
         return await this.brandModel.find();
     }
     async findById(id: string): Promise<Brand> {
-        return await this.brandModel.findById(id);
+        const brand = await this.brandModel.findById(id);
+        if (!brand) {
+            throw new Error(`Brand with ID "${id}" not found`);
+        }
+        return brand;
     }
     async create(createBrandInput: CreateBrandInput): Promise<Brand> {
         const newBrand = new this.brandModel({ ...createBrandInput });
@@ -19,7 +23,11 @@ export class BrandService {
       }
       
     async update(id: string, brand: Brand): Promise<Brand> {
-        return await this.brandModel.findByIdAndUpdate(id, brand, { new: true });
+        const updatedBrand = await this.brandModel.findByIdAndUpdate(id, brand, { new: true });
+        if (!updatedBrand) {
+            throw new Error(`Brand with ID "${id}" not found`);
+        }
+        return updatedBrand;
     }
     async delete(id: string): Promise<Brand> {
         return await this.brandModel.findByIdAndDelete(id);

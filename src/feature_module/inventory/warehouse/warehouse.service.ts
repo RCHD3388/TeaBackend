@@ -13,7 +13,11 @@ export class WarehouseService {
     }
 
     async findById(id: string): Promise<Warehouse> {
-        return await this.warehouseModel.findById(id);
+        const warehouse = await this.warehouseModel.findById(id);        
+        if (!warehouse) {
+            throw new Error(`Warehouse with ID "${id}" not found`);
+        }
+        return warehouse;
     }
 
     async create(createWarehouseInput: CreateWarehouseInput): Promise<Warehouse> {
@@ -21,9 +25,15 @@ export class WarehouseService {
         return newWarehouse.save();
     }
     async update(id: string, warehouse: UpdateWarehouseInput): Promise<Warehouse> {
-        return await this.warehouseModel.findByIdAndUpdate(id, warehouse, { new: true });
+        const updatedWarehouse = await this.warehouseModel.findByIdAndUpdate(id, warehouse, { new: true });
+        if (!updatedWarehouse) {
+            throw new Error(`Warehouse with ID "${id}" not found`);
+        }
+        return updatedWarehouse;
     }
-
+    async activate(id: string): Promise<Warehouse> {
+        return await this.warehouseModel.findByIdAndUpdate(id, { isActive: true }, { new: true });
+    }
     async deactivate(id: string): Promise<Warehouse> {
         return await this.warehouseModel.findByIdAndUpdate(id, { isActive: false }, { new: true });
     }

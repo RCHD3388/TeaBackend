@@ -27,6 +27,9 @@ export class WarehouseResolver {
   async deactivateWarehouse(@Args('id') id: string): Promise<Warehouse> {
     return await this.warehouseService.deactivate(id);
   }
+  async activateWarehouse(@Args('id') id: string): Promise<Warehouse> {
+    return await this.warehouseService.activate(id);
+  }
 
   @Query(() => Warehouse)
   async warehouse(@Args('id') id: string): Promise<Warehouse> {
