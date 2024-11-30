@@ -20,10 +20,13 @@ export class LoginResponse {
   username: string
 
   @Field()
+  role: string
+
+  @Field()
   access_token: string
 }
 
-export class LoginDto {
+export interface LoginDto {
   username: string;
   password: string;
 }

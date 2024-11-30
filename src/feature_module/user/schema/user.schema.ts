@@ -1,6 +1,7 @@
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 import * as bcrypt from 'bcrypt';
+import { Employee } from 'src/feature_module/person/schema/employee.schema';
 
 export enum UserStatus {
   ACTIVE = "active",
@@ -19,7 +20,7 @@ export class User extends Document {
   status: string;
 
   @Prop({ type: String, required: true })
-  employee: String;
+  employee: String | Employee;
 }
 export const UserSchema = SchemaFactory.createForClass(User);
 

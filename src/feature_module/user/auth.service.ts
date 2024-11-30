@@ -22,6 +22,7 @@ export class AuthService {
 
     return {
       username: user.username,
+      role: user.employee.role.name,
       access_token: access_token
     }
   }

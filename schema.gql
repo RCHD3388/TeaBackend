@@ -6,6 +6,7 @@ directive @upper on FIELD_DEFINITION
 
 type LoginResponse {
   username: String!
+  role: String!
   access_token: String!
 }
 
