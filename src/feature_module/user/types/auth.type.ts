@@ -1,12 +1,16 @@
 import { Field, InputType, ObjectType } from "@nestjs/graphql";
-import { IsEmail, IsString } from "class-validator";
+import { IsEmail, IsNotEmpty, isString, IsString, minLength } from "class-validator";
 
 @InputType()
 export class LoginInput {
   @Field()
+  @IsString()
+  @IsNotEmpty({ message: 'Username tidak boleh kosong.' })
   username: string
 
   @Field()
+  @IsString()
+  @IsNotEmpty({ message: 'Password tidak boleh kosong.' })
   password: string
 }
 
@@ -20,9 +24,6 @@ export class LoginResponse {
 }
 
 export class LoginDto {
-  @IsEmail()
-  username: string
-
-  @IsString()
-  password: string
+  username: string;
+  password: string;
 }

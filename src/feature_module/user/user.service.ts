@@ -11,19 +11,27 @@ export class UserService {
     @InjectModel(Employee.name) private employeeModel: Model<Employee>
   ) { }
 
-  async findByUsername(username: string): Promise<User | null> {
+  async findForAuth(username: string): Promise<User | null> {
     return this.userModel.findOne({ username }).exec();
   }
 
-  async findById(id: string): Promise<User>{
-    const user = await this.userModel.findById(id, '-password');
-    if(!user){
+  async findUser(param: { username?: string; id?: string }): Promise<User> {
+    let user = null;
+    if (param.username) {
+      user = await this.userModel.findOne({username: param.username}, '-password');
+    }
+    if (param.id) {
+      user = await this.userModel.findById(param.id, '-password')
+    }
+
+    if (!user) {
       throw new NotFoundException(`User not found`);
     }
-    const employee = await this.employeeModel.findOne({id: user.employee});
-    if(!employee){
+    const employee = await this.employeeModel.findOne({ id: user.employee });
+    if (!employee) {
       throw new NotFoundException(`User employee data not found`)
     }
+
     return user;
   }
 }

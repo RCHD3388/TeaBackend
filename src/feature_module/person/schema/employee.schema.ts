@@ -41,6 +41,16 @@ export class EmployeeSkill extends Document {
 export const EmployeeSkillSchema = SchemaFactory.createForClass(EmployeeSkill)
 
 @Schema()
+export class RoleSkillEmployee {
+  @Prop({ type: String, required: true })
+  id: string;
+
+  @Prop({ type: String, required: true })
+  name: string;
+}
+export const RoleSkillEmployeeSchema = SchemaFactory.createForClass(RoleSkillEmployee);
+
+@Schema()
 export class Employee extends Document {
   @Prop({ type: String, required: true })
   id: string;
@@ -57,13 +67,13 @@ export class Employee extends Document {
   @Prop({ type: String, required: true })
   status: string;
 
-  @Prop({ type: String, required: true })
-  role: String;
+  @Prop({ type: RoleSkillEmployeeSchema, required: true })
+  role: RoleSkillEmployee;
 
   @Prop({ type: [EmployeeProjectHistory], required: true })
   project_history: EmployeeProjectHistory[];
 
-  @Prop({ type: [String], ref: "EmployeeSkill" })
-  skill: String[];
+  @Prop({ type: [RoleSkillEmployeeSchema], required: true})
+  skill: RoleSkillEmployee[];
 }
 export const EmployeeSchema = SchemaFactory.createForClass(Employee);

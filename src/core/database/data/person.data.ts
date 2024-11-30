@@ -20,9 +20,9 @@ export const employeeData: Partial<Employee>[] = [
     hire_date: new Date("2010-01-12T00:00:00.000Z"),
     salary: 10000000,
     status: "active",
-    role: "ER1",
+    role: { id: "ER1", name: "owner"},
     project_history: [],
-    skill: ["ES1"]
+    skill: [{ id: "ES1", name: "administrator"}]
   }
 ]
 
