@@ -11,23 +11,15 @@ import { AppResolver } from './app.resolver';
 import { UsersModule } from './feature_module/user/user.module';
 import { ProjectModule } from './feature_module/project/project.module';
 import { PersonModule } from './feature_module/person/person.module';
+import { createGraphqlConfig } from './common/configs/graphql.config';
 
 @Module({
   imports: [
-    GraphQLModule.forRoot<ApolloDriverConfig>({
+    GraphQLModule.forRootAsync<ApolloDriverConfig>({
       driver: ApolloDriver,
-      autoSchemaFile: 'schema.gql',
-      transformSchema: schema => upperDirectiveTransformer(schema, 'upper'),
-      installSubscriptionHandlers: true,
-      buildSchemaOptions: {
-        directives: [
-          new GraphQLDirective({
-            name: 'upper',
-            locations: [DirectiveLocation.FIELD_DEFINITION],
-          }),
-        ],
-      },
-      context: ({ req }) => ({ req })
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => createGraphqlConfig(configService),
     }),
     DatabaseModule,
     CustomLoggerModule,

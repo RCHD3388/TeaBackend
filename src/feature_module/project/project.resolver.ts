@@ -5,6 +5,7 @@ import { CurrentUser } from "src/common/decorators/auth_user.decorator";
 import { User } from "../user/schema/user.schema";
 import { RolesGuard } from "src/common/guard/roles.guard";
 import { Roles } from "src/common/decorators/roles.decorator";
+import { ValidationError } from "class-validator";
 
 @Resolver()
 @UseGuards(AppAuthGuard)

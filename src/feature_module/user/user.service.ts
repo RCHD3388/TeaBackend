@@ -33,7 +33,10 @@ export class UserService {
       localField: "employee",
       foreignField: "id"
     });
-    let formated_user = this.userEmployeeFormater(user, true);
+    let formated_user = null
+    if(user){
+      formated_user = this.userEmployeeFormater(user, true);
+    }
     return formated_user;
   }
 
