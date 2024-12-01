@@ -18,7 +18,14 @@ export class BrandService {
         return brand;
     }
     async create(createBrandInput: CreateBrandInput): Promise<Brand> {
-        const newBrand = new this.brandModel({ ...createBrandInput });
+        const brand = await this.brandModel.findOne({ name: createBrandInput.name });
+        if (brand) {
+            throw new Error(`Brand with name "${createBrandInput.name}" already exists`);
+        }
+        const newBrand = new this.brandModel(createBrandInput);
+        if (!newBrand) {
+            throw new Error('Failed to create brand');
+        }
         return newBrand.save();
       }
       
@@ -28,8 +35,5 @@ export class BrandService {
             throw new Error(`Brand with ID "${id}" not found`);
         }
         return updatedBrand;
-    }
-    async delete(id: string): Promise<Brand> {
-        return await this.brandModel.findByIdAndDelete(id);
     }
 }

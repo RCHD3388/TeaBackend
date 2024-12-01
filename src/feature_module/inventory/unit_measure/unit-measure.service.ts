@@ -13,7 +13,11 @@ export class UnitMeasureService {
     }
 
     async create(createUnitMeasureInput: CreateUnitMeasureInput): Promise<UnitMeasure> {
-        const newUnitMeasure = new this.unitMeasureModel({ ...createUnitMeasureInput });
+        const unitMeasure = await this.unitMeasureModel.findOne({ name: createUnitMeasureInput.name }).exec();
+        if (unitMeasure) {
+            throw new Error(`UnitMeasure with name "${createUnitMeasureInput.name}" already exists`);
+        }
+        const newUnitMeasure = new this.unitMeasureModel(createUnitMeasureInput);
         return newUnitMeasure.save();
     }
     async findById(id: string): Promise<UnitMeasure> {
@@ -24,6 +28,10 @@ export class UnitMeasureService {
         return unitMeasure;
     }
     async update(id: string, data: UpdateUnitMeasureInput): Promise<UnitMeasure> {
-        return this.unitMeasureModel.findByIdAndUpdate(id, data, { new: true }).exec();
+        const updatedUnitMeasure = await this.unitMeasureModel.findByIdAndUpdate(id, data, { new: true }).exec();
+        if (!updatedUnitMeasure) {
+            throw new Error(`UnitMeasure with ID "${id}" not found`);
+        }
+        return updatedUnitMeasure;
     }   
 }

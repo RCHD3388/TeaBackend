@@ -1,6 +1,8 @@
+import { ObjectType } from '@nestjs/graphql';
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 
+@ObjectType() 
 @Schema({ timestamps: true })
 export class UnitMeasure extends Document {
   @Prop({ type: String, required: true })

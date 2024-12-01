@@ -1,40 +1,40 @@
 import { InputType, Field } from '@nestjs/graphql';
 import { IsString, IsOptional, IsDate, IsNumber } from 'class-validator';
-import { CategoryData } from '../../../category_data/category-data.schema';
-import { StockKeepingUnit } from '../../stock_keeping_unit/stock-keeping-unit.schema';
+
 @InputType()
 export class CreateToolInput {
-    @Field()
-    @IsString()
-    name: string;
-    
-    @Field()
-    @IsString()
-    @IsOptional()
-    description?: string;
+  @Field(() => String)
+  @IsString()
+  name: string;
 
-    @Field()
-    @IsString()
-    @IsOptional()
-    waranty_number?: string;
+  @Field(() => String, { nullable: true })
+  @IsString()
+  @IsOptional()
+  description?: string;
 
-    @Field()
-    @IsDate()
-    @IsOptional()
-    waranty_expiration_date?: Date;
+  @Field(() => String, { nullable: true })
+  @IsString()
+  @IsOptional()
+  waranty_number?: string;
 
-    @Field()
-    @IsString()
-    @IsOptional()
-    status?: string;
+  @Field(() => Date, { nullable: true })
+  @IsDate()
+  @IsOptional()
+  waranty_expiration_date?: Date;
 
-    @Field()
-    @IsNumber()
-    price: number;
+  @Field(() => String, { nullable: false })
+  @IsString()
+  status: string;
 
-    @Field()
-    item_category: CategoryData
+  @Field(() => Number)
+  @IsNumber()
+  price: number;
 
-    @Field()
-    stock_keeping_unit: StockKeepingUnit
+  @Field(() => String)
+  @IsString()
+  item_category: string;
+
+  @Field(() => String)
+  @IsString()
+  stock_keeping_unit: string;
 }

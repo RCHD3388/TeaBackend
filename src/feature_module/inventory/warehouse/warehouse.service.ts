@@ -37,4 +37,5 @@ export class WarehouseService {
     async deactivate(id: string): Promise<Warehouse> {
         return await this.warehouseModel.findByIdAndUpdate(id, { isActive: false }, { new: true });
     }
+    
 }
