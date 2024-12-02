@@ -4,14 +4,13 @@ import { CustomLoggerModule } from './core/custom_logger/custom-logger.module';
 import { CustomLoggerService } from './core/custom_logger/logger.service';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
-import { DirectiveLocation, GraphQLDirective } from 'graphql';
-import { upperDirectiveTransformer } from './common/directives/upper-case.directive';
 import { DatabaseModule } from './core/database/database.module';
 import { AppResolver } from './app.resolver';
 import { UsersModule } from './feature_module/user/user.module';
 import { ProjectModule } from './feature_module/project/project.module';
 import { PersonModule } from './feature_module/person/person.module';
 import { createGraphqlConfig } from './common/configs/graphql.config';
+import { CategoryModule } from './feature_module/category/category.module';
 
 @Module({
   imports: [
@@ -26,6 +25,7 @@ import { createGraphqlConfig } from './common/configs/graphql.config';
     UsersModule,
     ProjectModule,
     PersonModule,
+    CategoryModule,
   ],
   providers: [AppResolver],
 })

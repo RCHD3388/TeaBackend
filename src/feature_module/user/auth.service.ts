@@ -13,7 +13,7 @@ export class AuthService {
 
   async login(data: LoginDto): Promise<LoginResponse> {
     const user = await this.userService.findForAuth(data.username);
-    console.log(user)
+    
     if(!user || !(await bcrypt.compare(data.password, user.password))){
       throw new UnauthorizedException("Invalid Credentials");
     }
