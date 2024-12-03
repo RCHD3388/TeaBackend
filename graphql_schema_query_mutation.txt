@@ -1,0 +1,64 @@
+# Write your query or mutation here
+mutation {
+  login(data: { username: "", password: "" }) {
+    username
+    role
+    access_token
+  }
+}
+
+mutation {
+  create_project
+}
+
+query {
+  users {
+    username,
+    status
+  }
+}
+
+mutation {
+  createCategory(createCategoryInput: {
+    name: "Project Cost",
+    description: "Category for project costs",
+    type: "project_cost"
+  }) {
+    _id
+    name
+    description
+    type
+    already_used
+  }
+}
+
+query {
+  getCategories {
+    _id
+    name
+    description
+    type
+  }
+}
+
+mutation {
+  updateCategory(id: "674f3187e96dbce086b9474e", updateCategoryInput: {
+    name: "Project Cost",  
+    description: "Updated category for project cost description"
+  }) {
+    _id
+    name
+    description
+    type
+  }
+}
+
+mutation {
+  deleteCategory(id: "674f40570581d165f932e27f") {
+    _id
+    name
+    description
+    type
+  }
+}
+

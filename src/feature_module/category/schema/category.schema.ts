@@ -1,4 +1,4 @@
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 
@@ -15,6 +15,9 @@ export enum CategoryType {
 @ObjectType()
 @Schema()
 export class CategoryData extends Document {
+  @Field(() => ID) // Menyertakan _id dalam GraphQL response
+  _id: string;
+
   @Field(() => String)
   @Prop({ type: String, required: true })
   name: string;
@@ -30,6 +33,10 @@ export class CategoryData extends Document {
     enum: Object.values(CategoryType), // Hanya nilai yang ada di enum yang diperbolehkan
   })
   type: CategoryType;
+
+  @Field(() => Boolean)
+  @Prop({type: Boolean, default: false})
+  already_used: boolean
 }
 
 export const CategoryDataSchema = SchemaFactory.createForClass(CategoryData);

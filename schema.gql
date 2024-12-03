@@ -10,16 +10,39 @@ type LoginResponse {
   access_token: String!
 }
 
+type CategoryData {
+  _id: ID!
+  name: String!
+  description: String!
+  type: String!
+  already_used: Boolean!
+}
+
 type Query {
   getHello: String!
+  getCategories: [CategoryData!]!
 }
 
 type Mutation {
   login(data: LoginInput!): LoginResponse!
   create_project: String!
+  createCategory(createCategoryInput: CreateCategoryInput!): CategoryData!
+  updateCategory(id: String!, updateCategoryInput: UpdateCategoryInput!): CategoryData!
+  deleteCategory(id: String!): CategoryData!
 }
 
 input LoginInput {
   username: String!
   password: String!
+}
+
+input CreateCategoryInput {
+  name: String!
+  description: String!
+  type: String!
+}
+
+input UpdateCategoryInput {
+  name: String
+  description: String
 }
