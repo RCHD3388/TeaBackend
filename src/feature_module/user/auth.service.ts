@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from "@nestjs/common";
+import { BadRequestException, Injectable, UnauthorizedException } from "@nestjs/common";
 import { UserService } from "./user.service";
 import { LoginDto, LoginResponse } from "./types/auth.type";
 import * as bcrypt from "bcrypt";
@@ -15,7 +15,7 @@ export class AuthService {
     const user = await this.userService.findForAuth(data.username);
     
     if(!user || !(await bcrypt.compare(data.password, user.password))){
-      throw new UnauthorizedException("Invalid Credentials");
+      throw new BadRequestException("Invalid Credentials");
     }
 
     const payload = { id: user._id, username: user.username }

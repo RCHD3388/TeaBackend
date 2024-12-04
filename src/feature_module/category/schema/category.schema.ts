@@ -5,11 +5,11 @@ import { Document } from 'mongoose';
 // Enum untuk type
 export enum CategoryType {
   PROJECT_COST="project_cost",
-  PRIORITY="“priority”",
-  COMPLETION_STATUS="“completion_status”",
-  ITEM="“item”",
-  ATTENDANCE_STATUS="“attendance_status”",
-  PERSON_STATUS="“person_status”",
+  PRIORITY="priority",
+  COMPLETION_STATUS="completion_status",
+  ITEM="item",
+  ATTENDANCE_STATUS="attendance_status",
+  PERSON_STATUS="person_status",
 }
 
 @ObjectType()

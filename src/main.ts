@@ -8,8 +8,10 @@ async function bootstrap() {
     whitelist: true // delete undefined dto attribute
   }))
 
+  const allowedIPs = ['http://host.docker.internal/3000', 'http://localhost:3000', 'http://localhost:5173'];
+
   app.enableCors({
-    origin: 'http://localhost:5173',  // Ganti dengan URL frontend Anda
+    origin: allowedIPs,  // Ganti dengan URL frontend Anda
     methods: 'GET, POST, PUT, DELETE', // Tambahkan metode yang diizinkan sesuai kebutuhan
     allowedHeaders: 'Content-Type, Authorization',  // Header yang diizinkan
   });
