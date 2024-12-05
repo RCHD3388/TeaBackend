@@ -5,6 +5,10 @@ import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { Project } from 'src/feature_module/project/schema/project.schema';
 
 // EmployeeProjHist - EmpRole - EmptSkill - Employee
+export enum EmployeeStatus {
+  ACTIVE = 'Active',
+  INACTIVE = 'Inactive',
+}
 
 @ObjectType()
 @Schema()
@@ -62,6 +66,9 @@ export const RoleSkillEmployeeSchema = SchemaFactory.createForClass(RoleSkillEmp
 @Schema()
 export class Employee extends Document {
   @Field(() => String)
+  _id: string
+
+  @Field(() => String)
   @Prop({ type: String, required: true })
   id: string;
 
@@ -70,7 +77,7 @@ export class Employee extends Document {
   person: Person;
 
   @Field(() => Date)
-  @Prop({ type: Date, required: true })
+  @Prop({ type: Date, required: true }) 
   hire_date: Date;
 
   @Field(() => Number)
@@ -78,7 +85,7 @@ export class Employee extends Document {
   salary: number;
 
   @Field(() => String)
-  @Prop({ type: String, required: true })
+  @Prop({ type: String, required: true, enum: EmployeeStatus})
   status: string;
 
   @Field(() => RoleSkillEmployee)
@@ -93,4 +100,4 @@ export class Employee extends Document {
   @Prop({ type: [RoleSkillEmployeeSchema], required: true})
   skill: RoleSkillEmployee[];
 }
-export const EmployeeSchema = SchemaFactory.createForClass(Employee);
+export const EmployeeSchema = SchemaFactory.createForClass(Employee); 

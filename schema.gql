@@ -27,6 +27,7 @@ type RoleSkillEmployee {
 }
 
 type Employee {
+  _id: String!
   id: String!
   person: Person!
   hire_date: DateTime!
@@ -54,12 +55,15 @@ type CategoryData {
 type Query {
   getHello: String!
   getAllEmployees: [Employee!]!
+  getEmployeeById(id: String!): Employee!
   getCategories: [CategoryData!]!
 }
 
 type Mutation {
   login(data: LoginInput!): LoginResponse!
   create_project: String!
+  createEmployee(createEmployeeInput: CreateEmployeeInput!): Employee!
+  updateEmployee(id: String!, updateEmployeeInput: UpdateEmployeeInput!): Employee!
   createCategory(createCategoryInput: CreateCategoryInput!): CategoryData!
   updateCategory(id: String!, updateCategoryInput: UpdateCategoryInput!): CategoryData!
   deleteCategory(id: String!): CategoryData!
@@ -68,6 +72,42 @@ type Mutation {
 input LoginInput {
   username: String!
   password: String!
+}
+
+input CreateEmployeeInput {
+  person: PersonInput!
+  hire_date: String!
+  salary: Float!
+  status: String!
+  role: RoleSkillEmployeeInput!
+  skill: RoleSkillEmployeeInput!
+}
+
+input PersonInput {
+  name: String!
+  email: String!
+  phone_number: String!
+  address: String!
+}
+
+input RoleSkillEmployeeInput {
+  id: String!
+}
+
+input UpdateEmployeeInput {
+  name: String
+  email: String
+  phone_number: String
+  address: String
+  status: String
+  salary: Float
+  hire_date: String
+  skills: [RoleSkillEmployeeUpdateInput!]
+  role: RoleSkillEmployeeUpdateInput
+}
+
+input RoleSkillEmployeeUpdateInput {
+  id: String!
 }
 
 input CreateCategoryInput {

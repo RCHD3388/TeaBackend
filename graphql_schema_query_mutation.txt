@@ -62,3 +62,121 @@ mutation {
   }
 }
 
+query {
+  getAllEmployees {
+    _id
+    id
+    person{
+      name
+    }
+    hire_date
+    salary
+    status
+    role {
+      id
+      name
+    }
+    skill {
+      id
+      name
+    }
+  }
+}
+
+mutation {
+  createEmployee(createEmployeeInput: {
+    person: {
+      name: "Sean Laurence",
+      email: "sean@example.com",
+      phone_number: "123-456-7890",
+      address: "123 Main St, Springfield"
+    },
+    hire_date: "2024-10-05",
+    salary: 50000,
+    status: "Active",
+    role: {
+      id: "ER1"
+    },
+    skill: {
+      id: "ES1"
+    }
+  }) {
+    _id
+    person {
+      name
+      email
+      phone_number
+      address
+    }
+    hire_date
+    salary
+    status
+    role {
+      id
+      name
+    }
+    skill {
+      id
+      name
+    }
+  }
+}
+
+mutation {
+  updateEmployee(
+    id: "6751dab1555d2e329c50700d", 
+    updateEmployeeInput: {
+      name: "Updated Name",
+      email: "updatedemail@example.com",
+      phone_number: "9876543210",
+      address: "Updated Address",
+      status: "Active",
+      salary: 800000,
+      hire_date: "2024-12-07",
+      role: {id: "ER1"},
+      skills: [{id: "ES1"}]
+    }
+  ) {
+    _id
+    person {
+      name
+      email
+      phone_number
+      address
+    }
+    status
+    salary
+    hire_date
+    role {
+      id
+      name
+    }
+    skill {
+      id
+      name
+    }
+  }
+}
+
+query {
+  getEmployeeById(id: "6751dab1555d2e329c50700d") {
+    _id
+    person {
+      name
+      email
+      phone_number
+      address
+    }
+    hire_date
+    salary
+    status
+    role {
+			id
+      name
+    }
+    skill {
+			id
+      name
+    }
+  }
+}
