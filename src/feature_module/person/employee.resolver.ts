@@ -6,8 +6,8 @@ import { Employee } from './schema/employee.schema';
 export class EmployeeResolver {
   constructor(private readonly employeeService: EmployeeService) {}
 
-  // @Query(() => [Employee], { name: 'getAllEmployees' })
-  // async getAllEmployees() {
-  //   return this.employeeService.findAll();
-  // }
+  @Query(() => [Employee], { name: 'getAllEmployees' })
+  async getAllEmployees() {
+    return this.employeeService.findAll();
+  }
 }

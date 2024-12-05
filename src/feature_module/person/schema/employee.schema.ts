@@ -1,14 +1,19 @@
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 import { Person } from './person.schema';
+import { Field, ID, ObjectType } from '@nestjs/graphql';
+import { Project } from 'src/feature_module/project/schema/project.schema';
 
 // EmployeeProjHist - EmpRole - EmptSkill - Employee
 
+@ObjectType()
 @Schema()
 export class EmployeeProjectHistory {
+  @Field(() => String || Project)
   @Prop({ type: Types.ObjectId, ref: 'Project', required: true })
-  project: Types.ObjectId;
+  project: Types.ObjectId | Project
 
+  @Field()
   @Prop({ type: Date, required: true })
   join_at: Date;
 }
@@ -40,39 +45,51 @@ export class EmployeeSkill extends Document {
 }
 export const EmployeeSkillSchema = SchemaFactory.createForClass(EmployeeSkill)
 
+@ObjectType()
 @Schema()
 export class RoleSkillEmployee {
+  @Field()
   @Prop({ type: String, required: true })
   id: string;
 
+  @Field()
   @Prop({ type: String, required: true })
   name: string;
 }
 export const RoleSkillEmployeeSchema = SchemaFactory.createForClass(RoleSkillEmployee);
 
+@ObjectType()
 @Schema()
 export class Employee extends Document {
+  @Field(() => String)
   @Prop({ type: String, required: true })
   id: string;
 
+  @Field(() => Person)
   @Prop({ type: Person, required: true })
   person: Person;
 
+  @Field(() => Date)
   @Prop({ type: Date, required: true })
   hire_date: Date;
 
+  @Field(() => Number)
   @Prop({ type: Number, required: true })
   salary: number;
 
+  @Field(() => String)
   @Prop({ type: String, required: true })
   status: string;
 
+  @Field(() => RoleSkillEmployee)
   @Prop({ type: RoleSkillEmployeeSchema, required: true })
   role: RoleSkillEmployee;
 
+  @Field(() => [EmployeeProjectHistory])
   @Prop({ type: [EmployeeProjectHistory], required: true })
   project_history: EmployeeProjectHistory[];
 
+  @Field(() => [RoleSkillEmployee])
   @Prop({ type: [RoleSkillEmployeeSchema], required: true})
   skill: RoleSkillEmployee[];
 }

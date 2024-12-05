@@ -4,6 +4,39 @@
 
 directive @upper on FIELD_DEFINITION
 
+type Person {
+  name: String!
+  email: String!
+  phone_number: String!
+  address: String!
+}
+
+type EmployeeProjectHistory {
+  project: String!
+  join_at: DateTime!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type RoleSkillEmployee {
+  id: String!
+  name: String!
+}
+
+type Employee {
+  id: String!
+  person: Person!
+  hire_date: DateTime!
+  salary: Float!
+  status: String!
+  role: RoleSkillEmployee!
+  project_history: [EmployeeProjectHistory!]!
+  skill: [RoleSkillEmployee!]!
+}
+
 type LoginResponse {
   username: String!
   role: String!
@@ -20,6 +53,7 @@ type CategoryData {
 
 type Query {
   getHello: String!
+  getAllEmployees: [Employee!]!
   getCategories: [CategoryData!]!
 }
 
