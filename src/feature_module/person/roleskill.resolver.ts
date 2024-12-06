@@ -1,7 +1,7 @@
 import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
 import { EmployeeService } from './employee.service';
 import { Employee, EmployeeRole, EmployeeSkill, RoleSkillEmployeeSchema } from './schema/employee.schema';
-import { CreateEmployeeInput, UpdateEmployeeInput } from './types/employee.types';
+import { CreateEmployeeInput, CreateEmployeeSkillInput, UpdateEmployeeInput } from './types/employee.types';
 import { UseGuards } from '@nestjs/common';
 import { AppAuthGuard } from '../user/auth_related/auth.guard';
 import { RolesGuard } from 'src/common/guard/roles.guard';
@@ -25,5 +25,19 @@ export class RoleSkillResolver {
   @Roles("owner")
   async getAllSkill() {
     return this.roleSkillService.findAllSkill();
+  }
+
+  @Mutation(() => EmployeeSkill, { name: 'createEmployeeSkill' })
+  @UseGuards(RolesGuard)
+  @Roles("owner")
+  async createEmployeeSkill( @Args('createEmployeeSkillInput') createEmployeeSkillInput: CreateEmployeeSkillInput ) {
+    return this.roleSkillService.createEmployeeSkill(createEmployeeSkillInput);
+  }
+
+  @Mutation(() => EmployeeSkill, { name: 'updateEmployeeSkill' })
+  @UseGuards(RolesGuard)
+  @Roles("owner")
+  async updateEmployeeSkill( @Args('id') id: string, @Args('updateEmployeeSkillInput') updateEmployeeSkillInput: CreateEmployeeSkillInput ) {
+    return this.roleSkillService.updateEmployeeSkill(id, updateEmployeeSkillInput);
   }
 }

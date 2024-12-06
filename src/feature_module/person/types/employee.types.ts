@@ -141,3 +141,32 @@ export class UpdateEmployeeInput {
   @IsOptional()
   role?: RoleSkillEmployeeUpdateInput;
 }
+
+@InputType()
+export class CreateEmployeeSkillInput {
+  @Field(() => String)
+  @IsString()
+  @IsNotEmpty({ message: 'Name should not be empty' })
+  name: string;
+
+  @Field(() => String)
+  @IsString()
+  @IsNotEmpty({ message: 'Description should not be empty' })
+  description: string;
+}
+
+@InputType()
+export class UpdateEmployeeSkillInput {
+  @Field(() => String)
+  @IsString()
+  @IsOptional()
+  @IsNotEmpty({ message: 'Name should not be empty' })
+  name: string;
+
+  @Field(() => String)
+  @IsString()
+  @IsOptional()
+  @IsNotEmpty({ message: 'Description should not be empty' })
+  description: string;
+}
+

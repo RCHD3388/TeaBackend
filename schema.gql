@@ -80,6 +80,8 @@ type Mutation {
   create_project: String!
   createEmployee(createEmployeeInput: CreateEmployeeInput!): Employee!
   updateEmployee(id: String!, updateEmployeeInput: UpdateEmployeeInput!): Employee!
+  createEmployeeSkill(createEmployeeSkillInput: CreateEmployeeSkillInput!): EmployeeSkill!
+  updateEmployeeSkill(id: String!, updateEmployeeSkillInput: CreateEmployeeSkillInput!): EmployeeSkill!
   createCategory(createCategoryInput: CreateCategoryInput!): CategoryData!
   updateCategory(id: String!, updateCategoryInput: UpdateCategoryInput!): CategoryData!
   deleteCategory(id: String!): CategoryData!
@@ -124,6 +126,11 @@ input UpdateEmployeeInput {
 
 input RoleSkillEmployeeUpdateInput {
   id: String!
+}
+
+input CreateEmployeeSkillInput {
+  name: String!
+  description: String!
 }
 
 input CreateCategoryInput {

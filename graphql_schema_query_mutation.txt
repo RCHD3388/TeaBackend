@@ -180,3 +180,27 @@ query {
     }
   }
 }
+
+mutation {
+  createEmployeeSkill(createEmployeeSkillInput: { 
+    name: "Skill A", 
+    description: "Skill A Description" 
+  }) {
+    _id
+    id
+    name
+    description
+  }
+}
+
+mutation {
+  updateEmployeeSkill(id: "67532cd30b896e70bc108360", updateEmployeeSkillInput: { 
+    name: "Skill B", 
+    description: "Skill A Description" 
+  }) {
+    _id
+    id
+    name
+    description
+  }
+}
