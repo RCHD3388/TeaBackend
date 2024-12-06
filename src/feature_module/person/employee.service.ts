@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Employee, EmployeeRole, EmployeeSkill } from './schema/employee.schema';
@@ -11,6 +11,12 @@ export class EmployeeService {
     @InjectModel(EmployeeSkill.name) private readonly employeeSkillModel: Model<EmployeeSkill>,
     @InjectModel(EmployeeRole.name) private readonly employeeRoleModel: Model<EmployeeRole>,
   ) { }
+
+  private isHireDateValid(hire_date: string | Date): boolean {
+    const today = new Date();
+    const hireDate = new Date(hire_date); 
+    return hireDate <= today; 
+  }
 
   private async getNextEmployeeId(): Promise<string> {
     const employees = await this.employeeModel.find().select('id').exec();
@@ -43,6 +49,10 @@ export class EmployeeService {
     const DBrole = await this.employeeRoleModel.findOne({ id: role.id })
     const DBskill = await this.employeeSkillModel.findOne({ id: skill.id })
 
+    if(!this.isHireDateValid(hire_date)){
+      throw new BadRequestException("Hire date cannot be in the future")
+    }
+
     if (!DBrole || !DBskill) {
       throw new NotFoundException("Role or Skill not found")
     }
@@ -69,7 +79,12 @@ export class EmployeeService {
     // Update other fields
     if (updateEmployeeInput.status) updateData.status = updateEmployeeInput.status;
     if (updateEmployeeInput.salary) updateData.salary = updateEmployeeInput.salary;
-    if (updateEmployeeInput.hire_date) updateData.hire_date = updateEmployeeInput.hire_date;
+    if (updateEmployeeInput.hire_date) {
+      if(!this.isHireDateValid(updateEmployeeInput.hire_date)){
+        throw new BadRequestException("Hire date cannot be in the future")
+      }
+      updateData.hire_date = updateEmployeeInput.hire_date
+    };
 
     // Update role and skills if present
     if (updateEmployeeInput.role) {

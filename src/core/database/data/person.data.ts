@@ -19,7 +19,7 @@ export const employeeData: Partial<Employee>[] = [
     person: { name: "Richard Rafer Guy", email: "richard@gmail.com", phone_number: "0812345678", address: "Jln Hehe, No 123"}, 
     hire_date: new Date("2010-01-12T00:00:00.000Z"),
     salary: 10000000,
-    status: "active",
+    status: "Active",
     role: { id: "ER1", name: "owner"},
     project_history: [],
     skill: [{ id: "ES1", name: "administrator"}]

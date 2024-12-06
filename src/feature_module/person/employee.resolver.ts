@@ -12,6 +12,8 @@ import { Roles } from 'src/common/decorators/roles.decorator';
 export class EmployeeResolver {
   constructor(private readonly employeeService: EmployeeService) {}
 
+
+
   @Query(() => [Employee], { name: 'getAllEmployees' })
   @UseGuards(RolesGuard)
   @Roles("owner")
@@ -20,6 +22,8 @@ export class EmployeeResolver {
   }
 
   @Query(() => Employee)
+  @Query(() => [Employee], { name: 'getEmployeeById' })
+  @UseGuards(RolesGuard)
   async getEmployeeById(@Args('id') id: string): Promise<Employee> {
     return this.employeeService.findEmployeeById(id);
   }

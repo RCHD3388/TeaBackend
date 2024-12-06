@@ -2,7 +2,7 @@ import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 import { Person } from './person.schema';
 import { Field, ID, ObjectType } from '@nestjs/graphql';
-import { Project } from 'src/feature_module/project/schema/project.schema';
+import { Project } from '../../project/schema/project.schema';
 
 // EmployeeProjHist - EmpRole - EmptSkill - Employee
 export enum EmployeeStatus {
@@ -23,27 +23,41 @@ export class EmployeeProjectHistory {
 }
 export const EmployeeProjectHistorySchema = SchemaFactory.createForClass(EmployeeProjectHistory);
 
+@ObjectType()
 @Schema()
 export class EmployeeRole extends Document {
+  @Field(() => String)
+  _id: string
+
+  @Field(() => String)
   @Prop({ type: String, required: true, unique: true })
   id: string;
 
+  @Field(() => String)
   @Prop({ type: String, required: true })
   name: string;
 
+  @Field(() => String)
   @Prop({ type: String, required: true })
   description: string;
 }
 export const EmployeeRoleSchema = SchemaFactory.createForClass(EmployeeRole)
 
+@ObjectType()
 @Schema()
 export class EmployeeSkill extends Document {
+  @Field(() => String)
+  _id: string;
+
+  @Field(() => String)
   @Prop({ type: String, required: true, unique: true })
   id: string;
 
+  @Field(() => String)
   @Prop({ type: String, required: true })
   name: string;
 
+  @Field(() => String)
   @Prop({ type: String, required: true })
   description: string;
 }
