@@ -60,25 +60,8 @@ export class EmployeeSkill extends Document {
   @Field(() => String)
   @Prop({ type: String, required: true })
   description: string;
-
-  @Field(() => Boolean)
-  @Prop({type: Boolean, default: false})
-  already_used: boolean
 }
 export const EmployeeSkillSchema = SchemaFactory.createForClass(EmployeeSkill)
-
-@ObjectType()
-@Schema()
-export class RoleSkillEmployee {
-  @Field()
-  @Prop({ type: String, required: true })
-  id: string;
-
-  @Field()
-  @Prop({ type: String, required: true })
-  name: string;
-}
-export const RoleSkillEmployeeSchema = SchemaFactory.createForClass(RoleSkillEmployee);
 
 @ObjectType()
 @Schema()
@@ -106,16 +89,34 @@ export class Employee extends Document {
   @Prop({ type: String, required: true, enum: EmployeeStatus})
   status: string;
 
-  @Field(() => RoleSkillEmployee)
-  @Prop({ type: RoleSkillEmployeeSchema, required: true })
-  role: RoleSkillEmployee;
+  @Field(() => EmployeeRole)
+  @Prop({ type: String, required: true, ref: "Role" })
+  role: string | EmployeeRole;
 
   @Field(() => [EmployeeProjectHistory])
   @Prop({ type: [EmployeeProjectHistory], required: true })
   project_history: EmployeeProjectHistory[];
 
-  @Field(() => [RoleSkillEmployee])
-  @Prop({ type: [RoleSkillEmployeeSchema], required: true})
-  skill: RoleSkillEmployee[];
+  @Field(() => [EmployeeSkill])
+  @Prop({ type: [String], required: true, ref: "Skill"})
+  skill: string[] | EmployeeSkill[];
 }
-export const EmployeeSchema = SchemaFactory.createForClass(Employee); 
+export const EmployeeSchema = SchemaFactory.createForClass(Employee);
+
+const employeePopulateOption = [
+  { path: "role", model: "EmployeeRole", localField: "role", foreignField: "id" },
+  { path: "skill", model: "EmployeeSkill", localField: "skill", foreignField: "id" }
+]
+EmployeeSchema.pre('find', function(next) { this.populate(employeePopulateOption); next(); });
+EmployeeSchema.pre('findOne', function(next) { this.populate(employeePopulateOption); next(); });
+EmployeeSchema.post('save', async function(doc: any, next) { 
+  await doc.populate(employeePopulateOption); next(); 
+});
+EmployeeSchema.post('findOneAndUpdate', async function(doc: any, next) {
+  if (doc) await doc.populate(employeePopulateOption);
+  next();
+});
+EmployeeSchema.post('findOneAndDelete', async function(doc: any, next) {
+  if (doc) await doc.populate(employeePopulateOption);
+  next();
+});

@@ -12,8 +12,6 @@ import { Roles } from 'src/common/decorators/roles.decorator';
 export class EmployeeResolver {
   constructor(private readonly employeeService: EmployeeService) {}
 
-
-
   @Query(() => [Employee], { name: 'getAllEmployees' })
   @UseGuards(RolesGuard)
   @Roles("owner")

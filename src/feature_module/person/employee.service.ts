@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Employee, EmployeeRole, EmployeeSkill } from './schema/employee.schema';
-import { CreateEmployeeInput, EmployeeDto, RoleSkillEmployeeUpdateInput, UpdateEmployeeInput } from './types/employee.types';
+import { CreateEmployeeInput, UpdateEmployeeInput } from './types/employee.types';
 
 @Injectable()
 export class EmployeeService {
@@ -11,6 +11,11 @@ export class EmployeeService {
     @InjectModel(EmployeeSkill.name) private readonly employeeSkillModel: Model<EmployeeSkill>,
     @InjectModel(EmployeeRole.name) private readonly employeeRoleModel: Model<EmployeeRole>,
   ) { }
+
+  private employeePopulateOption = [
+    { path: "role", model: "EmployeeRole", localField: "role", foreignField: "id" },
+    { path: "skill", model: "EmployeeSkill", localField: "skill", foreignField: "id" }
+  ]
 
   private isHireDateValid(hire_date: string | Date): boolean {
     const today = new Date();
@@ -39,15 +44,15 @@ export class EmployeeService {
   }
 
   async findAll(): Promise<Employee[]> {
-    let employee = this.employeeModel.find().exec();
+    let employee = await this.employeeModel.find().exec();
     return employee
   }
 
   async create(createEmployeeInput: CreateEmployeeInput): Promise<Employee> {
     const { person, hire_date, salary, status, role, skill } = createEmployeeInput;
     const newId = await this.getNextEmployeeId();
-    const DBrole = await this.employeeRoleModel.findOne({ id: role.id })
-    const DBskill = await this.employeeSkillModel.findOne({ id: skill.id })
+    const DBrole = await this.employeeRoleModel.findOne({ id: role })
+    const DBskill = await this.employeeSkillModel.findOne({ id: skill })
 
     if (!this.isHireDateValid(hire_date)) {
       throw new BadRequestException("Hire date cannot be in the future")
@@ -57,17 +62,12 @@ export class EmployeeService {
       throw new NotFoundException("Role or Skill not found")
     }
 
-    if (DBskill.already_used == false) {
-      DBskill.already_used = true
-      await DBskill.save()
-    }
-
     const newEmployee = new this.employeeModel({
       id: newId, person, hire_date, salary, status,
-      role: { id: DBrole.id, name: DBrole.name },
-      skill: [{ id: DBskill.id, name: DBskill.name }],
+      role: DBrole.id,
+      skill: [DBskill.id],
       project_history: [],
-    });
+    })
 
     return await newEmployee.save();
   }
@@ -93,26 +93,26 @@ export class EmployeeService {
 
     // Update role and skills if present
     if (updateEmployeeInput.role) {
-      const { id } = updateEmployeeInput.role;
-      let targetUpdatedRole = await this.employeeRoleModel.findOne({ id })
+      const roleId = updateEmployeeInput.role;
+      let targetUpdatedRole = await this.employeeRoleModel.findOne({ id: roleId })
       if (!targetUpdatedRole) { throw new NotFoundException("Role is not found") }
-      updateData.role = { id: targetUpdatedRole.id, name: targetUpdatedRole.name }
+      updateData.role = targetUpdatedRole.id
     }
 
     if (updateEmployeeInput.skills && updateEmployeeInput.skills.length > 0) {
-      const skillIds = updateEmployeeInput.skills.map((skill) => skill.id);
+      const skillIds = updateEmployeeInput.skills;
       const uniqueSkillIds = new Set(skillIds);
       if (skillIds.length !== uniqueSkillIds.size) {
         throw new NotFoundException("Duplicate skill IDs found");
       }
 
       const DBskill = await this.employeeSkillModel.find();
-      updateData.skill = updateEmployeeInput.skills.map((skill: RoleSkillEmployeeUpdateInput) => {
-        let skillDetailData = DBskill.find((sk) => sk.id === skill.id)
+      updateData.skill = updateEmployeeInput.skills.map((skill: string) => {
+        let skillDetailData = DBskill.find((sk) => sk.id === skill)
         if (!skillDetailData) {
           throw new NotFoundException("Skill Not Found")
         }
-        return { id: skillDetailData.id, name: skillDetailData.name }
+        return skillDetailData.id
       })
 
     }

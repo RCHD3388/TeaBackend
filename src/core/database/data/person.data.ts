@@ -10,7 +10,7 @@ export const employeeRoleData: Partial<EmployeeRole>[] = [
 ]
 
 export const employeeSkillData: Partial<EmployeeSkill>[] = [
-  { id: "ES1", name: "administrator", description: "Pemilik Perusahaan", already_used: true},
+  { id: "ES1", name: "administrator", description: "Pemilik Perusahaan"},
 ]
 
 export const employeeData: Partial<Employee>[] = [
@@ -20,9 +20,9 @@ export const employeeData: Partial<Employee>[] = [
     hire_date: new Date("2010-01-12T00:00:00.000Z"),
     salary: 10000000,
     status: "Active",
-    role: { id: "ER1", name: "owner"},
+    role: "ER1",
     project_history: [],
-    skill: [{ id: "ES1", name: "administrator"}]
+    skill: ["ES1"]
   }
 ]
 

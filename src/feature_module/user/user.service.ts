@@ -1,9 +1,10 @@
 import { Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { User } from "./schema/user.schema";
-import { Model } from "mongoose";
+import { model, Model } from "mongoose";
 import { Employee } from "../person/schema/employee.schema";
 import { UserEmployeeDTO } from "./types/user.types";
+import path from "path";
 
 @Injectable()
 export class UserService {
@@ -11,7 +12,16 @@ export class UserService {
     @InjectModel(User.name) private userModel: Model<User>,
     @InjectModel(Employee.name) private employeeModel: Model<Employee>
   ) { }
-
+  private populateOption = {
+    path: "employee",
+    model: "Employee",
+    localField: "employee",
+    foreignField: "id",
+    populate: [
+      { path: "role", model: "EmployeeRole", localField: "role", foreignField: "id" },
+      { path: "skill", model: "EmployeeSkill", localField: "skill", foreignField: "id" }
+    ]
+  }
   private userEmployeeFormater(user: User, with_password: boolean = false): UserEmployeeDTO{
     let employee = user.employee as Employee;
     let return_value = {
@@ -27,12 +37,7 @@ export class UserService {
   }
 
   async findForAuth(username: string): Promise<UserEmployeeDTO | null> {
-    let user = await this.userModel.findOne({ username }).populate({
-      path: "employee",
-      model: "Employee",
-      localField: "employee",
-      foreignField: "id"
-    });
+    let user = await this.userModel.findOne({ username }).populate(this.populateOption);
     let formated_user = null
     if(user){
       formated_user = this.userEmployeeFormater(user, true);
@@ -43,20 +48,10 @@ export class UserService {
   async findUserForSecurity(param: { username?: string; id?: string }): Promise<UserEmployeeDTO> {
     let user = null;
     if (param.username) {
-      user = await this.userModel.findOne({username: param.username}, '-password').populate({
-        path: "employee",
-        model: "Employee",
-        localField: "employee",
-        foreignField: "id"
-      });
+      user = await this.userModel.findOne({username: param.username}, '-password').populate(this.populateOption);
     }
     if (param.id) {
-      user = await this.userModel.findById(param.id, '-password').populate({
-        path: "employee",
-        model: "Employee",
-        localField: "employee",
-        foreignField: "id"
-      });
+      user = await this.userModel.findById(param.id, '-password').populate(this.populateOption);
     }
 
     if (!user) {

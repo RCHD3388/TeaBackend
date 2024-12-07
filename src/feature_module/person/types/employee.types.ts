@@ -1,7 +1,7 @@
 import { Field, InputType } from "@nestjs/graphql";
-import { EmployeeProjectHistory, EmployeeStatus, RoleSkillEmployee } from "../schema/employee.schema";
+import { EmployeeProjectHistory, EmployeeRole, EmployeeSkill, EmployeeStatus } from "../schema/employee.schema";
 import { Person } from "../schema/person.schema";
-import { IsEmail, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, ValidateNested } from "class-validator";
+import { ArrayMinSize, ArrayNotEmpty, IsArray, IsEmail, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, ValidateNested } from "class-validator";
 import { Type } from "class-transformer";
 
 export interface EmployeeDto {
@@ -11,9 +11,9 @@ export interface EmployeeDto {
   hire_date: Date,
   salary: number,
   status: string,
-  role: RoleSkillEmployee,
+  role: EmployeeRole,
   project_history: EmployeeProjectHistory,
-  skill: RoleSkillEmployee
+  skill: EmployeeSkill[]
 }
 
 @InputType()
@@ -41,16 +41,8 @@ export class PersonInput {
 }
 
 @InputType()
-class RoleSkillEmployeeInput{
-  @Field(() => String)
-  @IsString()
-  @IsNotEmpty({ message: 'Role & Skill ID should not be empty' })
-  id: String;
-}
-
-@InputType()
 export class CreateEmployeeInput {
-  @Field(() => PersonInput)  
+  @Field(() => PersonInput)
   @IsNotEmpty({ message: 'Person should not be empty' })
   @ValidateNested()
   @Type(() => PersonInput)
@@ -65,30 +57,21 @@ export class CreateEmployeeInput {
   salary: number;
 
   @Field(() => String)
-  @IsEnum(EmployeeStatus, {message: "Invalid Type Status"})
+  @IsEnum(EmployeeStatus, { message: "Invalid Type Status" })
   status: string;
 
-  @Field(() => RoleSkillEmployeeInput)  
-  @IsNotEmpty({ message: 'Role should not be empty' })
-  @ValidateNested()
-  @Type(() => RoleSkillEmployeeInput)
-  role: RoleSkillEmployeeInput;
+  @Field(() => String)
+  @IsString()
+  @IsNotEmpty({ message: 'Role ID should not be empty' })
+  role: string;
 
-  @Field(() => RoleSkillEmployeeInput)
-  @IsNotEmpty({ message: 'Skill should not be empty' })
-  @ValidateNested()
-  @Type(() => RoleSkillEmployeeInput)
-  skill: RoleSkillEmployeeInput;
+  @Field(() => String)
+  @IsString()
+  @IsNotEmpty({ message: 'Skill ID should not be empty' })
+  skill: string;
 }
 
 // UPDATE DATA EMPLOYEE
-@InputType()
-export class RoleSkillEmployeeUpdateInput {
-  @Field(() => String)
-  @IsString()
-  @IsNotEmpty({ message: 'Role & Skill ID should not be empty' })
-  id: string;
-}
 
 @InputType()
 export class UpdateEmployeeInput {
@@ -119,7 +102,7 @@ export class UpdateEmployeeInput {
   @Field(() => String, { nullable: true })
   @IsString()
   @IsOptional()
-  @IsEnum(EmployeeStatus, {message: "Invalid Type Status"})
+  @IsEnum(EmployeeStatus, { message: "Invalid Type Status" })
   status?: string;
 
   @Field(() => Number, { nullable: true })
@@ -133,13 +116,19 @@ export class UpdateEmployeeInput {
   @IsNotEmpty({ message: 'Hire Date should not be empty' })
   hire_date?: Date;
 
-  @Field(() => [RoleSkillEmployeeUpdateInput], { nullable: true })
+  @Field(() => [String], { nullable: true })
   @IsOptional()
-  skills?: RoleSkillEmployeeUpdateInput[];
+  @IsArray({ message: 'Skills should be an array of strings' })
+  @ArrayNotEmpty({ message: 'Skills should not be empty' })
+  @ArrayMinSize(1, { message: 'Skills should contain at least one element' })
+  @IsString({ each: true, message: 'Each skill should be a string' })
+  skills?: string[];
 
-  @Field(() => RoleSkillEmployeeUpdateInput, { nullable: true })
+  @Field(() => String, { nullable: true })
   @IsOptional()
-  role?: RoleSkillEmployeeUpdateInput;
+  @IsString()
+  @IsNotEmpty({ message: 'Role should not be empty' })
+  role?: string;
 }
 
 @InputType()

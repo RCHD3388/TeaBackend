@@ -33,12 +33,6 @@ type EmployeeSkill {
   id: String!
   name: String!
   description: String!
-  already_used: Boolean!
-}
-
-type RoleSkillEmployee {
-  id: String!
-  name: String!
 }
 
 type Employee {
@@ -48,9 +42,9 @@ type Employee {
   hire_date: DateTime!
   salary: Float!
   status: String!
-  role: RoleSkillEmployee!
+  role: EmployeeRole!
   project_history: [EmployeeProjectHistory!]!
-  skill: [RoleSkillEmployee!]!
+  skill: [EmployeeSkill!]!
 }
 
 type LoginResponse {
@@ -99,8 +93,8 @@ input CreateEmployeeInput {
   hire_date: String!
   salary: Float!
   status: String!
-  role: RoleSkillEmployeeInput!
-  skill: RoleSkillEmployeeInput!
+  role: String!
+  skill: String!
 }
 
 input PersonInput {
@@ -108,10 +102,6 @@ input PersonInput {
   email: String!
   phone_number: String!
   address: String!
-}
-
-input RoleSkillEmployeeInput {
-  id: String!
 }
 
 input UpdateEmployeeInput {
@@ -122,12 +112,8 @@ input UpdateEmployeeInput {
   status: String
   salary: Float
   hire_date: String
-  skills: [RoleSkillEmployeeUpdateInput!]
-  role: RoleSkillEmployeeUpdateInput
-}
-
-input RoleSkillEmployeeUpdateInput {
-  id: String!
+  skills: [String!]
+  role: String
 }
 
 input CreateEmployeeSkillInput {

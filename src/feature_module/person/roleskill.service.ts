@@ -71,8 +71,10 @@ export class RoleSkillService {
     if (!employee) {
       throw new NotFoundException(`Employee skill with ID ${id} not found`);
     }
-    if (employee.already_used) {
-      throw new BadRequestException('This Employee skill has already been used and cannot be deleted');
+
+    const isSkillUsed = await this.employeeModel.exists({ skill: { $in: [employee.id] } });
+    if (isSkillUsed) {
+      throw new BadRequestException(`Skill with ID ${id} is already in use by an employee and cannot be deleted`);
     }
 
     const deletedEmpSkill = await this.employeeSkillModel.findByIdAndDelete(id).exec();
