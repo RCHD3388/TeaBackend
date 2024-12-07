@@ -23,18 +23,6 @@ export class EmployeeService {
     return hireDate <= today;
   }
 
-  private async getNextEmployeeId(): Promise<string> {
-    const employees = await this.employeeModel.find().select('id').exec();
-    const employeeIds = employees.map((emp) => emp.id);
-    const maxId = employeeIds.reduce((max, id) => {
-      const numberPart = parseInt(id.slice(2), 10);
-      return numberPart > max ? numberPart : max;
-    }, 0);
-
-    const nextId = `EM${maxId + 1}`;
-    return nextId;
-  }
-
   async findEmployeeById(id: string): Promise<Employee> {
     const employee = await this.employeeModel.findById(id).exec();
     if (!employee) {
@@ -50,9 +38,8 @@ export class EmployeeService {
 
   async create(createEmployeeInput: CreateEmployeeInput): Promise<Employee> {
     const { person, hire_date, salary, status, role, skill } = createEmployeeInput;
-    const newId = await this.getNextEmployeeId();
-    const DBrole = await this.employeeRoleModel.findOne({ id: role })
-    const DBskill = await this.employeeSkillModel.findOne({ id: skill })
+    const DBrole = await this.employeeRoleModel.findById(role)
+    const DBskill = await this.employeeSkillModel.findById(skill)
 
     if (!this.isHireDateValid(hire_date)) {
       throw new BadRequestException("Hire date cannot be in the future")
@@ -63,9 +50,9 @@ export class EmployeeService {
     }
 
     const newEmployee = new this.employeeModel({
-      id: newId, person, hire_date, salary, status,
-      role: DBrole.id,
-      skill: [DBskill.id],
+      person, hire_date, salary, status,
+      role: DBrole._id,
+      skill: [DBskill._id],
       project_history: [],
     })
 
@@ -94,9 +81,9 @@ export class EmployeeService {
     // Update role and skills if present
     if (updateEmployeeInput.role) {
       const roleId = updateEmployeeInput.role;
-      let targetUpdatedRole = await this.employeeRoleModel.findOne({ id: roleId })
+      let targetUpdatedRole = await this.employeeRoleModel.findById(roleId)
       if (!targetUpdatedRole) { throw new NotFoundException("Role is not found") }
-      updateData.role = targetUpdatedRole.id
+      updateData.role = targetUpdatedRole._id
     }
 
     if (updateEmployeeInput.skills && updateEmployeeInput.skills.length > 0) {
@@ -108,11 +95,11 @@ export class EmployeeService {
 
       const DBskill = await this.employeeSkillModel.find();
       updateData.skill = updateEmployeeInput.skills.map((skill: string) => {
-        let skillDetailData = DBskill.find((sk) => sk.id === skill)
+        let skillDetailData = DBskill.find((sk) => sk._id.toString() === skill)
         if (!skillDetailData) {
           throw new NotFoundException("Skill Not Found")
         }
-        return skillDetailData.id
+        return skillDetailData._id
       })
 
     }

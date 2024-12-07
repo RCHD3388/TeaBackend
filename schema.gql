@@ -23,21 +23,18 @@ scalar DateTime
 
 type EmployeeRole {
   _id: String!
-  id: String!
   name: String!
   description: String!
 }
 
 type EmployeeSkill {
   _id: String!
-  id: String!
   name: String!
   description: String!
 }
 
 type Employee {
   _id: String!
-  id: String!
   person: Person!
   hire_date: DateTime!
   salary: Float!
@@ -58,7 +55,6 @@ type CategoryData {
   name: String!
   description: String!
   type: String!
-  already_used: Boolean!
 }
 
 type Query {

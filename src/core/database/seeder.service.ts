@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User } from '../../feature_module/user/schema/user.schema';
 import { CustomLoggerService } from '../custom_logger/logger.service';
-import { employeeData, employeeRoleData, employeeSkillData, userData } from './data/person.data';
+import { employeeRoleData, employeeSkillData, getEmployeeData, getUserData } from './data/person.data';
 import { Employee, EmployeeRole, EmployeeSkill } from '../../feature_module/person/schema/employee.schema';
 
 @Injectable()
@@ -34,9 +34,15 @@ export class SeederService {
   async seed() {
     this.logger.log("Seeding data ...")
     await this.seedModel(this.employeeRole, employeeRoleData);
+    let employeeRole = await this.employeeRole.findOne({ name: "owner" });
     await this.seedModel(this.employeeSkill, employeeSkillData);
-    await this.seedModel(this.employeeModel, employeeData);
-    await this.seedUser(this.userModel, userData);
+    let employeeSkill = await this.employeeSkill.findOne({ name: "administrator" });
+    await this.seedModel(this.employeeModel, getEmployeeData({
+      role: employeeRole._id,
+      skill: employeeSkill._id
+    }));
+    let employee = await this.employeeModel.findOne()
+    await this.seedUser(this.userModel, getUserData({employee: employee._id}));
     this.logger.log("Seeding completed !")
   }
 }

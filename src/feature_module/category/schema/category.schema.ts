@@ -33,10 +33,6 @@ export class CategoryData extends Document {
     enum: Object.values(CategoryType), // Hanya nilai yang ada di enum yang diperbolehkan
   })
   type: CategoryType;
-
-  @Field(() => Boolean)
-  @Prop({type: Boolean, default: false})
-  already_used: boolean
 }
 
 export const CategoryDataSchema = SchemaFactory.createForClass(CategoryData);

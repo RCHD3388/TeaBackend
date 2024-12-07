@@ -20,19 +20,6 @@ export class RoleSkillService {
     return false
   }
 
-  private async getNextEmployeeSkillId(): Promise<string> {
-    const skills = await this.employeeSkillModel.find().select('id').exec();
-    const skillIds = skills.map((sk) => sk.id);
-    const maxId = skillIds.reduce((max, id) => {
-      const numberPart = parseInt(id.slice(2), 10);
-      return numberPart > max ? numberPart : max;
-    }, 0);
-
-    const nextId = `ES${maxId + 1}`;
-    return nextId;
-  }
-
-
   async findAllRole(): Promise<EmployeeRole[]> {
     let roles = this.employeeRoleModel.find().exec();
     return roles
@@ -45,9 +32,8 @@ export class RoleSkillService {
 
   async createEmployeeSkill(createEmployeeSkillInput: CreateEmployeeSkillInput): Promise<EmployeeSkill> {
     let { name, description } = createEmployeeSkillInput
-    let newId = await this.getNextEmployeeSkillId();
     if (await this.doesSkillExist(name) == true) throw new BadRequestException(`Skill with name ${name} already exist`);
-    const newSkill = new this.employeeSkillModel({ id: newId, name, description });
+    const newSkill = new this.employeeSkillModel({ name, description });
     return newSkill.save();
   }
 
@@ -66,13 +52,13 @@ export class RoleSkillService {
   }
 
   async delete(id: string): Promise<EmployeeSkill> {
-    const employee = await this.employeeSkillModel.findById(id).exec();
+    const employeeSkill = await this.employeeSkillModel.findById(id).exec();
 
-    if (!employee) {
+    if (!employeeSkill) {
       throw new NotFoundException(`Employee skill with ID ${id} not found`);
     }
 
-    const isSkillUsed = await this.employeeModel.exists({ skill: { $in: [employee.id] } });
+    const isSkillUsed = await this.employeeModel.exists({ skill: { $in: [employeeSkill._id] } });
     if (isSkillUsed) {
       throw new BadRequestException(`Skill with ID ${id} is already in use by an employee and cannot be deleted`);
     }

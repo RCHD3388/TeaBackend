@@ -30,10 +30,6 @@ export class EmployeeRole extends Document {
   _id: string
 
   @Field(() => String)
-  @Prop({ type: String, required: true, unique: true })
-  id: string;
-
-  @Field(() => String)
   @Prop({ type: String, required: true })
   name: string;
 
@@ -50,10 +46,6 @@ export class EmployeeSkill extends Document {
   _id: string;
 
   @Field(() => String)
-  @Prop({ type: String, required: true, unique: true })
-  id: string;
-
-  @Field(() => String)
   @Prop({ type: String, required: true })
   name: string;
 
@@ -68,10 +60,6 @@ export const EmployeeSkillSchema = SchemaFactory.createForClass(EmployeeSkill)
 export class Employee extends Document {
   @Field(() => String)
   _id: string
-
-  @Field(() => String)
-  @Prop({ type: String, required: true })
-  id: string;
 
   @Field(() => Person)
   @Prop({ type: Person, required: true })
@@ -90,7 +78,7 @@ export class Employee extends Document {
   status: string;
 
   @Field(() => EmployeeRole)
-  @Prop({ type: String, required: true, ref: "Role" })
+  @Prop({ type: Types.ObjectId, required: true, ref: "EmployeeRole" })
   role: string | EmployeeRole;
 
   @Field(() => [EmployeeProjectHistory])
@@ -98,15 +86,12 @@ export class Employee extends Document {
   project_history: EmployeeProjectHistory[];
 
   @Field(() => [EmployeeSkill])
-  @Prop({ type: [String], required: true, ref: "Skill"})
+  @Prop({ type: [Types.ObjectId], required: true, ref: "EmployeeSkill"})
   skill: string[] | EmployeeSkill[];
 }
 export const EmployeeSchema = SchemaFactory.createForClass(Employee);
 
-const employeePopulateOption = [
-  { path: "role", model: "EmployeeRole", localField: "role", foreignField: "id" },
-  { path: "skill", model: "EmployeeSkill", localField: "skill", foreignField: "id" }
-]
+const employeePopulateOption = ["role", "skill"]
 EmployeeSchema.pre('find', function(next) { this.populate(employeePopulateOption); next(); });
 EmployeeSchema.pre('findOne', function(next) { this.populate(employeePopulateOption); next(); });
 EmployeeSchema.post('save', async function(doc: any, next) { 

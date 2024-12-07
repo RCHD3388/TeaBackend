@@ -19,7 +19,7 @@ export class User extends Document {
   @Prop({ type: String, required: true, enum: UserStatus, default: UserStatus.ACTIVE })
   status: string;
 
-  @Prop({ type: String, required: true })
+  @Prop({ type: Types.ObjectId, required: true, ref: "Employee" })
   employee: String | Employee;
 }
 export const UserSchema = SchemaFactory.createForClass(User);

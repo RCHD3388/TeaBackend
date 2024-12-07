@@ -12,16 +12,7 @@ export class UserService {
     @InjectModel(User.name) private userModel: Model<User>,
     @InjectModel(Employee.name) private employeeModel: Model<Employee>
   ) { }
-  private populateOption = {
-    path: "employee",
-    model: "Employee",
-    localField: "employee",
-    foreignField: "id",
-    populate: [
-      { path: "role", model: "EmployeeRole", localField: "role", foreignField: "id" },
-      { path: "skill", model: "EmployeeSkill", localField: "skill", foreignField: "id" }
-    ]
-  }
+  
   private userEmployeeFormater(user: User, with_password: boolean = false): UserEmployeeDTO{
     let employee = user.employee as Employee;
     let return_value = {
@@ -37,7 +28,7 @@ export class UserService {
   }
 
   async findForAuth(username: string): Promise<UserEmployeeDTO | null> {
-    let user = await this.userModel.findOne({ username }).populate(this.populateOption);
+    let user = await this.userModel.findOne({ username }).populate("employee");
     let formated_user = null
     if(user){
       formated_user = this.userEmployeeFormater(user, true);
@@ -48,10 +39,10 @@ export class UserService {
   async findUserForSecurity(param: { username?: string; id?: string }): Promise<UserEmployeeDTO> {
     let user = null;
     if (param.username) {
-      user = await this.userModel.findOne({username: param.username}, '-password').populate(this.populateOption);
+      user = await this.userModel.findOne({username: param.username}, '-password').populate("employee");
     }
     if (param.id) {
-      user = await this.userModel.findById(param.id, '-password').populate(this.populateOption);
+      user = await this.userModel.findById(param.id, '-password').populate("employee");
     }
 
     if (!user) {
