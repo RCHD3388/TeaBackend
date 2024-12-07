@@ -10,7 +10,7 @@ export const employeeRoleData: Partial<EmployeeRole>[] = [
 ]
 
 export const employeeSkillData: Partial<EmployeeSkill>[] = [
-  { id: "ES1", name: "administrator", description: "Pemilik Perusahaan"},
+  { id: "ES1", name: "administrator", description: "Pemilik Perusahaan", already_used: true},
 ]
 
 export const employeeData: Partial<Employee>[] = [

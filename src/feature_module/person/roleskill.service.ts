@@ -2,18 +2,21 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Employee, EmployeeRole, EmployeeSkill } from './schema/employee.schema';
-import { CreateEmployeeInput, CreateEmployeeSkillInput, EmployeeDto, RoleSkillEmployeeUpdateInput, UpdateEmployeeInput, UpdateEmployeeSkillInput } from './types/employee.types';
+import { CreateEmployeeSkillInput, UpdateEmployeeSkillInput } from './types/employee.types';
 
 @Injectable()
 export class RoleSkillService {
   constructor(
     @InjectModel(EmployeeSkill.name) private readonly employeeSkillModel: Model<EmployeeSkill>,
     @InjectModel(EmployeeRole.name) private readonly employeeRoleModel: Model<EmployeeRole>,
+    @InjectModel(Employee.name) private readonly employeeModel: Model<Employee>,
   ) { }
 
-  private async doesSkillExist(name: string): Promise<boolean> {
-    const existingSkill = await this.employeeSkillModel.findOne({ name }).exec();
-    if(existingSkill) return true
+  private async doesSkillExist(name: string, id: string | null = null): Promise<boolean> {
+    const filter: any = { name };
+    if (id) { filter._id = { $ne: id }; }
+    const existingSkill = await this.employeeSkillModel.findOne(filter).exec();
+    if (existingSkill) return true
     return false
   }
 
@@ -49,7 +52,7 @@ export class RoleSkillService {
   }
 
   async updateEmployeeSkill(id: string, updateEmployeeSkillInput: UpdateEmployeeSkillInput): Promise<EmployeeSkill> {
-    if (await this.doesSkillExist(updateEmployeeSkillInput.name)) {
+    if (await this.doesSkillExist(updateEmployeeSkillInput.name, id)) {
       throw new BadRequestException(`Skill with name ${updateEmployeeSkillInput.name} already exist`);
     }
     let skill = await this.employeeSkillModel.findByIdAndUpdate(
@@ -57,7 +60,22 @@ export class RoleSkillService {
       { $set: updateEmployeeSkillInput },
       { new: true, runValidators: true },
     );
+
     if (!skill) throw new NotFoundException(`Skill with id ${id} not found`);
     return skill;
+  }
+
+  async delete(id: string): Promise<EmployeeSkill> {
+    const employee = await this.employeeSkillModel.findById(id).exec();
+
+    if (!employee) {
+      throw new NotFoundException(`Employee skill with ID ${id} not found`);
+    }
+    if (employee.already_used) {
+      throw new BadRequestException('This Employee skill has already been used and cannot be deleted');
+    }
+
+    const deletedEmpSkill = await this.employeeSkillModel.findByIdAndDelete(id).exec();
+    return deletedEmpSkill;
   }
 }

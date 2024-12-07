@@ -60,6 +60,10 @@ export class EmployeeSkill extends Document {
   @Field(() => String)
   @Prop({ type: String, required: true })
   description: string;
+
+  @Field(() => Boolean)
+  @Prop({type: Boolean, default: false})
+  already_used: boolean
 }
 export const EmployeeSkillSchema = SchemaFactory.createForClass(EmployeeSkill)
 

@@ -33,6 +33,7 @@ type EmployeeSkill {
   id: String!
   name: String!
   description: String!
+  already_used: Boolean!
 }
 
 type RoleSkillEmployee {
@@ -82,6 +83,7 @@ type Mutation {
   updateEmployee(id: String!, updateEmployeeInput: UpdateEmployeeInput!): Employee!
   createEmployeeSkill(createEmployeeSkillInput: CreateEmployeeSkillInput!): EmployeeSkill!
   updateEmployeeSkill(id: String!, updateEmployeeSkillInput: CreateEmployeeSkillInput!): EmployeeSkill!
+  deleteEmployeeSkill(id: String!): EmployeeSkill!
   createCategory(createCategoryInput: CreateCategoryInput!): CategoryData!
   updateCategory(id: String!, updateCategoryInput: UpdateCategoryInput!): CategoryData!
   deleteCategory(id: String!): CategoryData!

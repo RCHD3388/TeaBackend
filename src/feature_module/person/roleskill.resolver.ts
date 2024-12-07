@@ -1,7 +1,6 @@
 import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
-import { EmployeeService } from './employee.service';
-import { Employee, EmployeeRole, EmployeeSkill, RoleSkillEmployeeSchema } from './schema/employee.schema';
-import { CreateEmployeeInput, CreateEmployeeSkillInput, UpdateEmployeeInput } from './types/employee.types';
+import { EmployeeRole, EmployeeSkill } from './schema/employee.schema';
+import { CreateEmployeeSkillInput } from './types/employee.types';
 import { UseGuards } from '@nestjs/common';
 import { AppAuthGuard } from '../user/auth_related/auth.guard';
 import { RolesGuard } from 'src/common/guard/roles.guard';
@@ -39,5 +38,12 @@ export class RoleSkillResolver {
   @Roles("owner")
   async updateEmployeeSkill( @Args('id') id: string, @Args('updateEmployeeSkillInput') updateEmployeeSkillInput: CreateEmployeeSkillInput ) {
     return this.roleSkillService.updateEmployeeSkill(id, updateEmployeeSkillInput);
+  }
+
+  @Mutation(() => EmployeeSkill)
+  @UseGuards(RolesGuard)
+  @Roles("owner")
+  async deleteEmployeeSkill(@Args('id') id: string): Promise<EmployeeSkill> {
+    return this.roleSkillService.delete(id);
   }
 }

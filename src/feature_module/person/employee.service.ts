@@ -14,8 +14,8 @@ export class EmployeeService {
 
   private isHireDateValid(hire_date: string | Date): boolean {
     const today = new Date();
-    const hireDate = new Date(hire_date); 
-    return hireDate <= today; 
+    const hireDate = new Date(hire_date);
+    return hireDate <= today;
   }
 
   private async getNextEmployeeId(): Promise<string> {
@@ -49,12 +49,17 @@ export class EmployeeService {
     const DBrole = await this.employeeRoleModel.findOne({ id: role.id })
     const DBskill = await this.employeeSkillModel.findOne({ id: skill.id })
 
-    if(!this.isHireDateValid(hire_date)){
+    if (!this.isHireDateValid(hire_date)) {
       throw new BadRequestException("Hire date cannot be in the future")
     }
 
     if (!DBrole || !DBskill) {
       throw new NotFoundException("Role or Skill not found")
+    }
+
+    if (DBskill.already_used == false) {
+      DBskill.already_used = true
+      await DBskill.save()
     }
 
     const newEmployee = new this.employeeModel({
@@ -80,7 +85,7 @@ export class EmployeeService {
     if (updateEmployeeInput.status) updateData.status = updateEmployeeInput.status;
     if (updateEmployeeInput.salary) updateData.salary = updateEmployeeInput.salary;
     if (updateEmployeeInput.hire_date) {
-      if(!this.isHireDateValid(updateEmployeeInput.hire_date)){
+      if (!this.isHireDateValid(updateEmployeeInput.hire_date)) {
         throw new BadRequestException("Hire date cannot be in the future")
       }
       updateData.hire_date = updateEmployeeInput.hire_date

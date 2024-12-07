@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { User } from "./schema/user.schema";
 import { Model } from "mongoose";
@@ -40,7 +40,7 @@ export class UserService {
     return formated_user;
   }
 
-  async findUser(param: { username?: string; id?: string }): Promise<UserEmployeeDTO> {
+  async findUserForSecurity(param: { username?: string; id?: string }): Promise<UserEmployeeDTO> {
     let user = null;
     if (param.username) {
       user = await this.userModel.findOne({username: param.username}, '-password').populate({
@@ -60,7 +60,7 @@ export class UserService {
     }
 
     if (!user) {
-      throw new NotFoundException(`User not found`);
+      throw new UnauthorizedException(`User not found`);
     }
 
     let formated_user = this.userEmployeeFormater(user);
