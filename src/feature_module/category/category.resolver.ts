@@ -14,21 +14,21 @@ export class CategoryResolver {
 
   @Mutation(() => CategoryData)
   @UseGuards(RolesGuard)
-  @Roles("owner")
+  @Roles("owner", "admin")
   async createCategory(@Args('createCategoryInput') createCategoryInput: CreateCategoryInput): Promise<CategoryData> {
     return this.categoryService.create(createCategoryInput);
   }
 
   @Query(() => [CategoryData], { name: 'getCategories' })
   @UseGuards(RolesGuard)
-  @Roles("owner")
+  @Roles("owner", "admin")
   async getCategories(): Promise<CategoryData[]> {
     return this.categoryService.findAll();
   }
 
   @Mutation(() => CategoryData, { name: 'updateCategory' })
   @UseGuards(RolesGuard)
-  @Roles("owner")
+  @Roles("owner", "admin")
   async updateCategory(
     @Args('id') id: string,
     @Args('updateCategoryInput') updateCategoryInput: UpdateCategoryInput,
@@ -38,7 +38,7 @@ export class CategoryResolver {
 
   @Mutation(() => CategoryData)
   @UseGuards(RolesGuard)
-  @Roles("owner")
+  @Roles("owner", "admin")
   async deleteCategory(@Args('id') id: string): Promise<CategoryData> {
     return this.categoryService.delete(id);
   }

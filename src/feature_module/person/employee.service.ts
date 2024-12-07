@@ -1,8 +1,9 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Employee, EmployeeRole, EmployeeSkill } from './schema/employee.schema';
 import { CreateEmployeeInput, UpdateEmployeeInput } from './types/employee.types';
+import { User } from '../user/schema/user.schema';
 
 @Injectable()
 export class EmployeeService {
@@ -36,7 +37,7 @@ export class EmployeeService {
     return employee
   }
 
-  async create(createEmployeeInput: CreateEmployeeInput): Promise<Employee> {
+  async create(createEmployeeInput: CreateEmployeeInput, user: User): Promise<Employee> {
     const { person, hire_date, salary, status, role, skill } = createEmployeeInput;
     const DBrole = await this.employeeRoleModel.findById(role)
     const DBskill = await this.employeeSkillModel.findById(skill)
@@ -44,9 +45,12 @@ export class EmployeeService {
     if (!this.isHireDateValid(hire_date)) {
       throw new BadRequestException("Hire date cannot be in the future")
     }
-
     if (!DBrole || !DBskill) {
       throw new NotFoundException("Role or Skill not found")
+    }
+    let employee = user.employee as Employee
+    if((employee.role as EmployeeRole).name == "admin" && (DBrole.name == "admin" || DBrole.name == "owner")) {
+      throw new ForbiddenException("Not allowed to perform this action.")
     }
 
     const newEmployee = new this.employeeModel({

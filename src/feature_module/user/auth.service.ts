@@ -14,7 +14,6 @@ export class AuthService {
 
   async login(data: LoginDto): Promise<LoginResponse> {
     const user = await this.userService.findForAuth(data.username);
-    
     if(!user || !(await bcrypt.compare(data.password, user.password))){
       throw new BadRequestException("Invalid Credentials");
     }

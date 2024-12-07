@@ -14,35 +14,35 @@ export class RoleSkillResolver {
 
   @Query(() => [EmployeeRole], { name: 'getAllRole' })
   @UseGuards(RolesGuard)
-  @Roles("owner")
+  @Roles("owner", "admin")
   async getAllRole() {
     return this.roleSkillService.findAllRole();
   }
 
   @Query(() => [EmployeeSkill], { name: 'getAllSkill' })
   @UseGuards(RolesGuard)
-  @Roles("owner")
+  @Roles("owner", "admin")
   async getAllSkill() {
     return this.roleSkillService.findAllSkill();
   }
 
   @Mutation(() => EmployeeSkill, { name: 'createEmployeeSkill' })
   @UseGuards(RolesGuard)
-  @Roles("owner")
+  @Roles("owner", "admin")
   async createEmployeeSkill( @Args('createEmployeeSkillInput') createEmployeeSkillInput: CreateEmployeeSkillInput ) {
     return this.roleSkillService.createEmployeeSkill(createEmployeeSkillInput);
   }
 
   @Mutation(() => EmployeeSkill, { name: 'updateEmployeeSkill' })
   @UseGuards(RolesGuard)
-  @Roles("owner")
+  @Roles("owner", "admin")
   async updateEmployeeSkill( @Args('id') id: string, @Args('updateEmployeeSkillInput') updateEmployeeSkillInput: CreateEmployeeSkillInput ) {
     return this.roleSkillService.updateEmployeeSkill(id, updateEmployeeSkillInput);
   }
 
   @Mutation(() => EmployeeSkill)
   @UseGuards(RolesGuard)
-  @Roles("owner")
+  @Roles("owner", "admin")
   async deleteEmployeeSkill(@Args('id') id: string): Promise<EmployeeSkill> {
     return this.roleSkillService.delete(id);
   }

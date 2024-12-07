@@ -6,6 +6,8 @@ import { UseGuards } from '@nestjs/common';
 import { AppAuthGuard } from '../user/auth_related/auth.guard';
 import { RolesGuard } from 'src/common/guard/roles.guard';
 import { Roles } from 'src/common/decorators/roles.decorator';
+import { CurrentUser } from 'src/common/decorators/auth_user.decorator';
+import { User } from '../user/schema/user.schema';
 
 @Resolver()
 @UseGuards(AppAuthGuard)
@@ -14,7 +16,7 @@ export class EmployeeResolver {
 
   @Query(() => [Employee], { name: 'getAllEmployees' })
   @UseGuards(RolesGuard)
-  @Roles("owner")
+  @Roles("owner", "admin")
   async getAllEmployees() {
     return this.employeeService.findAll();
   }
@@ -22,20 +24,24 @@ export class EmployeeResolver {
   @Query(() => Employee)
   @Query(() => [Employee], { name: 'getEmployeeById' })
   @UseGuards(RolesGuard)
+  @Roles("owner", "admin")
   async getEmployeeById(@Args('id') id: string): Promise<Employee> {
     return this.employeeService.findEmployeeById(id);
   }
 
   @Mutation(() => Employee)
   @UseGuards(RolesGuard)
-  @Roles("owner")
-  async createEmployee( @Args('createEmployeeInput') createEmployeeInput: CreateEmployeeInput ): Promise<Employee> {
-    return this.employeeService.create(createEmployeeInput);
+  @Roles("owner", "admin")
+  async createEmployee( 
+    @Args('createEmployeeInput') createEmployeeInput: CreateEmployeeInput,
+    @CurrentUser() user: User
+  ): Promise<Employee> {
+    return this.employeeService.create(createEmployeeInput, user);
   }
 
   @Mutation(() => Employee)
   @UseGuards(RolesGuard)
-  @Roles("owner")
+  @Roles("owner", "admin")
   async updateEmployee(
     @Args('id') id: string, 
     @Args('updateEmployeeInput') updateEmployeeInput: UpdateEmployeeInput
