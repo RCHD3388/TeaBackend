@@ -5,13 +5,21 @@ import { EmployeeResolver } from './employee.resolver';
 import { EmployeeService } from './employee.service';
 import { RoleSkillResolver } from './roleskill.resolver';
 import { RoleSkillService } from './roleskill.service';
+import { SupplierResolver } from './supplier.resolver';
+import { SupplierService } from './supplier.service';
+import { Supplier, SupplierSchema } from './schema/supplier.schema';
 
 @Module({
   imports: [MongooseModule.forFeature([
     { name: Employee.name, schema: EmployeeSchema },
     { name: EmployeeSkill.name, schema: EmployeeSkillSchema},
-    { name: EmployeeRole.name, schema: EmployeeRoleSchema }
+    { name: EmployeeRole.name, schema: EmployeeRoleSchema },
+    { name: Supplier.name, schema: SupplierSchema }
   ]),],
-  providers: [EmployeeResolver, EmployeeService, RoleSkillResolver, RoleSkillService]
+  providers: [
+    EmployeeResolver, EmployeeService, 
+    RoleSkillResolver, RoleSkillService,
+    SupplierResolver, SupplierService
+  ]
 })
 export class PersonModule { }

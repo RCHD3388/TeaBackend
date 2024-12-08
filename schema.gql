@@ -50,6 +50,13 @@ type LoginResponse {
   access_token: String!
 }
 
+type Supplier {
+  _id: String!
+  name: String!
+  person: Person!
+  status: String!
+}
+
 type CategoryData {
   _id: ID!
   name: String!
@@ -60,9 +67,11 @@ type CategoryData {
 type Query {
   getHello: String!
   getAllEmployees: [Employee!]!
-  getEmployeeById(id: String!): Employee!
+  getEmployeeById(id: String!): [Employee!]!
   getAllRole: [EmployeeRole!]!
   getAllSkill: [EmployeeSkill!]!
+  getAllSuppliers: [Supplier!]!
+  getSupplierById(id: String!): [Supplier!]!
   getCategories: [CategoryData!]!
 }
 
@@ -74,6 +83,8 @@ type Mutation {
   createEmployeeSkill(createEmployeeSkillInput: CreateEmployeeSkillInput!): EmployeeSkill!
   updateEmployeeSkill(id: String!, updateEmployeeSkillInput: CreateEmployeeSkillInput!): EmployeeSkill!
   deleteEmployeeSkill(id: String!): EmployeeSkill!
+  createSupplier(createSupplierInput: CreateSupplierInput!): Supplier!
+  updateSupplier(id: String!, updateSupplierInput: UpdateSupplierInput!): Supplier!
   createCategory(createCategoryInput: CreateCategoryInput!): CategoryData!
   updateCategory(id: String!, updateCategoryInput: UpdateCategoryInput!): CategoryData!
   deleteCategory(id: String!): CategoryData!
@@ -115,6 +126,21 @@ input UpdateEmployeeInput {
 input CreateEmployeeSkillInput {
   name: String!
   description: String!
+}
+
+input CreateSupplierInput {
+  name: String!
+  person: PersonInput!
+  status: String!
+}
+
+input UpdateSupplierInput {
+  company_name: String
+  name: String
+  email: String
+  phone_number: String
+  address: String
+  status: String
 }
 
 input CreateCategoryInput {

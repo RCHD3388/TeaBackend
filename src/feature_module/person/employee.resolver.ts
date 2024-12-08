@@ -21,7 +21,6 @@ export class EmployeeResolver {
     return this.employeeService.findAll();
   }
 
-  @Query(() => Employee)
   @Query(() => [Employee], { name: 'getEmployeeById' })
   @UseGuards(RolesGuard)
   @Roles("owner", "admin")
