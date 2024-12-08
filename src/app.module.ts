@@ -12,6 +12,11 @@ import { AppResolver } from './app.resolver';
 import { ProjectModule } from './modules/project/project.module'; // Import your ProjectModule
 import { BrandModule } from './feature_module/inventory/brand/brand.module';
 import { WarehouseModule } from './feature_module/inventory/warehouse/warehouse.module';
+import { ToolModule } from './feature_module/inventory/tool/tool.module';
+import { MaterialModule } from './feature_module/inventory/material/material.module';
+import { ToolTransactionModule } from './feature_module/inventory/tool_transaction/tool-transaction.module';
+import { MaterialTransactionModule } from './feature_module/inventory/material_transaction/material-transaction.module';
+import { StockKeepingUnitModule } from './feature_module/inventory/stock_keeping_unit/stock-keeping-unit.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -33,10 +38,14 @@ import { WarehouseModule } from './feature_module/inventory/warehouse/warehouse.
       },
     }),
     DatabaseModule,
+    CustomLoggerModule,
     BrandModule,
     WarehouseModule,
-    CustomLoggerModule,
-
+    // ToolModule,
+    // MaterialModule,
+    // ToolTransactionModule,
+    // MaterialTransactionModule,
+    StockKeepingUnitModule,
     ProjectModule, // Add the ProjectModule to the imports array
   ],
   providers: [AppResolver],

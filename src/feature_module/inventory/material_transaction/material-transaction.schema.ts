@@ -1,15 +1,17 @@
+import { ObjectType } from '@nestjs/graphql';
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 
+@ObjectType()
 @Schema({ timestamps: true })
 export class MaterialTransaction extends Document {
   @Prop({ type: Types.ObjectId, ref: 'Material', required: true })
   material: string;
   
-  @Prop({ type: Number, required: true })
+  @Prop({ type: Number, required: true , default : 0})
   in: number;
   
-  @Prop({ type: Number, required: true })
+  @Prop({ type: Number, required: true,  default: 0 })
   out: number;
   
   @Prop({ type: Number, required: true })

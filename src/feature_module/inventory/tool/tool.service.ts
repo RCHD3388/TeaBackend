@@ -4,7 +4,7 @@ import { Model } from 'mongoose';
 import { Tool } from './tool.schema';
 import { StockKeepingUnit } from '../stock_keeping_unit/stock-keeping-unit.schema';
 import { CreateToolInput } from './dto/create-tool.input';
-import { CategoryData } from '../../category_data/category-data.schema';
+import { CategoryData } from '../../category_data/category_data/category-data.schema';
 @Injectable()
 export class ToolService {
     constructor(

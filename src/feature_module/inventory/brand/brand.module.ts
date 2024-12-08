@@ -6,9 +6,13 @@ import { BrandResolver } from './brand.resolver';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: Brand.name, schema: BrandSchema }]), // Register the schema
+    MongooseModule.forFeature([{ name: Brand.name, schema: BrandSchema }]),
   ],
-  providers: [BrandService, BrandResolver], // Service and resolver
-  exports: [BrandService], // Export the service for use in other modules if needed
+  providers: [BrandService, BrandResolver],
+  exports: [
+    BrandService,
+    MongooseModule, // Export MongooseModule to make the schema accessible
+  ],
 })
 export class BrandModule {}
+

@@ -1,6 +1,8 @@
+import { ObjectType } from '@nestjs/graphql';
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 
+@ObjectType()
 @Schema({ timestamps: true })
 export class ToolTransaction extends Document {
   @Prop({ type: Types.ObjectId, ref: 'Tool', required: true })

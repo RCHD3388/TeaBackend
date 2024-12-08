@@ -35,11 +35,20 @@ type Warehouse {
   material_transaction: [String!]!
 }
 
+type StockKeepingUnit {
+  _id: ID!
+  id: String!
+  name: String!
+  brand: String
+  description: String
+}
+
 type Query {
   getHello: String!
   brands: [Brand!]!
   warehouses: [Warehouse!]!
   warehouse(id: String!): Warehouse!
+  stockKeepingUnits: [StockKeepingUnit!]!
   projects: [Project!]!
   project(id: String!): Project!
 }
@@ -49,6 +58,7 @@ type Mutation {
   createWarehouse(createWarehouseInput: CreateWarehouseInput!): Warehouse!
   updateWarehouse(id: String!, warehouse: UpdateWarehouseInput!): Warehouse!
   deactivateWarehouse(id: String!): Warehouse!
+  createStockKeepingUnit(data: CreateStockKeepingUnitInput!): StockKeepingUnit!
   createProject(data: CreateProjectInput!): Project!
   updateProject(id: String!, data: UpdateProjectInput!): Project!
   deleteProject(id: String!): Boolean!
@@ -73,6 +83,12 @@ input UpdateWarehouseInput {
   type: String!
   status: String
   address: String!
+}
+
+input CreateStockKeepingUnitInput {
+  name: String!
+  description: String
+  brand: String
 }
 
 input CreateProjectInput {
