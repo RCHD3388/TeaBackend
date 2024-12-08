@@ -120,7 +120,7 @@ export class UpdateEmployeeInput {
   @IsOptional()
   @IsArray({ message: 'Skills should be an array of strings' })
   @ArrayNotEmpty({ message: 'Skills should not be empty' })
-  @ArrayMinSize(1, { message: 'Skills should contain at least one element' })
+  @ArrayMinSize(1, { message: 'Pegawai harus memiliki setidaknya satu skill' })
   @IsString({ each: true, message: 'Each skill should be a string' })
   skills?: string[];
 

@@ -86,7 +86,7 @@ export class EmployeeService {
     if (updateEmployeeInput.role) {
       const roleId = updateEmployeeInput.role;
       let targetUpdatedRole = await this.employeeRoleModel.findById(roleId)
-      if (!targetUpdatedRole) { throw new NotFoundException("Role is not found") }
+      if (!targetUpdatedRole) { throw new BadRequestException("Role tidak ditemukan") }
       updateData.role = targetUpdatedRole._id
     }
 
@@ -94,7 +94,7 @@ export class EmployeeService {
       const skillIds = updateEmployeeInput.skills;
       const uniqueSkillIds = new Set(skillIds);
       if (skillIds.length !== uniqueSkillIds.size) {
-        throw new NotFoundException("Duplicate skill IDs found");
+        throw new BadRequestException("Skill dengan nama yang sama tidak diperbolehkan.");
       }
 
       const DBskill = await this.employeeSkillModel.find();
