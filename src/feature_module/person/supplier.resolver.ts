@@ -20,7 +20,7 @@ export class SupplierResolver {
     return this.supplierService.findAll();
   }
 
-  @Query(() => [Supplier], { name: 'getSupplierById' })
+  @Query(() => Supplier, { name: 'getSupplierById' })
   @UseGuards(RolesGuard)
   @Roles("owner", "staff_pembelian")
   async getSupplierById(@Args('id') id: string): Promise<Supplier> {

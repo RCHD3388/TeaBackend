@@ -71,7 +71,7 @@ type Query {
   getAllRole: [EmployeeRole!]!
   getAllSkill: [EmployeeSkill!]!
   getAllSuppliers: [Supplier!]!
-  getSupplierById(id: String!): [Supplier!]!
+  getSupplierById(id: String!): Supplier!
   getCategories: [CategoryData!]!
 }
 
