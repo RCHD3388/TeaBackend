@@ -67,7 +67,7 @@ type CategoryData {
 type Query {
   getHello: String!
   getAllEmployees: [Employee!]!
-  getEmployeeById(id: String!): [Employee!]!
+  getEmployeeById(id: String!): Employee!
   getAllRole: [EmployeeRole!]!
   getAllSkill: [EmployeeSkill!]!
   getAllSuppliers: [Supplier!]!

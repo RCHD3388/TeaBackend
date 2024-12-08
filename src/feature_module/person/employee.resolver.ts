@@ -21,7 +21,7 @@ export class EmployeeResolver {
     return this.employeeService.findAll();
   }
 
-  @Query(() => [Employee], { name: 'getEmployeeById' })
+  @Query(() => Employee, { name: 'getEmployeeById' })
   @UseGuards(RolesGuard)
   @Roles("owner", "admin")
   async getEmployeeById(@Args('id') id: string): Promise<Employee> {
