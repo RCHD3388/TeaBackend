@@ -5,48 +5,28 @@ import { CustomLoggerService } from './core/custom_logger/logger.service';
 import { GraphQLModule } from '@nestjs/graphql';
 import databaseConfig from './common/configs/database.config';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
-import { DirectiveLocation, GraphQLDirective } from 'graphql';
-import { upperDirectiveTransformer } from './common/directives/upper-case.directive';
 import { DatabaseModule } from './core/database/database.module';
 import { AppResolver } from './app.resolver';
-import { ProjectModule } from './modules/project/project.module'; // Import your ProjectModule
-import { BrandModule } from './feature_module/inventory/brand/brand.module';
-import { WarehouseModule } from './feature_module/inventory/warehouse/warehouse.module';
-import { ToolModule } from './feature_module/inventory/tool/tool.module';
-import { MaterialModule } from './feature_module/inventory/material/material.module';
-import { ToolTransactionModule } from './feature_module/inventory/tool_transaction/tool-transaction.module';
-import { MaterialTransactionModule } from './feature_module/inventory/material_transaction/material-transaction.module';
-import { StockKeepingUnitModule } from './feature_module/inventory/stock_keeping_unit/stock-keeping-unit.module';
+import { UsersModule } from './feature_module/user/user.module';
+import { ProjectModule } from './feature_module/project/project.module';
+import { PersonModule } from './feature_module/person/person.module';
+import { createGraphqlConfig } from './common/configs/graphql.config';
+import { CategoryModule } from './feature_module/category/category.module';
+
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      isGlobal: true, // Makes ConfigModule available throughout the app
-      load: [databaseConfig],
-    }),
-    GraphQLModule.forRoot<ApolloDriverConfig>({
+    GraphQLModule.forRootAsync<ApolloDriverConfig>({
       driver: ApolloDriver,
-      autoSchemaFile: 'schema.gql',
-      transformSchema: (schema) => upperDirectiveTransformer(schema, 'upper'),
-      installSubscriptionHandlers: true,
-      buildSchemaOptions: {
-        directives: [
-          new GraphQLDirective({
-            name: 'upper',
-            locations: [DirectiveLocation.FIELD_DEFINITION],
-          }),
-        ],
-      },
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => createGraphqlConfig(configService),
     }),
     DatabaseModule,
     CustomLoggerModule,
-    BrandModule,
-    WarehouseModule,
-    // ToolModule,
-    // MaterialModule,
-    // ToolTransactionModule,
-    // MaterialTransactionModule,
-    StockKeepingUnitModule,
-    ProjectModule, // Add the ProjectModule to the imports array
+    UsersModule,
+    ProjectModule,
+    PersonModule,
+    CategoryModule,
   ],
   providers: [AppResolver],
 })

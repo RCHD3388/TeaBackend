@@ -1,0 +1,517 @@
+{
+	"info": {
+		"_postman_id": "ae172eb0-d6fb-4bb9-9d70-51f34a2c1d79",
+		"name": "DREAMHOME",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "28354018"
+	},
+	"item": [
+		{
+			"name": "employee",
+			"item": [
+				{
+					"name": "createEmployee",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTQ1ZjMxZjI1YzliYjljMzdhYzczOCIsInVzZXJuYW1lIjoicmljaGFyZCIsImlhdCI6MTczMzU5MDk0MCwiZXhwIjoxNzMzNTk4MTQwfQ.s8zpdu2_-fuRUJCrjEGLBV2zRWRwXXefoGN8OSkVAvQ",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation {\r\n  createEmployee(createEmployeeInput: {\r\n    person: {\r\n      name: \"Yoga Pramana\",\r\n      email: \"yoga@example.com\",\r\n      phone_number: \"123-456-7890\",\r\n      address: \"123 Main St, Springfield\"\r\n    },\r\n    hire_date: \"2024-10-05\",\r\n    salary: 50000,\r\n    status: \"Active\",\r\n    role: \"67545f31f25c9bb9c37ac726\",\r\n    skill: \"67545f31f25c9bb9c37ac72d\"\r\n  }) {\r\n    _id\r\n    person {\r\n      name\r\n      email\r\n      phone_number\r\n      address\r\n    }\r\n    hire_date\r\n    salary\r\n    status\r\n    role {\r\n      _id\r\n      name\r\n    }\r\n    skill {\r\n      _id\r\n      name\r\n    }\r\n  }\r\n}\r\n",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "localhost:3000/graphql",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getEmployeeRole",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTQ1ZjMxZjI1YzliYjljMzdhYzczOCIsInVzZXJuYW1lIjoicmljaGFyZCIsImlhdCI6MTczMzU5MDk0MCwiZXhwIjoxNzMzNTk4MTQwfQ.s8zpdu2_-fuRUJCrjEGLBV2zRWRwXXefoGN8OSkVAvQ",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query {\r\n  getAllRole{\r\n    _id\r\n    name\r\n    description\r\n  }\r\n}",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/graphql",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateEmployee",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTQ1ZjMxZjI1YzliYjljMzdhYzczOCIsInVzZXJuYW1lIjoicmljaGFyZCIsImlhdCI6MTczMzYzOTUyNywiZXhwIjoxNzMzNjQ2NzI3fQ.B0-xgcbzmhPY6ylZqA6560jLFQt4QZirtDbgbyRLduk",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation {\r\n  updateEmployee(\r\n    id: \"67545f31f25c9bb9c37ac731\", \r\n    updateEmployeeInput: {\r\n      name: \"Updated Name\",\r\n      email: \"updatedemail@example.com\",\r\n      phone_number: \"08123634523\",\r\n      address: \"Updated Address\",\r\n      status: \"Active\",\r\n      salary: 800000,\r\n      hire_date: \"2024-12-07\",\r\n      role: \"67545f31f25c9bb9c37ac726\",\r\n      skills: [\"67545f31f25c9bb9c37ac72d\", \"67553d853c54c7994c696da1\"]\r\n    }\r\n  ) {\r\n    _id\r\n    person {\r\n      name\r\n      email\r\n      phone_number\r\n      address\r\n    }\r\n    status\r\n    salary\r\n    hire_date\r\n    role {\r\n      _id\r\n      name\r\n    }\r\n    skill {\r\n      _id\r\n      name\r\n    }\r\n  }\r\n}\r\n",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "localhost:3000/graphql",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getAllEmployee",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTQ1ZjMxZjI1YzliYjljMzdhYzczOCIsInVzZXJuYW1lIjoicmljaGFyZCIsImlhdCI6MTczMzU5MDk0MCwiZXhwIjoxNzMzNTk4MTQwfQ.s8zpdu2_-fuRUJCrjEGLBV2zRWRwXXefoGN8OSkVAvQ",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query {\r\n  getAllEmployees {\r\n    _id\r\n    person{\r\n      name\r\n    }\r\n    hire_date\r\n    salary\r\n    status\r\n    role{\r\n      _id\r\n      name\r\n    }\r\n    skill{\r\n      _id\r\n      name\r\n    }\r\n  }\r\n}",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/graphql",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getEmployeeById",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTQ1ZjMxZjI1YzliYjljMzdhYzczOCIsInVzZXJuYW1lIjoicmljaGFyZCIsImlhdCI6MTczMzYwMTM3MCwiZXhwIjoxNzMzNjA4NTcwfQ.MOvkK1UiWVpyxcEgEm6XXjKSqPCk_PwZbNKsNk4akEg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query {\r\n  getEmployeeById(id: \"67545f31f25c9bb9c37ac731\") {\r\n    _id\r\n    person {\r\n      name\r\n      email\r\n      phone_number\r\n      address\r\n    }\r\n    hire_date\r\n    salary\r\n    status\r\n    role {\r\n        _id\r\n      name\r\n      description\r\n    }\r\n    skill {\r\n        _id\r\n      name\r\n      description\r\n    }\r\n  }\r\n}",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/graphql",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getAllEmployeeSkill",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTQ1ZjMxZjI1YzliYjljMzdhYzczOCIsInVzZXJuYW1lIjoicmljaGFyZCIsImlhdCI6MTczMzU5MDk0MCwiZXhwIjoxNzMzNTk4MTQwfQ.s8zpdu2_-fuRUJCrjEGLBV2zRWRwXXefoGN8OSkVAvQ",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query {\r\n  getAllSkill{\r\n    _id\r\n    name\r\n    description\r\n  }\r\n}",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/graphql",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "category",
+			"item": [
+				{
+					"name": "createCategory",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTQ1ZjMxZjI1YzliYjljMzdhYzczOCIsInVzZXJuYW1lIjoicmljaGFyZCIsImlhdCI6MTczMzU5MDk0MCwiZXhwIjoxNzMzNTk4MTQwfQ.s8zpdu2_-fuRUJCrjEGLBV2zRWRwXXefoGN8OSkVAvQ",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation {\r\n  createCategory(createCategoryInput: {\r\n    name: \"Project Def Cost\",\r\n    description: \"Category for project costs latest description\",\r\n    type: \"project_cost\"\r\n  }) {\r\n    _id\r\n    name\r\n    description\r\n    type\r\n  }\r\n}",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/graphql",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getCategories",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTQ1ZjMxZjI1YzliYjljMzdhYzczOCIsInVzZXJuYW1lIjoicmljaGFyZCIsImlhdCI6MTczMzU5MDk0MCwiZXhwIjoxNzMzNTk4MTQwfQ.s8zpdu2_-fuRUJCrjEGLBV2zRWRwXXefoGN8OSkVAvQ",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query {\r\n  getCategories {\r\n    _id\r\n    name\r\n    description\r\n    type\r\n  }\r\n}\r\n",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/graphql",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateCategory",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTQ1ZjMxZjI1YzliYjljMzdhYzczOCIsInVzZXJuYW1lIjoicmljaGFyZCIsImlhdCI6MTczMzU5MDk0MCwiZXhwIjoxNzMzNTk4MTQwfQ.s8zpdu2_-fuRUJCrjEGLBV2zRWRwXXefoGN8OSkVAvQ",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation {\r\n  updateCategory(id: \"675482d60331eb721b06a128\", updateCategoryInput: {\r\n    name: \"Project Def Cost\",  \r\n    description: \"Updated category for project cost description\"\r\n  }) {\r\n    _id\r\n    name\r\n    description\r\n    type\r\n  }\r\n}\r\n",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/graphql",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteCategory",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTQ1ZjMxZjI1YzliYjljMzdhYzczOCIsInVzZXJuYW1lIjoicmljaGFyZCIsImlhdCI6MTczMzU5MDk0MCwiZXhwIjoxNzMzNTk4MTQwfQ.s8zpdu2_-fuRUJCrjEGLBV2zRWRwXXefoGN8OSkVAvQ",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation {\r\n  deleteCategory(id: \"675482d60331eb721b06a128\") {\r\n    _id\r\n    name\r\n    description\r\n    type\r\n  }\r\n}\r\n",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/graphql",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "supplier",
+			"item": [
+				{
+					"name": "createSupplier",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTQ1ZjMxZjI1YzliYjljMzdhYzczOCIsInVzZXJuYW1lIjoicmljaGFyZCIsImlhdCI6MTczMzY3NjAyNywiZXhwIjoxNzMzNjgzMjI3fQ.5ls0PFyVXxx3wXAb3brEKKYBMcVUnhLg8qBVuQ2j2Yo",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation {\r\n  createSupplier(createSupplierInput: {\r\n    person: {\r\n      name: \"Michael Steven\",\r\n      email: \"mcihael@example.com\",\r\n      phone_number: \"123-456-7890\",\r\n      address: \"123 Main St, Springfield\"\r\n    },\r\n    name: \"2024-10-05\",\r\n    status: \"Active\",\r\n  }) {\r\n    _id\r\n    name\r\n    person {\r\n      name\r\n      email\r\n      phone_number\r\n      address\r\n    }\r\n    status\r\n  }\r\n}\r\n",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/graphql",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getSupplierById",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTQ1ZjMxZjI1YzliYjljMzdhYzczOCIsInVzZXJuYW1lIjoicmljaGFyZCIsImlhdCI6MTczMzY3NjAyNywiZXhwIjoxNzMzNjgzMjI3fQ.5ls0PFyVXxx3wXAb3brEKKYBMcVUnhLg8qBVuQ2j2Yo",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query {\r\n  getSupplierById(id: \"6755cc61a8fb1ef061dd5469\") {\r\n    _id\r\n    name\r\n    person {\r\n      name\r\n      email\r\n      phone_number\r\n      address\r\n    }\r\n    status\r\n  }\r\n}",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/graphql",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getAllSupplier",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NTQ1ZjMxZjI1YzliYjljMzdhYzczOCIsInVzZXJuYW1lIjoicmljaGFyZCIsImlhdCI6MTczMzY3NjAyNywiZXhwIjoxNzMzNjgzMjI3fQ.5ls0PFyVXxx3wXAb3brEKKYBMcVUnhLg8qBVuQ2j2Yo",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query {\r\n  getAllSuppliers {\r\n    _id\r\n    name\r\n    person {\r\n      name\r\n      email\r\n      phone_number\r\n      address\r\n    }\r\n    status\r\n  }\r\n}",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/graphql",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "login",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation {\r\n  login(data: { username: \"richard\", password: \"password\" }) {\r\n    username\r\n    role\r\n    access_token\r\n  }\r\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/graphql",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

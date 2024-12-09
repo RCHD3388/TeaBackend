@@ -5,25 +5,9 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { DatabaseService } from './database.service';
 import { SeederService } from './seeder.service';
 import { CustomLoggerModule } from '../custom_logger/custom-logger.module';
-import { User, UserSchema } from '../../feature_module/user/user.schema';
+import { User, UserSchema } from '../../feature_module/user/schema/user.schema'
 import databaseConfig from '../../common/configs/database.config';
-import { Person, PersonSchema } from 'src/feature_module/person/person.schema';
-import {
-  Employee,
-  EmployeeSchema,
-} from 'src/feature_module/person/employee/employee.schema';
-import {
-  EmployeeRole,
-  EmployeeRoleSchema,
-} from 'src/feature_module/person/employee-role/employee-role.schema';
-import {
-  Supplier,
-  SupplierSchema,
-} from 'src/feature_module/person/supplier.schema';
-import {
-  Project,
-  ProjectSchema,
-} from 'src/feature_module/project/project.schema';
+import { Employee, EmployeeRole, EmployeeRoleSchema, EmployeeSchema, EmployeeSkill, EmployeeSkillSchema } from '../../feature_module/person/schema/employee.schema';
 
 @Module({
   imports: [
@@ -32,21 +16,18 @@ import {
       isGlobal: true,
       load: [databaseConfig],
     }),
-    ConfigModule,
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: DatabaseService.createMongooseOptions,
       inject: [ConfigService],
     }),
     MongooseModule.forFeature([
-      { name: User.name, schema: UserSchema },
-      { name: Person.name, schema: PersonSchema },
-      { name: Employee.name, schema: EmployeeSchema },
-      { name: EmployeeRole.name, schema: EmployeeRoleSchema },
-      { name: Supplier.name, schema: SupplierSchema },
-      { name: Project.name, schema: ProjectSchema },
+      { name: EmployeeRole.name, schema: EmployeeRoleSchema},
+      { name: EmployeeSkill.name, schema: EmployeeSkillSchema},
+      { name: Employee.name, schema: EmployeeSchema},
+      { name: User.name, schema: UserSchema}
     ]),
-    CustomLoggerModule,
+    CustomLoggerModule
   ],
   providers: [DatabaseService, SeederService],
   exports: [MongooseModule],

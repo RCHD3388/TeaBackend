@@ -13,6 +13,16 @@ type Project {
   finished_at: DateTime
   priority: String!
   status: String!
+type Person {
+  name: String!
+  email: String!
+  phone_number: String!
+  address: String!
+}
+
+type EmployeeProjectHistory {
+  project: String!
+  join_at: DateTime!
 }
 
 """
@@ -41,6 +51,54 @@ type StockKeepingUnit {
   name: String!
   brand: String
   description: String
+type EmployeeRole {
+  _id: String!
+  name: String!
+  description: String!
+}
+
+type EmployeeSkill {
+  _id: String!
+  name: String!
+  description: String!
+}
+
+type Employee {
+  _id: String!
+  person: Person!
+  hire_date: DateTime!
+  salary: Float!
+  status: String!
+  role: EmployeeRole!
+  project_history: [EmployeeProjectHistory!]!
+  skill: [EmployeeSkill!]!
+}
+
+type User {
+  _id: String!
+  username: String!
+  status: String!
+  employee: Employee!
+}
+
+type LoginResponse {
+  username: String!
+  role: String!
+  access_token: String!
+}
+
+type Supplier {
+  _id: String!
+  name: String!
+  person: Person!
+  status: String!
+}
+
+type CategoryData {
+  _id: ID!
+  name: String!
+  description: String!
+  type: String!
 }
 
 type Query {
@@ -117,4 +175,108 @@ input UpdateProjectInput {
   worker: [String!]
   attendance: [String!]
   project_closing: String
+  getAllUsers: [User!]!
+  getUserById(id: String!): User!
+  getAllEmployees: [Employee!]!
+  getEmployeeById(id: String!): Employee!
+  getAllRole: [EmployeeRole!]!
+  getAllSkill: [EmployeeSkill!]!
+  getAllSuppliers: [Supplier!]!
+  getSupplierById(id: String!): Supplier!
+  getCategories: [CategoryData!]!
+}
+
+type Mutation {
+  login(data: LoginInput!): LoginResponse!
+  createUser(createUserInput: CreateUserInput!): User!
+  updateUser(id: String!, updateUserInput: UpdateUserInput!): User!
+  updateUserPassword(id: String!, password: String!): User!
+  deleteUserPassword(id: String!): User!
+  create_project: String!
+  createEmployee(createEmployeeInput: CreateEmployeeInput!): Employee!
+  updateEmployee(id: String!, updateEmployeeInput: UpdateEmployeeInput!): Employee!
+  createEmployeeSkill(createEmployeeSkillInput: CreateEmployeeSkillInput!): EmployeeSkill!
+  updateEmployeeSkill(id: String!, updateEmployeeSkillInput: CreateEmployeeSkillInput!): EmployeeSkill!
+  deleteEmployeeSkill(id: String!): EmployeeSkill!
+  createSupplier(createSupplierInput: CreateSupplierInput!): Supplier!
+  updateSupplier(id: String!, updateSupplierInput: UpdateSupplierInput!): Supplier!
+  createCategory(createCategoryInput: CreateCategoryInput!): CategoryData!
+  updateCategory(id: String!, updateCategoryInput: UpdateCategoryInput!): CategoryData!
+  deleteCategory(id: String!): CategoryData!
+}
+
+input LoginInput {
+  username: String!
+  password: String!
+}
+
+input CreateUserInput {
+  username: String!
+  password: String!
+  employee: String!
+}
+
+input UpdateUserInput {
+  username: String
+  password: String
+  status: String
+}
+
+input CreateEmployeeInput {
+  person: PersonInput!
+  hire_date: String!
+  salary: Float!
+  status: String!
+  role: String!
+  skill: String!
+}
+
+input PersonInput {
+  name: String!
+  email: String!
+  phone_number: String!
+  address: String!
+}
+
+input UpdateEmployeeInput {
+  name: String
+  email: String
+  phone_number: String
+  address: String
+  status: String
+  salary: Float
+  hire_date: String
+  skills: [String!]
+  role: String
+}
+
+input CreateEmployeeSkillInput {
+  name: String!
+  description: String!
+}
+
+input CreateSupplierInput {
+  name: String!
+  person: PersonInput!
+  status: String!
+}
+
+input UpdateSupplierInput {
+  company_name: String
+  name: String
+  email: String
+  phone_number: String
+  address: String
+  status: String
+}
+
+input CreateCategoryInput {
+  name: String!
+  description: String!
+  type: String!
+}
+
+input UpdateCategoryInput {
+  name: String
+  description: String
 }
