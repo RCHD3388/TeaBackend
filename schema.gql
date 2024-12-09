@@ -45,6 +45,7 @@ type Employee {
 }
 
 type User {
+  _id: String!
   username: String!
   status: String!
   employee: Employee!
@@ -87,6 +88,8 @@ type Mutation {
   login(data: LoginInput!): LoginResponse!
   createUser(createUserInput: CreateUserInput!): User!
   updateUser(id: String!, updateUserInput: UpdateUserInput!): User!
+  updateUserPassword(id: String!, password: String!): User!
+  deleteUserPassword(id: String!): User!
   create_project: String!
   createEmployee(createEmployeeInput: CreateEmployeeInput!): Employee!
   updateEmployee(id: String!, updateEmployeeInput: UpdateEmployeeInput!): Employee!

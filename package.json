@@ -38,6 +38,7 @@
     "dotenv": "^16.4.5",
     "graphql": "^16.9.0",
     "mongoose": "^8.7.0",
+    "mongoose-delete": "^1.0.2",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "pg": "^8.12.0",

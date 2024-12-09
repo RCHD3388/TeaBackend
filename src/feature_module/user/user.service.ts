@@ -1,8 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { User } from "./schema/user.schema";
 import { model, Model } from "mongoose";
-import { Employee } from "../person/schema/employee.schema";
+import { Employee, EmployeeRole } from "../person/schema/employee.schema";
 import { CreateUserInput, UpdateUserInput } from "./types/user.types";
 import path from "path";
 
@@ -21,7 +21,7 @@ export class UserService {
   async findOneUser(param: { username?: string; id?: string }): Promise<User> {
     let user = null;
     if (param.username) {
-      user = await this.userModel.findOne({username: param.username}, '-password').populate("employee");
+      user = await this.userModel.findOne({ username: param.username }, '-password').populate("employee");
     }
     if (param.id) {
       user = await this.userModel.findById(param.id, '-password').populate("employee");
@@ -39,36 +39,99 @@ export class UserService {
     return users;
   }
 
-  async create(createUserInput: CreateUserInput): Promise<User> {
+  async create(createUserInput: CreateUserInput, user: User): Promise<User> {
     let { username, password, employee } = createUserInput;
 
-    let targetEmployee = await this.employeeModel.findById(employee);
-    if(!targetEmployee) throw new BadRequestException("Employee tidak ditemukan")
+    if (await this.userModel.findOne({ username })) {
+      throw new BadRequestException("Username sudah pernah digunakan sebelumnya")
+    }
+
+    let targetEmployee = await this.employeeModel.findById(employee)
+      .populate(["role"]);
+
+    if (!targetEmployee) throw new BadRequestException("Employee tidak ditemukan")
+
+    let loggedInUserEmployeeRole = ((user.employee as Employee).role as EmployeeRole).name
+    let targetUserEmployeeRole = (targetEmployee.role as EmployeeRole).name
+    if (loggedInUserEmployeeRole == "admin" &&
+      (targetUserEmployeeRole == "admin" || targetUserEmployeeRole == "owner")
+    ) {
+      throw new ForbiddenException("User tidak diperbolehkan untuk melakukan aksi tersebut")
+    }
 
     const newUser = new this.userModel({
       username,
       password,
       employee: employee,
     });
+    await newUser.save();
 
-    const savedUser = await newUser.save();
-    const userObject = savedUser.toObject()
-    delete userObject.password;
-    return userObject;
+    return await this.userModel.findById(newUser._id).populate("employee");
   }
 
-  async update(id: string, updateUserInput: UpdateUserInput): Promise<User> {
-    const updateData: any = {};
+  async update(id: string, updateUserInput: UpdateUserInput, user: User): Promise<User> {
+    let targetUser = await this.userModel.findById(id).populate("employee");
+    if (!targetUser) throw new NotFoundException(`User with id ${id} Not found`)
 
-    if (updateUserInput.username) updateData.username = updateUserInput.username;
-    if (updateUserInput.status) updateData.status = updateUserInput.status;
+    // check if user permission
+    let targetUserRole = ((targetUser.employee as Employee).role as EmployeeRole).name;
+    let loggedInUserRole = ((user.employee as Employee).role as EmployeeRole).name
+    if (loggedInUserRole == "admin" &&
+      (targetUserRole == "admin" || targetUserRole == "owner")
+    ) {
+      throw new ForbiddenException("User tidak diperbolehkan untuk melakukan aksi tersebut")
+    }
 
-    let updatedUser = await this.userModel
-      .findByIdAndUpdate(id, updateData, { new: true })
-      .select("-password")
-      .populate("employee")
-      .exec();
-    if (!updatedUser) { throw new NotFoundException(`User with id ${id} Not found`) }
-    return updatedUser
+    // update username
+    if (updateUserInput.username) {
+      if (await this.userModel.findOne({
+        username: updateUserInput.username,
+        _id: { $ne: targetUser._id }
+      })) {
+        throw new BadRequestException("Username sudah pernah digunakan")
+      } else {
+        // username valid
+        targetUser.username = updateUserInput.username
+      }
+    }
+
+    if (updateUserInput.status) {
+      targetUser.status = updateUserInput.status
+    }
+
+    await targetUser.save()
+
+    return targetUser
+  }
+
+  async updatePassword(id: string, newPassword: string, authUser: User): Promise<User> {
+    let user = await this.userModel.findById(id);
+    if (!user) {
+      throw new NotFoundException(`User dengan id not found`)
+    }
+    if (user._id != authUser._id) {
+      throw new ForbiddenException("User tidak diperbolehkan untuk melakukan aksi tersebut")
+    }
+    user.password = newPassword
+    user.save();
+    let returnObject = user.toObject();
+    delete returnObject.password
+    return returnObject
+  }
+
+  async deleteUser(id: string, user: User): Promise<User> {
+    let targetUser = await this.userModel.findById(id).populate("employee");
+    if (!targetUser) throw new NotFoundException(`User with id ${id} Not found`)
+
+    let targetUserRole = ((targetUser.employee as Employee).role as EmployeeRole).name;
+    let loggedInUserRole = ((user.employee as Employee).role as EmployeeRole).name
+    if (loggedInUserRole == "admin" &&
+      (targetUserRole == "admin" || targetUserRole == "owner")
+    ) {
+      throw new ForbiddenException("User tidak diperbolehkan untuk melakukan aksi tersebut")
+    }
+
+    await this.userModel.findByIdAndDelete(id)
+    return targetUser
   }
 }

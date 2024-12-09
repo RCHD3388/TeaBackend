@@ -13,6 +13,9 @@ export enum UserStatus {
 @Schema()
 export class User extends Document {
   @Field(() => String)
+  _id: string
+
+  @Field(() => String)
   @Prop({ type: String, required: true })
   username: string;
 

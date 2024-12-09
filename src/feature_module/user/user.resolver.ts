@@ -6,6 +6,7 @@ import { UseGuards } from "@nestjs/common";
 import { Roles } from "src/common/decorators/roles.decorator";
 import { CreateUserInput, UpdateUserInput } from "./types/user.types";
 import { AppAuthGuard } from "./auth_related/auth.guard";
+import { CurrentUser } from "src/common/decorators/auth_user.decorator";
 
 @Resolver()
 @UseGuards(AppAuthGuard)
@@ -31,8 +32,9 @@ export class UserResolver {
   @Roles("owner", "admin")
   async createUser(
     @Args('createUserInput') createUserInput: CreateUserInput,
+    @CurrentUser() user: User
   ): Promise<User> {
-    return this.userService.create(createUserInput);
+    return this.userService.create(createUserInput, user);
   }
 
   @Mutation(() => User)
@@ -40,8 +42,30 @@ export class UserResolver {
   @Roles("owner", "admin")
   async updateUser(
     @Args('id') id: string,
-    @Args('updateUserInput') updateUserInput: UpdateUserInput
+    @Args('updateUserInput') updateUserInput: UpdateUserInput,
+    @CurrentUser() user: User
   ): Promise<User> {
-    return this.userService.update(id, updateUserInput);
+    return this.userService.update(id, updateUserInput, user);
+  }
+
+  @Mutation(() => User)
+  @UseGuards(RolesGuard)
+  @Roles("owner", "admin", "mandor", "staff_pembelian")
+  async updateUserPassword(
+    @Args('id') id: string,
+    @Args('password') password: string,
+    @CurrentUser() user: User
+  ): Promise<User> {
+    return this.userService.updatePassword(id, password, user);
+  }
+
+  @Mutation(() => User)
+  @UseGuards(RolesGuard)
+  @Roles("owner", "admin")
+  async deleteUserPassword(
+    @Args('id') id: string,
+    @CurrentUser() user: User
+  ): Promise<User> {
+    return this.userService.deleteUser(id, user);
   }
 }
