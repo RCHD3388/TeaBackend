@@ -116,7 +116,6 @@ input CreateUserInput {
 
 input UpdateUserInput {
   username: String
-  password: String
   status: String
 }
 

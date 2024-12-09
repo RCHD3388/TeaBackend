@@ -32,12 +32,6 @@ export class UpdateUserInput {
   @Field(() => String, { nullable: true })
   @IsOptional()
   @IsString()
-  @IsNotEmpty({ message: 'Password should not be empty' })
-  password?: string;
-
-  @Field(() => String, { nullable: true })
-  @IsOptional()
-  @IsString()
   @IsNotEmpty({ message: 'Status should not be empty' })
   @IsEnum(UserStatus, { message: "Invalid user status" })
   status?: string;

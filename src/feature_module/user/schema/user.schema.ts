@@ -1,7 +1,7 @@
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 import * as bcrypt from 'bcrypt';
-import { Employee } from 'src/feature_module/person/schema/employee.schema';
+import { Employee } from '../../person/schema/employee.schema';
 import { Field, ObjectType } from '@nestjs/graphql';
 
 export enum UserStatus {

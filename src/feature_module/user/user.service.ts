@@ -73,7 +73,7 @@ export class UserService {
     let targetUser = await this.userModel.findById(id).populate("employee");
     if (!targetUser) throw new NotFoundException(`User with id ${id} Not found`)
 
-    // check if user permission
+    // check user permission
     let targetUserRole = ((targetUser.employee as Employee).role as EmployeeRole).name;
     let loggedInUserRole = ((user.employee as Employee).role as EmployeeRole).name
     if (loggedInUserRole == "admin" &&

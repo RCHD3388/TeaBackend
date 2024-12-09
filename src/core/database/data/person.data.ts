@@ -1,12 +1,12 @@
-import { Employee, EmployeeRole, EmployeeSkill } from "src/feature_module/person/schema/employee.schema";
+import { Employee, EmployeeRole, EmployeeSkill } from "../../../feature_module/person/schema/employee.schema";
 import { User, UserStatus } from "../../../feature_module/user/schema/user.schema";
-import { Person } from "src/feature_module/person/schema/person.schema";
 
 export const employeeRoleData: Partial<EmployeeRole>[] = [
   { name: "owner", description: "Pemilik Perusahaan" },
   { name: "admin", description: "Administrator perusahaan yang berperan penting dalam monitoring perusahaan" },
   { name: "mandor", description: "Pimpinan dari sebuah project yang akan mengelola data dari project yang sedang ditangani pada perusahaan" },
-  { name: "staff_pembelian", description: "Staff yang akan membantu proses purchasing, untuk pengelolaan data pembelian dan transaksi perusahaan" }
+  { name: "staff_pembelian", description: "Staff yang akan membantu proses purchasing, untuk pengelolaan data pembelian dan transaksi perusahaan" },
+  { name: "pegawai", description: "Pegawai pekerja biasa, seperti tukang, dan pembantu proses pembelian" }
 ]
 
 export const employeeSkillData: Partial<EmployeeSkill>[] = [
