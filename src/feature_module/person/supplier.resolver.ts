@@ -15,21 +15,21 @@ export class SupplierResolver {
 
   @Query(() => [Supplier], { name: 'getAllSuppliers' })
   @UseGuards(RolesGuard)
-  @Roles("owner", "staff_pembelian")
+  @Roles("owner", "admin", "staff_pembelian")
   async getAllSuppliers() {
     return this.supplierService.findAll();
   }
 
   @Query(() => Supplier, { name: 'getSupplierById' })
   @UseGuards(RolesGuard)
-  @Roles("owner", "staff_pembelian")
+  @Roles("owner", "admin", "staff_pembelian")
   async getSupplierById(@Args('id') id: string): Promise<Supplier> {
     return this.supplierService.findSupplierById(id);
   }
 
   @Mutation(() => Supplier)
   @UseGuards(RolesGuard)
-  @Roles("owner", "staff_pembelian")
+  @Roles("owner", "admin", "staff_pembelian")
   async createSupplier(
     @Args('createSupplierInput') createSupplierInput: CreateSupplierInput,
   ): Promise<Supplier> {
@@ -38,7 +38,7 @@ export class SupplierResolver {
 
   @Mutation(() => Supplier)
   @UseGuards(RolesGuard)
-  @Roles("owner", "staff_pembelian")
+  @Roles("owner", "admin", "staff_pembelian")
   async updateSupplier(
     @Args('id') id: string,
     @Args('updateSupplierInput') updateSupplierInput: UpdateSupplierInput

@@ -44,6 +44,12 @@ type Employee {
   skill: [EmployeeSkill!]!
 }
 
+type User {
+  username: String!
+  status: String!
+  employee: Employee!
+}
+
 type LoginResponse {
   username: String!
   role: String!
@@ -66,6 +72,8 @@ type CategoryData {
 
 type Query {
   getHello: String!
+  getAllUsers: [User!]!
+  getUserById(id: String!): User!
   getAllEmployees: [Employee!]!
   getEmployeeById(id: String!): Employee!
   getAllRole: [EmployeeRole!]!
@@ -77,6 +85,8 @@ type Query {
 
 type Mutation {
   login(data: LoginInput!): LoginResponse!
+  createUser(createUserInput: CreateUserInput!): User!
+  updateUser(id: String!, updateUserInput: UpdateUserInput!): User!
   create_project: String!
   createEmployee(createEmployeeInput: CreateEmployeeInput!): Employee!
   updateEmployee(id: String!, updateEmployeeInput: UpdateEmployeeInput!): Employee!
@@ -93,6 +103,18 @@ type Mutation {
 input LoginInput {
   username: String!
   password: String!
+}
+
+input CreateUserInput {
+  username: String!
+  password: String!
+  employee: String!
+}
+
+input UpdateUserInput {
+  username: String
+  password: String
+  status: String
 }
 
 input CreateEmployeeInput {

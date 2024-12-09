@@ -7,6 +7,7 @@ import { AuthService } from './auth.service';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './auth_related/auth.strategy';
 import { Employee, EmployeeSchema } from '../person/schema/employee.schema';
+import { UserResolver } from './user.resolver';
 
 @Module({
   imports: [
@@ -19,7 +20,11 @@ import { Employee, EmployeeSchema } from '../person/schema/employee.schema';
       signOptions: {expiresIn: "2h"}
     })
   ],
-  providers: [JwtStrategy, AuthResolver, UserService, AuthService],
+  providers: [
+    JwtStrategy, 
+    AuthResolver, AuthService,
+    UserResolver, UserService, 
+  ],
   exports: [UserService, AuthService]
 })
 export class UsersModule {}
