@@ -6,6 +6,8 @@ import { Employee, EmployeeSchema } from '../person/schema/employee.schema';
 import { Project, ProjectSchema } from './schema/project.schema';
 import { CategoryData, CategoryDataSchema } from '../category/schema/category.schema';
 import { ProjectService } from './project.service';
+import { ProjectEmployeeService } from './project_employee.service';
+import { ProjectEmployeeResolver } from './project_employee.resolver';
 
 @Module({
   imports: [
@@ -17,8 +19,8 @@ import { ProjectService } from './project.service';
     ]),
   ],
   providers: [
-    ProjectResolver,
-    ProjectService
+    ProjectResolver, ProjectEmployeeResolver,
+    ProjectService, ProjectEmployeeService
   ]
 })
 export class ProjectModule {}
