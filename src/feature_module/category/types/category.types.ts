@@ -34,6 +34,13 @@ export class UpdateCategoryInput {
   description?: string;
 }
 
+@InputType()
+export class CategoryFilter {
+  @Field(() => [String], {nullable: true})
+  @IsOptional()
+  filter?: string[]
+}
+
 export interface CreateCategoryDto {
   name: string;
   description: string;

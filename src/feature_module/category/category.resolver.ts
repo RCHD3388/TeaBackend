@@ -1,7 +1,7 @@
 import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
 import { CategoryService } from './category.service';
 import { CategoryData } from './schema/category.schema';
-import { CreateCategoryInput, UpdateCategoryInput } from './types/category.types';
+import { CategoryFilter, CreateCategoryInput, UpdateCategoryInput } from './types/category.types';
 import { UseGuards } from '@nestjs/common';
 import { AppAuthGuard } from '../user/auth_related/auth.guard';
 import { RolesGuard } from 'src/common/guard/roles.guard';
@@ -22,8 +22,10 @@ export class CategoryResolver {
   @Query(() => [CategoryData], { name: 'getCategories' })
   @UseGuards(RolesGuard)
   @Roles("owner", "admin")
-  async getCategories(): Promise<CategoryData[]> {
-    return this.categoryService.findAll();
+  async getCategories(
+    @Args('categoryFilter', {nullable: true}) categoryFilter?: CategoryFilter
+  ): Promise<CategoryData[]> {
+    return this.categoryService.findAll(categoryFilter);
   }
 
   @Mutation(() => CategoryData, { name: 'updateCategory' })

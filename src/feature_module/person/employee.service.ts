@@ -2,7 +2,7 @@ import { BadRequestException, ForbiddenException, Injectable, NotFoundException 
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Employee, EmployeeRole, EmployeeSkill } from './schema/employee.schema';
-import { CreateEmployeeInput, UpdateEmployeeInput } from './types/employee.types';
+import { CreateEmployeeInput, EmployeeFilter, UpdateEmployeeInput } from './types/employee.types';
 import { User } from '../user/schema/user.schema';
 
 @Injectable()
@@ -32,8 +32,14 @@ export class EmployeeService {
     return employee;
   }
 
-  async findAll(): Promise<Employee[]> {
-    let employee = await this.employeeModel.find().exec();
+  async findAll(employeeFilter?: EmployeeFilter): Promise<Employee[]> {
+    let employee_filter:any = {}
+    if (employeeFilter?.filter) {
+      let roleIds = (await this.employeeRoleModel.find({ name: { $in: employeeFilter.filter } }).select("_id")).map((empRole) => empRole._id)
+      employee_filter.role = {$in : roleIds}
+    }
+
+    let employee = await this.employeeModel.find(employee_filter).exec();
     return employee
   }
 
@@ -49,7 +55,7 @@ export class EmployeeService {
       throw new NotFoundException("Role or Skill not found")
     }
     let employee = user.employee as Employee
-    if((employee.role as EmployeeRole).name == "admin" && (DBrole.name == "admin" || DBrole.name == "owner")) {
+    if ((employee.role as EmployeeRole).name == "admin" && (DBrole.name == "admin" || DBrole.name == "owner")) {
       throw new ForbiddenException("Not allowed to perform this action.")
     }
 

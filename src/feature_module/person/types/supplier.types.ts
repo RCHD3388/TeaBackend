@@ -25,38 +25,38 @@ export class CreateSupplierInput {
 @InputType()
 export class UpdateSupplierInput {
   @Field(() => String, { nullable: true })
-  @IsString()
   @IsOptional()
+  @IsString()
   @IsNotEmpty({ message: 'Company name should not be empty' })
   company_name?: string;
 
   @Field(() => String, { nullable: true })
-  @IsString()
   @IsOptional()
+  @IsString()
   @IsNotEmpty({ message: 'Name should not be empty' })
   name?: string;
 
   @Field(() => String, { nullable: true })
-  @IsEmail({}, { message: 'Email must be a valid email address' })
   @IsOptional()
+  @IsEmail({}, { message: 'Email must be a valid email address' })
   @IsNotEmpty({ message: 'Email should not be empty' })
   email?: string;
 
   @Field(() => String, { nullable: true })
-  @IsString()
   @IsOptional()
+  @IsString()
   @IsNotEmpty({ message: 'Phone number should not be empty' })
   phone_number?: string;
 
   @Field(() => String, { nullable: true })
-  @IsString()
   @IsOptional()
+  @IsString()
   @IsNotEmpty({ message: 'Address should not be empty' })
   address?: string;
 
   @Field(() => String, { nullable: true })
-  @IsString()
   @IsOptional()
+  @IsString()
   @IsEnum(SupplierStatus, { message: "Invalid Type Status" })
   status?: string;
 }

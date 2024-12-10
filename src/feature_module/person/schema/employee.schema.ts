@@ -15,11 +15,19 @@ export enum EmployeeStatus {
 export class EmployeeProjectHistory {
   @Field(() => String || Project)
   @Prop({ type: Types.ObjectId, ref: 'Project', required: true })
-  project: Types.ObjectId | Project
+  project: String | Project
 
-  @Field()
+  @Field(() => Date)
   @Prop({ type: Date, required: true })
   join_at: Date;
+
+  @Field(() => Date, {nullable: true})
+  @Prop({ type: Date, default: null})
+  left_at?: Date;
+
+  @Field(() => String)
+  @Prop({ type: String, default: ""})
+  description: String;
 }
 export const EmployeeProjectHistorySchema = SchemaFactory.createForClass(EmployeeProjectHistory);
 

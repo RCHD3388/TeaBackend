@@ -54,6 +54,10 @@ export class ProjectClosing {
   @Prop({ type: String, required: true, default: "" })
   note: string;
 
+  @Field(() => CategoryData)
+  @Prop({ type: Types.ObjectId, required: true, ref: "CategoryData" })
+  status: String | CategoryData;
+
   @Field(() => String, { nullable: true })
   @Prop({ type: String, required: true, default: "" })
   document: string;
@@ -63,6 +67,9 @@ export class ProjectClosing {
 @Schema({ timestamps: true })
 export class Project extends Document {
   @Field(() => String)
+  _id: string;
+
+  @Field(() => String)
   @Prop({ type: String, required: true })
   name: string;
 
@@ -71,17 +78,19 @@ export class Project extends Document {
   location: string;
 
   @Field(() => String)
-  @Prop({ type: String, required: true })
+  @Prop({ type: String, default: "" })
   description: string;
 
   // createdAt using timestamps
+  @Field(() => Date)
+  createdAt: Date
 
   @Field(() => Date, {nullable: true})
   @Prop({ type: Date })
   finished_at?: Date;
 
   @Field(() => Date, {nullable: true})
-  @Prop({ type: Date })
+  @Prop({ type: Date, default: null })
   target_date?: Date;
 
   @Field(() => CategoryData)

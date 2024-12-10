@@ -40,12 +40,31 @@ scalar DateTime
 type ProjectClosing {
   closed_by: Employee!
   note: String
+  status: CategoryData!
   document: String
+}
+
+type Project {
+  _id: String!
+  name: String!
+  location: String!
+  description: String!
+  createdAt: DateTime!
+  finished_at: DateTime
+  target_date: DateTime
+  priority: CategoryData!
+  status: CategoryData!
+  project_leader: Employee!
+  worker: [Employee!]!
+  attendace: [Attendance!]!
+  project_closing: ProjectClosing
 }
 
 type EmployeeProjectHistory {
   project: String!
   join_at: DateTime!
+  left_at: DateTime
+  description: String!
 }
 
 type EmployeeRole {
@@ -95,13 +114,23 @@ type Query {
   getHello: String!
   getAllUsers: [User!]!
   getUserById(id: String!): User!
-  getAllEmployees: [Employee!]!
+  findAllProjects: [Project!]!
+  findProjectById(id: String!): Project!
+  getAllEmployees(employeeFilter: EmployeeFilter): [Employee!]!
   getEmployeeById(id: String!): Employee!
   getAllRole: [EmployeeRole!]!
   getAllSkill: [EmployeeSkill!]!
   getAllSuppliers: [Supplier!]!
   getSupplierById(id: String!): Supplier!
-  getCategories: [CategoryData!]!
+  getCategories(categoryFilter: CategoryFilter): [CategoryData!]!
+}
+
+input EmployeeFilter {
+  filter: [String!]
+}
+
+input CategoryFilter {
+  filter: [String!]
 }
 
 type Mutation {
@@ -110,7 +139,8 @@ type Mutation {
   updateUser(id: String!, updateUserInput: UpdateUserInput!): User!
   updateUserPassword(id: String!, password: String!): User!
   deleteUserPassword(id: String!): User!
-  create_project: String!
+  createProject(createProjectInput: CreateProjectInput!): Project!
+  updateProject(id: String!, updateProjectInput: UpdateProjectInput!): Project!
   createEmployee(createEmployeeInput: CreateEmployeeInput!): Employee!
   updateEmployee(id: String!, updateEmployeeInput: UpdateEmployeeInput!): Employee!
   createEmployeeSkill(createEmployeeSkillInput: CreateEmployeeSkillInput!): EmployeeSkill!
@@ -137,6 +167,26 @@ input CreateUserInput {
 input UpdateUserInput {
   username: String
   status: String
+}
+
+input CreateProjectInput {
+  name: String!
+  location: String!
+  description: String
+  target_date: DateTime
+  priority: String!
+  status: String!
+  project_leader: String!
+}
+
+input UpdateProjectInput {
+  name: String
+  location: String
+  description: String
+  target_date: DateTime
+  priority: String
+  status: String
+  project_leader: String
 }
 
 input CreateEmployeeInput {

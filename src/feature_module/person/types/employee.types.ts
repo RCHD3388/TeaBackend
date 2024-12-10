@@ -159,3 +159,10 @@ export class UpdateEmployeeSkillInput {
   description: string;
 }
 
+@InputType()
+export class EmployeeFilter {
+  @Field(() => [String], {nullable: true})
+  @IsOptional()
+  filter?: string[]
+}
+
