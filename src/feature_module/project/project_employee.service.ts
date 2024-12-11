@@ -33,23 +33,21 @@ export class ProjectEmployeeService {
       throw new ForbiddenException("User tidak diperbolehkan melakukan aksi tersebut")
     }
     let target_return_value: GetAllProjectEmployeeDto = {
-      registered: project.worker.map((pw: any) => { return pw as Employee })
+      registered: project.worker.map((pw: any) => {  
+        (pw as Employee).salary = null;
+        return pw
+      })
     }
 
     // check if admin / owner
     if (current_loggedin_user_role == "admin" || current_loggedin_user_role == "owner") {
       let all_employee = await this.employeeService.findAll({ filter: ["pegawai"] }, { _id: { $nin: target_return_value.registered }, status: "Active" });
-      target_return_value.unregistered = all_employee
+      // remove salary from unregistered employee return
+      target_return_value.unregistered = all_employee.map((emp) => {
+        emp.salary = null;
+        return emp
+      })
     }
-
-    target_return_value.registered.map((regisEmp) => {
-      regisEmp.salary = null
-      return regisEmp
-    })
-    target_return_value.unregistered.map((unregisEmp) => {
-      unregisEmp.salary = null
-      return unregisEmp
-    })
 
     return target_return_value
   }

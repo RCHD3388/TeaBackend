@@ -49,7 +49,12 @@ export class UserService {
     let targetEmployee = await this.employeeModel.findById(employee)
       .populate(["role"]);
 
-    if (!targetEmployee) throw new BadRequestException("Employee tidak ditemukan")
+    if (!targetEmployee) throw new BadRequestException("Pegawai tidak ditemukan")
+
+    if(targetEmployee.status == "Inactive") throw new BadRequestException("Pegawai aktif yang dapat didaftarkan sebagai user")
+
+    let targetEmployee_role = (targetEmployee.role as EmployeeRole).name
+    if (targetEmployee_role == "pegawai") throw new BadRequestException("Pegawai biasa tidak dapat dibuatkan data user")
 
     let loggedInUserEmployeeRole = ((user.employee as Employee).role as EmployeeRole).name
     let targetUserEmployeeRole = (targetEmployee.role as EmployeeRole).name
@@ -95,7 +100,11 @@ export class UserService {
       }
     }
 
+    // check status
     if (updateUserInput.status) {
+      if((targetUser.employee as Employee).status == "Inactive" && updateUserInput.status == "Inactive"){
+        throw new BadRequestException("Pegawai yang tidak aktif tidak dapat memiliki user dengan status aktif.")
+      }
       targetUser.status = updateUserInput.status
     }
 

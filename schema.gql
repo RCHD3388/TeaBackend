@@ -101,6 +101,7 @@ type LoginResponse {
   username: String!
   role: String!
   access_token: String!
+  name: String!
 }
 
 type GetAllProjectEmployeeDto {
@@ -133,6 +134,7 @@ type Query {
 
 input EmployeeFilter {
   filter: [String!]
+  status: Boolean
 }
 
 input CategoryFilter {

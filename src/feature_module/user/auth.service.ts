@@ -17,15 +17,20 @@ export class AuthService {
     if(!user || !(await bcrypt.compare(data.password, user.password))){
       throw new BadRequestException("Invalid Credentials");
     }
+    if(user.status == "Inactive"){
+      throw new BadRequestException("User aktif tidak ditemukan")
+    }
 
     const payload = { id: user._id, username: user.username }
     const access_token = this.jwtService.sign(payload);
     let role = ((user.employee as Employee).role as EmployeeRole).name
+    let name = (user.employee as Employee).person.name
 
     return {
       username: user.username,
       role: role,
-      access_token: access_token
+      access_token: access_token,
+      name: name
     }
   }
 }

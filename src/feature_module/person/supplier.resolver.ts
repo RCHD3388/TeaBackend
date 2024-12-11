@@ -7,6 +7,9 @@ import { Supplier } from './schema/supplier.schema';
 import { RolesGuard } from 'src/common/guard/roles.guard';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { CreateSupplierInput, UpdateSupplierInput } from './types/supplier.types';
+import { CurrentUser } from 'src/common/decorators/auth_user.decorator';
+import { User } from '../user/schema/user.schema';
+import { Employee, EmployeeRole } from './schema/employee.schema';
 
 @Resolver()
 @UseGuards(AppAuthGuard)
@@ -31,7 +34,7 @@ export class SupplierResolver {
   @UseGuards(RolesGuard)
   @Roles("owner", "admin", "staff_pembelian")
   async createSupplier(
-    @Args('createSupplierInput') createSupplierInput: CreateSupplierInput,
+    @Args('createSupplierInput') createSupplierInput: CreateSupplierInput
   ): Promise<Supplier> {
     return this.supplierService.create(createSupplierInput);
   }

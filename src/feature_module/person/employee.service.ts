@@ -1,9 +1,9 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Employee, EmployeeRole, EmployeeSkill } from './schema/employee.schema';
+import { Employee, EmployeeRole, EmployeeSkill, EmployeeStatus } from './schema/employee.schema';
 import { CreateEmployeeInput, EmployeeFilter, UpdateEmployeeInput } from './types/employee.types';
-import { User } from '../user/schema/user.schema';
+import { User, UserStatus } from '../user/schema/user.schema';
 
 @Injectable()
 export class EmployeeService {
@@ -11,6 +11,7 @@ export class EmployeeService {
     @InjectModel(Employee.name) private readonly employeeModel: Model<Employee>,
     @InjectModel(EmployeeSkill.name) private readonly employeeSkillModel: Model<EmployeeSkill>,
     @InjectModel(EmployeeRole.name) private readonly employeeRoleModel: Model<EmployeeRole>,
+    @InjectModel(User.name) private readonly userModel: Model<User>,
   ) { }
 
   private employeePopulateOption = [
@@ -32,14 +33,17 @@ export class EmployeeService {
     return employee;
   }
 
-  async findAll(employeeFilter?: EmployeeFilter, custom_filter?: any ): Promise<Employee[]> {
-    let employee_filter:any = {}
+  async findAll(employeeFilter?: EmployeeFilter, custom_filter?: any): Promise<Employee[]> {
+    let employee_filter: any = {}
     if (employeeFilter?.filter) {
       let roleIds = (await this.employeeRoleModel.find({ name: { $in: employeeFilter.filter } }).select("_id")).map((empRole) => empRole._id)
-      employee_filter.role = {$in : roleIds}
+      employee_filter.role = { $in: roleIds }
     }
-    if(custom_filter){
-      employee_filter = {...employee_filter, ...custom_filter}
+    if (employeeFilter?.status) {
+      employee_filter.status = "Active"
+    }
+    if (custom_filter) {
+      employee_filter = { ...employee_filter, ...custom_filter }
     }
 
     let employee = await this.employeeModel.find(employee_filter).exec();
@@ -82,7 +86,9 @@ export class EmployeeService {
     if (updateEmployeeInput.address) updateData['person.address'] = updateEmployeeInput.address;
 
     // Update other fields
-    if (updateEmployeeInput.status) updateData.status = updateEmployeeInput.status;
+    if (updateEmployeeInput.status) {
+      updateData.status = updateEmployeeInput.status;
+    }
     if (updateEmployeeInput.salary) updateData.salary = updateEmployeeInput.salary;
     if (updateEmployeeInput.hire_date) {
       if (!this.isHireDateValid(updateEmployeeInput.hire_date)) {
@@ -117,8 +123,31 @@ export class EmployeeService {
 
     }
 
-    let updatedEmployee = await this.employeeModel.findByIdAndUpdate(id, updateData, { new: true }).exec();
-    if (!updatedEmployee) { throw new NotFoundException(`Employee with id ${id} Not found`) }
-    return updatedEmployee
+    // control transaction database
+
+    const session = await this.employeeModel.db.startSession()
+
+    try {
+      session.startTransaction()
+
+      // main transaction
+      let updatedEmployee = await this.employeeModel.findByIdAndUpdate(id, updateData, { new: true }).exec();
+      if (!updatedEmployee) { throw new NotFoundException(`Employee with id ${id} Not found`) }
+
+      if (updateEmployeeInput.status && updateEmployeeInput.status == EmployeeStatus.INACTIVE) {
+        await this.userModel.updateMany(
+          { employee: id, status: UserStatus.ACTIVE },
+          { $set: { status: UserStatus.INACTIVE } }
+        )
+      }
+      // end of transaction
+      await session.commitTransaction()
+      return updatedEmployee
+    } catch (error) {
+      await session.abortTransaction()
+      throw error
+    } finally {
+      session.endSession()
+    }
   }
 }

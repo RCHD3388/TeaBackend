@@ -8,13 +8,15 @@ import { RoleSkillService } from './roleskill.service';
 import { SupplierResolver } from './supplier.resolver';
 import { SupplierService } from './supplier.service';
 import { Supplier, SupplierSchema } from './schema/supplier.schema';
+import { User, UserSchema } from '../user/schema/user.schema';
 
 @Module({
   imports: [MongooseModule.forFeature([
     { name: Employee.name, schema: EmployeeSchema },
     { name: EmployeeSkill.name, schema: EmployeeSkillSchema},
     { name: EmployeeRole.name, schema: EmployeeRoleSchema },
-    { name: Supplier.name, schema: SupplierSchema }
+    { name: Supplier.name, schema: SupplierSchema },
+    { name: User.name, schema: UserSchema }
   ]),],
   providers: [
     EmployeeResolver, EmployeeService, 

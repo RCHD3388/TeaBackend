@@ -164,5 +164,9 @@ export class EmployeeFilter {
   @Field(() => [String], {nullable: true})
   @IsOptional()
   filter?: string[]
+
+  @Field(() => Boolean, {nullable: true})
+  @IsOptional()
+  status?: Boolean
 }
 

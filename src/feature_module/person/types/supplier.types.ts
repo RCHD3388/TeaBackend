@@ -60,4 +60,3 @@ export class UpdateSupplierInput {
   @IsEnum(SupplierStatus, { message: "Invalid Type Status" })
   status?: string;
 }
-

@@ -24,6 +24,9 @@ export class LoginResponse {
 
   @Field()
   access_token: string
+
+  @Field()
+  name: string
 }
 
 export interface LoginDto {
