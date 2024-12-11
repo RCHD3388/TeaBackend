@@ -8,6 +8,7 @@ import { CategoryData, CategoryDataSchema } from '../category/schema/category.sc
 import { ProjectService } from './project.service';
 import { ProjectEmployeeService } from './project_employee.service';
 import { ProjectEmployeeResolver } from './project_employee.resolver';
+import { PersonModule } from '../person/person.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { ProjectEmployeeResolver } from './project_employee.resolver';
       { name: Project.name, schema: ProjectSchema},
       { name: CategoryData.name, schema: CategoryDataSchema},
     ]),
+    PersonModule
   ],
   providers: [
     ProjectResolver, ProjectEmployeeResolver,

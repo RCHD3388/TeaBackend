@@ -32,11 +32,14 @@ export class EmployeeService {
     return employee;
   }
 
-  async findAll(employeeFilter?: EmployeeFilter): Promise<Employee[]> {
+  async findAll(employeeFilter?: EmployeeFilter, custom_filter?: any ): Promise<Employee[]> {
     let employee_filter:any = {}
     if (employeeFilter?.filter) {
       let roleIds = (await this.employeeRoleModel.find({ name: { $in: employeeFilter.filter } }).select("_id")).map((empRole) => empRole._id)
       employee_filter.role = {$in : roleIds}
+    }
+    if(custom_filter){
+      employee_filter = {...employee_filter, ...custom_filter}
     }
 
     let employee = await this.employeeModel.find(employee_filter).exec();

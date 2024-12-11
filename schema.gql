@@ -103,6 +103,11 @@ type LoginResponse {
   access_token: String!
 }
 
+type GetAllProjectEmployeeDto {
+  registered: [Employee!]!
+  unregistered: [Employee!]
+}
+
 type Supplier {
   _id: String!
   name: String!
@@ -116,7 +121,7 @@ type Query {
   getUserById(id: String!): User!
   findAllProjects: [Project!]!
   findProjectById(id: String!): Project!
-  getAllProjectEmployees(id: String!): [Employee!]!
+  getAllProjectEmployees(id: String!): GetAllProjectEmployeeDto!
   getAllEmployees(employeeFilter: EmployeeFilter): [Employee!]!
   getEmployeeById(id: String!): Employee!
   getAllRole: [EmployeeRole!]!
@@ -142,8 +147,8 @@ type Mutation {
   deleteUserPassword(id: String!): User!
   createProject(createProjectInput: CreateProjectInput!): Project!
   updateProject(id: String!, updateProjectInput: UpdateProjectInput!): Project!
-  addNewProjectEmployee(id: String!, employees: [String!]!): Project!
-  removeProjectEmployee(id: String!, employees: String!, description: String!): Project!
+  addNewProjectEmployee(id: String!, employees: [String!]!): [Employee!]!
+  removeProjectEmployee(id: String!, employees: String!, description: String!): Employee!
   createEmployee(createEmployeeInput: CreateEmployeeInput!): Employee!
   updateEmployee(id: String!, updateEmployeeInput: UpdateEmployeeInput!): Employee!
   createEmployeeSkill(createEmployeeSkillInput: CreateEmployeeSkillInput!): EmployeeSkill!

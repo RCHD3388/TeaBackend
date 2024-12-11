@@ -8,7 +8,7 @@ import { Roles } from "src/common/decorators/roles.decorator";
 import { ValidationError } from "class-validator";
 import { ProjectService } from "./project.service";
 import { Project } from "./schema/project.schema";
-import { CreateProjectInput, UpdateProjectInput } from "./types/project.types";
+import { CreateProjectInput, GetAllProjectEmployeeDto, UpdateProjectInput } from "./types/project.types";
 import { Employee } from "../person/schema/employee.schema";
 import { ProjectEmployeeService } from "./project_employee.service";
 
@@ -58,34 +58,34 @@ export class ProjectEmployeeResolver {
     return this.projectService.update(id, updateProjectInput, user);
   }
 
-  @Query(() => [Employee], { name: 'getAllProjectEmployees' })
+  @Query(() => GetAllProjectEmployeeDto, { name: 'getAllProjectEmployees' })
   @UseGuards(RolesGuard)
   @Roles("owner", "admin", "mandor")
   async getAllProjectEmployees(
     @Args('id', { type: () => String }) id: string,
     @CurrentUser() user: User
-  ): Promise<Employee[]> {
+  ): Promise<GetAllProjectEmployeeDto> {
     return await this.projectEmployeeService.getAllProjectEmployee(id, user);
   }
 
-  @Mutation(() => Project, { name: 'addNewProjectEmployee' })
+  @Mutation(() => [Employee], { name: 'addNewProjectEmployee' })
   @UseGuards(RolesGuard)
   @Roles("owner", "admin")
   async addNewProjectEmployee(
     @Args('id', { type: () => String }) id: string,
     @Args('employees', { type: () => [String] }) employees: string[],
-  ): Promise<Project> {
+  ): Promise<Employee[]> {
     return await this.projectEmployeeService.addNewProjectEmployee(id, employees);
   }
 
-  @Mutation(() => Project, { name: 'removeProjectEmployee' })
+  @Mutation(() => Employee, { name: 'removeProjectEmployee' })
   @UseGuards(RolesGuard)
   @Roles("owner", "admin")
   async removeProjectEmployee(
     @Args('id', { type: () => String }) id: string,
     @Args('employees', { type: () => String }) employees: string,
     @Args('description', { type: () => String }) description: string,
-  ): Promise<Project> {
+  ): Promise<Employee> {
     return await this.projectEmployeeService.removeProjectEmployee(id, employees, description);
   }
 }

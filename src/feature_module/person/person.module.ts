@@ -20,6 +20,7 @@ import { Supplier, SupplierSchema } from './schema/supplier.schema';
     EmployeeResolver, EmployeeService, 
     RoleSkillResolver, RoleSkillService,
     SupplierResolver, SupplierService
-  ]
+  ],
+  exports: [EmployeeService, RoleSkillService, SupplierService]
 })
 export class PersonModule { }

@@ -1,5 +1,6 @@
-import { InputType, Field } from '@nestjs/graphql';
+import { InputType, Field, ObjectType } from '@nestjs/graphql';
 import { IsDate, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { Employee } from 'src/feature_module/person/schema/employee.schema';
 
 @InputType()
 export class CreateProjectInput {
@@ -13,12 +14,12 @@ export class CreateProjectInput {
   @IsNotEmpty({ message: 'Lokasi tidak boleh kosong' })
   location: string;
 
-  @Field(() => String, {nullable: true})
+  @Field(() => String, { nullable: true })
   @IsString()
   @IsOptional()
   description?: string;
 
-  @Field(() => Date, {nullable: true})
+  @Field(() => Date, { nullable: true })
   @IsDate()
   @IsOptional()
   target_date?: Date;
@@ -41,45 +42,54 @@ export class CreateProjectInput {
 
 @InputType()
 export class UpdateProjectInput {
-  @Field(() => String, {nullable: true})
+  @Field(() => String, { nullable: true })
   @IsOptional()
   @IsString()
   @IsNotEmpty({ message: 'Nama tidak boleh kosong' })
   name?: string;
 
-  @Field(() => String, {nullable: true})
+  @Field(() => String, { nullable: true })
   @IsOptional()
   @IsString()
   @IsNotEmpty({ message: 'Lokasi tidak boleh kosong' })
   location?: string;
 
-  @Field(() => String, {nullable: true})
+  @Field(() => String, { nullable: true })
   @IsOptional()
   @IsString()
   @IsNotEmpty({ message: 'Deskripsi tidak boleh kosong' })
   description?: string;
 
-  @Field(() => Date, {nullable: true})
+  @Field(() => Date, { nullable: true })
   @IsOptional()
   @IsDate()
   @IsNotEmpty({ message: 'Tanggal target tidak boleh kosong' })
   target_date?: Date;
 
-  @Field(() => String, {nullable: true})
+  @Field(() => String, { nullable: true })
   @IsOptional()
   @IsString()
   @IsNotEmpty({ message: 'Prioritas tidak boleh kosong' })
   priority?: string;
 
-  @Field(() => String, {nullable: true})
+  @Field(() => String, { nullable: true })
   @IsOptional()
   @IsString()
   @IsNotEmpty({ message: 'Status tidak boleh kosong' })
   status?: string;
 
-  @Field(() => String, {nullable: true})
+  @Field(() => String, { nullable: true })
   @IsOptional()
   @IsString()
   @IsNotEmpty({ message: 'Pemimpin proyek tidak boleh kosong' })
   project_leader?: string;
+}
+
+@ObjectType()
+export class GetAllProjectEmployeeDto { 
+  @Field(() => [Employee])
+  registered: Employee[];
+
+  @Field(() => [Employee], {nullable: true})
+  unregistered?: Employee[] 
 }

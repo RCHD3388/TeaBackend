@@ -107,7 +107,7 @@ export class Project extends Document {
 
   @Field(() => [Employee])
   @Prop({ type: [Types.ObjectId], required: true, ref: "Employee" })
-  worker: String[] | Employee[];
+  worker: String[];
 
   @Field(() => [Attendance])
   @Prop({ type: [Types.ObjectId], required: true, ref: "Attendance" })
