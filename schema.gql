@@ -83,7 +83,7 @@ type Employee {
   _id: String!
   person: Person!
   hire_date: DateTime!
-  salary: Float!
+  salary: Float
   status: String!
   role: EmployeeRole!
   project_history: [EmployeeProjectHistory!]!
@@ -148,7 +148,7 @@ type Mutation {
   createProject(createProjectInput: CreateProjectInput!): Project!
   updateProject(id: String!, updateProjectInput: UpdateProjectInput!): Project!
   addNewProjectEmployee(id: String!, employees: [String!]!): [Employee!]!
-  removeProjectEmployee(id: String!, employees: String!, description: String!): Employee!
+  removeProjectEmployee(id: String!, employee: String!, description: String!): Employee!
   createEmployee(createEmployeeInput: CreateEmployeeInput!): Employee!
   updateEmployee(id: String!, updateEmployeeInput: UpdateEmployeeInput!): Employee!
   createEmployeeSkill(createEmployeeSkillInput: CreateEmployeeSkillInput!): EmployeeSkill!

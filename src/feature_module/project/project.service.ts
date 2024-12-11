@@ -35,16 +35,23 @@ export class ProjectService {
     await newLeader.save()
   }
 
+  // find withour worker detail
   async findAll(user: User): Promise<Project[]> {
     let filter = {}
     if (((user.employee as Employee).role as EmployeeRole).name == "mandor") {
       filter = { project_leader: (user.employee as Employee)._id.toString() }
     }
 
-    let employee = await this.projectModel.find(filter).populate(["project_leader", "status", "priority"]).exec();
-    return employee
+    let project = await this.projectModel.find(filter).populate(["project_leader", "status", "priority"]).exec();
+    project = project.map((proj) => {
+      (proj.project_leader as Employee).salary = null
+      return proj
+    })
+    
+    return project
   }
 
+  // find withour worker detail
   async findProjectById(id: string, user: User): Promise<Project> {
     let filter: any = { _id: id }
     if (((user.employee as Employee).role as EmployeeRole).name == "mandor") {
@@ -52,13 +59,16 @@ export class ProjectService {
     }
 
     const project = await this.projectModel.findOne(filter).populate([
-      "status", "priority", "project_leader", "worker"
+      "status", "priority", "project_leader"
     ]).exec();
     if (!project) {
       throw new NotFoundException(`Project with ID ${id} not found for this user`);
     }
+
+    (project.project_leader as Employee).salary = null
     return project;
   }
+
 
   async create(createProjectInput: CreateProjectInput): Promise<Project> {
     let { name, target_date, status, priority, project_leader } = createProjectInput
@@ -96,7 +106,10 @@ export class ProjectService {
     })
     employee_data.save();
 
-    return await this.projectModel.findById(new_project._id).populate("project_leader")
+    let project = await this.projectModel.findById(new_project._id).populate("project_leader");
+    (project.project_leader as Employee).salary = null
+
+    return project
   }
 
   async update(id: string, updateProjectInput: UpdateProjectInput, user: User): Promise<Project> {
@@ -173,6 +186,8 @@ export class ProjectService {
 
     let updatedProject = await this.projectModel.findByIdAndUpdate(id, updateData, { new: true }).populate(["project_leader", "status", "priority"]).exec();
     if (!updatedProject) { throw new NotFoundException(`Project with id ${id} Not found`) }
+
+    (updatedProject.project_leader as Employee).salary = null
 
     return updatedProject
   }

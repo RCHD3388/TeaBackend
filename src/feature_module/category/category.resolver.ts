@@ -21,7 +21,7 @@ export class CategoryResolver {
 
   @Query(() => [CategoryData], { name: 'getCategories' })
   @UseGuards(RolesGuard)
-  @Roles("owner", "admin")
+  @Roles("owner", "admin", "mandor", "staff_pembelian")
   async getCategories(
     @Args('categoryFilter', {nullable: true}) categoryFilter?: CategoryFilter
   ): Promise<CategoryData[]> {

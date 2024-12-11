@@ -20,44 +20,6 @@ export class ProjectEmployeeResolver {
     private readonly projectEmployeeService: ProjectEmployeeService
   ) {}
 
-  @Query(() => [Project], { name: 'findAllProjects' })
-  @UseGuards(RolesGuard)
-  @Roles("owner", "admin", "mandor")
-  async findAllProjects(@CurrentUser() user: User): Promise<Project[]> {
-    return this.projectService.findAll(user);
-  }
-
-  // Query untuk mendapatkan project berdasarkan ID
-  @Query(() => Project, { name: 'findProjectById' })
-  @UseGuards(RolesGuard)
-  @Roles("owner", "admin", "mandor")
-  async findProjectById(
-    @Args('id', { type: () => String }) id: string, 
-    @CurrentUser() user: User
-  ): Promise<Project> {
-    return this.projectService.findProjectById(id, user);
-  }
-
-  // Mutation untuk membuat project baru
-  @Mutation(() => Project, { name: 'createProject' })
-  @UseGuards(RolesGuard)
-  @Roles("owner", "admin")
-  async createProject(@Args('createProjectInput') createProjectInput: CreateProjectInput): Promise<Project> {
-    return this.projectService.create(createProjectInput);
-  }
-
-  // Mutation untuk memperbarui project
-  @Mutation(() => Project, { name: 'updateProject' })
-  @UseGuards(RolesGuard)
-  @Roles("owner", "admin", "mandor")
-  async updateProject(
-    @Args('id', { type: () => String }) id: string,
-    @Args('updateProjectInput') updateProjectInput: UpdateProjectInput,
-    @CurrentUser() user: User
-  ): Promise<Project> {
-    return this.projectService.update(id, updateProjectInput, user);
-  }
-
   @Query(() => GetAllProjectEmployeeDto, { name: 'getAllProjectEmployees' })
   @UseGuards(RolesGuard)
   @Roles("owner", "admin", "mandor")
@@ -83,9 +45,9 @@ export class ProjectEmployeeResolver {
   @Roles("owner", "admin")
   async removeProjectEmployee(
     @Args('id', { type: () => String }) id: string,
-    @Args('employees', { type: () => String }) employees: string,
+    @Args('employee', { type: () => String }) employee: string,
     @Args('description', { type: () => String }) description: string,
   ): Promise<Employee> {
-    return await this.projectEmployeeService.removeProjectEmployee(id, employees, description);
+    return await this.projectEmployeeService.removeProjectEmployee(id, employee, description);
   }
 }

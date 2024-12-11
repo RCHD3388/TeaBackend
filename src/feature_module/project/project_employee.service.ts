@@ -28,7 +28,8 @@ export class ProjectEmployeeService {
   async getAllProjectEmployee(id: string, user: User): Promise<GetAllProjectEmployeeDto> {
     const project = await this.projectModel.findById(id).populate('worker').exec();
     let current_loggedin_user_role = ((user.employee as Employee).role as EmployeeRole).name
-    if (current_loggedin_user_role == "mandor" && project.project_leader !== user._id) {
+
+    if (current_loggedin_user_role == "mandor" && project.project_leader.toString() !== (user.employee as Employee)._id.toString()) {
       throw new ForbiddenException("User tidak diperbolehkan melakukan aksi tersebut")
     }
     let target_return_value: GetAllProjectEmployeeDto = {
@@ -37,9 +38,18 @@ export class ProjectEmployeeService {
 
     // check if admin / owner
     if (current_loggedin_user_role == "admin" || current_loggedin_user_role == "owner") {
-      let all_employee = await this.employeeService.findAll({ filter: ["pegawai"] }, { _id: { $nin: target_return_value.registered }, });
+      let all_employee = await this.employeeService.findAll({ filter: ["pegawai"] }, { _id: { $nin: target_return_value.registered }, status: "Active" });
       target_return_value.unregistered = all_employee
     }
+
+    target_return_value.registered.map((regisEmp) => {
+      regisEmp.salary = null
+      return regisEmp
+    })
+    target_return_value.unregistered.map((unregisEmp) => {
+      unregisEmp.salary = null
+      return unregisEmp
+    })
 
     return target_return_value
   }
@@ -92,7 +102,11 @@ export class ProjectEmployeeService {
       await project.save();
 
       await session.commitTransaction();
-      return employeesToAdd;
+
+      return employeesToAdd.map((emp) => {
+        emp.salary = null
+        return emp
+      });
     } catch (error) {
       await session.abortTransaction();
       throw error;
@@ -110,15 +124,15 @@ export class ProjectEmployeeService {
 
     // Validasi employee
     const target_employee = await this.employeeModel.findById(employee).populate(["role", "skill"]);
-    
+
     if (!target_employee) {
       throw new NotFoundException(`Employee with ID ${employee} not found`);
     }
 
     // Cek apakah employee terdaftar dalam project
     const removeIndex = project.worker.findIndex((workerId: any) => workerId.toString() === employee);
-    
-    
+
+
     if (removeIndex == -1) {
       throw new BadRequestException(`Pegawai ${target_employee.person.name} bukan bagian dari pegawai project`);
     }
@@ -138,6 +152,7 @@ export class ProjectEmployeeService {
 
     // Simpan perubahan pada employee
     await target_employee.save();
+    target_employee.salary = null;
     return target_employee;
   }
 }

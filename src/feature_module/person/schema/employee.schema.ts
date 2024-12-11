@@ -77,9 +77,9 @@ export class Employee extends Document {
   @Prop({ type: Date, required: true }) 
   hire_date: Date;
 
-  @Field(() => Number)
+  @Field(() => Number, {nullable: true})
   @Prop({ type: Number, required: true })
-  salary: number;
+  salary?: number;
 
   @Field(() => String)
   @Prop({ type: String, required: true, enum: EmployeeStatus})
