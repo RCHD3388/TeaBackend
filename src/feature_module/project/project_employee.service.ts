@@ -42,7 +42,7 @@ export class ProjectEmployeeService {
       if ((employee.role as EmployeeRole).name != "pegawai" ) throw new BadRequestException("Pegawai yang didaftarkan harus memiliki role PEGAWAI")
 
       // Cek apakah employee sudah menjadi bagian dari project
-      if (project.worker.find((wo) => wo == employeeId)) {
+      if (project.worker.findIndex((wo) => wo == employeeId) != -1) {
         throw new BadRequestException(`Pegawai ${employee.person.name} telah terdaftar sebagai pegawai project tersebut`);
       }
   
