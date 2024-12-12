@@ -1,8 +1,8 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
-import { CategoryData } from 'src/feature_module/category/schema/category.schema';
-import { Employee } from 'src/feature_module/person/schema/employee.schema';
+import { CategoryData } from '../../category/schema/category.schema';
+import { Employee } from '../../person/schema/employee.schema';
 
 @ObjectType()
 @Schema()

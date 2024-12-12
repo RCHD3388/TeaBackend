@@ -41,6 +41,7 @@ export class ProjectEmployeeService {
 
     // check if admin / owner
     if (current_loggedin_user_role == "admin" || current_loggedin_user_role == "owner") {
+      // find all using employe service (employee_filter, custom_filter)
       let all_employee = await this.employeeService.findAll({ filter: ["pegawai"] }, { _id: { $nin: target_return_value.registered }, status: "Active" });
       // remove salary from unregistered employee return
       target_return_value.unregistered = all_employee.map((emp) => {

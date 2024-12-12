@@ -102,7 +102,7 @@ export class UserService {
 
     // check status
     if (updateUserInput.status) {
-      if((targetUser.employee as Employee).status == "Inactive" && updateUserInput.status == "Inactive"){
+      if((targetUser.employee as Employee).status == "Inactive" && updateUserInput.status == "Active"){
         throw new BadRequestException("Pegawai yang tidak aktif tidak dapat memiliki user dengan status aktif.")
       }
       targetUser.status = updateUserInput.status
