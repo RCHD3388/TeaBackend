@@ -32,9 +32,9 @@ export class Warehouse extends Document {
   @Prop({ type: String, required: true, enum: WarehouseType})
   type: string;
 
-  @Field(() => Project)
-  @Prop({ type: Types.ObjectId, required: true, ref: "Project" })
-  project: string | Project;
+  @Field(() => Project, {nullable: true})
+  @Prop({ type: Types.ObjectId, ref: "Project" })
+  project: string | Project | null;
 
   @Field(() => String)
   @Prop({ type: String, required: true })

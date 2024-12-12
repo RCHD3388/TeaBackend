@@ -112,6 +112,18 @@ type ToolTransaction {
   name: String!
 }
 
+type Warehouse {
+  _id: String!
+  name: String!
+  description: String
+  type: String!
+  project: Project
+  address: String!
+  status: String!
+  material_transaction: [MaterialTransaction!]!
+  tool_transaction: [ToolTransaction!]!
+}
+
 type GetAllProjectEmployeeDto {
   registered: [Employee!]!
   unregistered: [Employee!]
@@ -137,6 +149,8 @@ type Query {
   getAllSkill: [EmployeeSkill!]!
   getAllSuppliers: [Supplier!]!
   getSupplierById(id: String!): Supplier!
+  getAllWarehouses: [Warehouse!]!
+  getWarehouseById(id: String!): Warehouse!
   getCategories(categoryFilter: CategoryFilter): [CategoryData!]!
 }
 
@@ -166,6 +180,8 @@ type Mutation {
   deleteEmployeeSkill(id: String!): EmployeeSkill!
   createSupplier(createSupplierInput: CreateSupplierInput!): Supplier!
   updateSupplier(id: String!, updateSupplierInput: UpdateSupplierInput!): Supplier!
+  createWarehouse(createWarehouseInput: CreateWarehouseInput!): Warehouse!
+  updateWarehouse(id: String!, updateWarehouseInput: UpdateWarehouseInput!): Warehouse!
   createCategory(createCategoryInput: CreateCategoryInput!): CategoryData!
   updateCategory(id: String!, updateCategoryInput: UpdateCategoryInput!): CategoryData!
   deleteCategory(id: String!): CategoryData!
@@ -251,6 +267,21 @@ input UpdateSupplierInput {
   name: String
   email: String
   phone_number: String
+  address: String
+  status: String
+}
+
+input CreateWarehouseInput {
+  name: String!
+  description: String
+  project: String
+  address: String!
+  status: String
+}
+
+input UpdateWarehouseInput {
+  name: String
+  description: String
   address: String
   status: String
 }

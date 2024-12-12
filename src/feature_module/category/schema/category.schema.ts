@@ -8,8 +8,7 @@ export enum CategoryType {
   PRIORITY="priority",
   COMPLETION_STATUS="completion_status",
   ITEM="item",
-  ATTENDANCE_STATUS="attendance_status",
-  PERSON_STATUS="person_status",
+  REQUEST_STATUS="request_status",
 }
 
 @ObjectType()

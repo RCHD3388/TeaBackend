@@ -11,6 +11,7 @@ import { ProjectModule } from './feature_module/project/project.module';
 import { PersonModule } from './feature_module/person/person.module';
 import { createGraphqlConfig } from './common/configs/graphql.config';
 import { CategoryModule } from './feature_module/category/category.module';
+import { InventoryModule } from './feature_module/inventory/inventory.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { CategoryModule } from './feature_module/category/category.module';
     ProjectModule,
     PersonModule,
     CategoryModule,
+    InventoryModule
   ],
   providers: [AppResolver],
 })

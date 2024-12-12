@@ -1,5 +1,5 @@
 import { Field, InputType } from "@nestjs/graphql";
-import { IsEnum, IsNotEmpty, isString, IsString } from "class-validator";
+import { IsEnum, IsNotEmpty, IsOptional, isString, IsString } from "class-validator";
 import { WarehouseStatus, WarehouseType } from "../schema/warehouse.schema";
 
 @InputType()
@@ -9,13 +9,15 @@ export class CreateWarehouseInput {
   name: string;
 
   @Field(() => String, {nullable: true})
+  @IsOptional()
   @IsNotEmpty({ message: 'Description is required.' })
   description?: string;
 
-  @Field(() => String)
+  @Field(() => String, {nullable: true})
+  @IsOptional()
   @IsString()
   @IsNotEmpty({ message: 'Project should not be empty' })
-  project: string;
+  project?: string;
 
   @Field(() => String)
   @IsString()
@@ -23,10 +25,35 @@ export class CreateWarehouseInput {
   address: string;
 
   @Field(() => String, {nullable: true})
+  @IsOptional()
   @IsEnum(WarehouseStatus, { message: `Status is invalid` })
   status?: string;
   
-  @Field(() => String)
-  @IsEnum(WarehouseType, { message: `Type is invalid` })
   type: string;
+}
+
+@InputType()
+export class UpdateWarehouseInput {
+  @Field(() => String, {nullable: true})
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty({ message: 'Name is required.' })
+  name?: string;
+
+  @Field(() => String, {nullable: true})
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty({ message: 'Description is required.' })
+  description?: string;
+
+  @Field(() => String, {nullable: true})
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty({ message: 'Address is required.' })
+  address?: string;
+
+  @Field(() => String, {nullable: true})
+  @IsOptional()
+  @IsEnum(WarehouseStatus, { message: `Status is invalid` })
+  status?: string;
 }

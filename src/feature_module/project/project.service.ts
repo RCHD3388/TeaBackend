@@ -46,7 +46,7 @@ export class ProjectService {
     }
 
     let project = await this.projectModel.find(filter).populate(["project_leader", "status", "priority"]).exec();
-    console.log(project)
+    
     project = project.map((proj) => {
       (proj.project_leader as Employee).salary = null
       return proj
