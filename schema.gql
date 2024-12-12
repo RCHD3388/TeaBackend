@@ -104,6 +104,14 @@ type LoginResponse {
   name: String!
 }
 
+type MaterialTransaction {
+  name: String!
+}
+
+type ToolTransaction {
+  name: String!
+}
+
 type GetAllProjectEmployeeDto {
   registered: [Employee!]!
   unregistered: [Employee!]

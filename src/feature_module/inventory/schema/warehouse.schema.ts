@@ -1,6 +1,6 @@
 import { Field, ObjectType } from "@nestjs/graphql";
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { Types } from "mongoose";
+import { Types, Document } from "mongoose";
 import { Project } from "src/feature_module/project/schema/project.schema";
 import { MaterialTransaction, ToolTransaction } from "./material.schema";
 
@@ -45,12 +45,12 @@ export class Warehouse extends Document {
   status: string;
 
   @Field(() => [MaterialTransaction])
-  @Prop({ type: [Types.ObjectId], required: true, ref: "MaterialTransaction" })
+  @Prop({ type: [Types.ObjectId], required: true, default: [], ref: "MaterialTransaction" })
   material_transaction: String[] | MaterialTransaction[];
 
   @Field(() => [ToolTransaction])
-  @Prop({ type: [Types.ObjectId], required: true, ref: "ToolTransaction" })
+  @Prop({ type: [Types.ObjectId], required: true, default: [], ref: "ToolTransaction" })
   tool_transaction: String[] | ToolTransaction[];
 }
 
-export const WarehouseSchema = SchemaFactory.createForClass(Project);
+export const WarehouseSchema = SchemaFactory.createForClass(Warehouse);

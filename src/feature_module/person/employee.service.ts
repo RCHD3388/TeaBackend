@@ -33,7 +33,7 @@ export class EmployeeService {
     return employee;
   }
 
-  async findAll(employeeFilter?: EmployeeFilter, custom_filter?: any): Promise<Employee[]> {
+  async findAll(employeeFilter?: EmployeeFilter, custom_filter?: any, withSalary?: boolean): Promise<Employee[]> {
     let employee_filter: any = {}
     if (employeeFilter?.filter) {
       let roleIds = (await this.employeeRoleModel.find({ name: { $in: employeeFilter.filter } }).select("_id")).map((empRole) => empRole._id)
@@ -45,8 +45,12 @@ export class EmployeeService {
     if (custom_filter) {
       employee_filter = { ...employee_filter, ...custom_filter }
     }
+    let salaryFilter = {}
+    if(withSalary == false) {
+      salaryFilter = { salary: 0 }
+    }
 
-    let employee = await this.employeeModel.find(employee_filter).exec();
+    let employee = await this.employeeModel.find(employee_filter, salaryFilter).exec();
     return employee
   }
 

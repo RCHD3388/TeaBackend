@@ -6,13 +6,16 @@ import { Model, ObjectId, Types } from "mongoose";
 import { Project } from "./schema/project.schema";
 import { CreateProjectInput, UpdateProjectInput } from "./types/project.types";
 import { CategoryData, CategoryType } from "../category/schema/category.schema";
+import { WarehouseService } from "../inventory/warehouse.service";
+import { WarehouseType } from "../inventory/schema/warehouse.schema";
 
 @Injectable()
 export class ProjectService {
   constructor(
     @InjectModel(Employee.name) private employeeModel: Model<Employee>,
     @InjectModel(CategoryData.name) private categoryDataModel: Model<CategoryData>,
-    @InjectModel(Project.name) private projectModel: Model<Project>
+    @InjectModel(Project.name) private projectModel: Model<Project>,
+    private readonly warehouseService: WarehouseService
   ) { }
 
   private isValidTargetDate(target_date: string | Date): boolean {
@@ -43,11 +46,12 @@ export class ProjectService {
     }
 
     let project = await this.projectModel.find(filter).populate(["project_leader", "status", "priority"]).exec();
+    console.log(project)
     project = project.map((proj) => {
       (proj.project_leader as Employee).salary = null
       return proj
     })
-    
+
     return project
   }
 
@@ -95,21 +99,46 @@ export class ProjectService {
     } else {
       if ((employee_data.role as EmployeeRole).name != "mandor") throw new BadRequestException("Pegawai yang bertugas sebagai mandor harus memiliki role sesuai")
     }
-    let new_project = await this.projectModel.create(createProjectInput);
 
-    // add project leader new project history
-    employee_data.project_history.push({
-      project: new_project._id,
-      join_at: new Date(),
-      left_at: null,
-      description: ""
-    })
-    employee_data.save();
+    let session = await this.projectModel.db.startSession();
 
-    let project = await this.projectModel.findById(new_project._id).populate("project_leader");
-    (project.project_leader as Employee).salary = null
+    try {
+      session.startTransaction();
 
-    return project
+      // create new project
+      let new_project = await this.projectModel.create(createProjectInput);
+
+      // create warehouse
+      await this.warehouseService.create({
+        name: `Warehouse ${new_project.name}`,
+        description : `Warehouse untuk project ${new_project.name}`,
+        project: new_project._id,
+        address : `${new_project.location}`, 
+        type: WarehouseType.PROJECT, 
+      })
+
+      // add project leader new project history
+      employee_data.project_history.push({
+        project: new_project._id,
+        join_at: new Date(),
+        left_at: null,
+        description: ""
+      })
+      employee_data.save();
+
+      let project = await this.projectModel.findById(new_project._id).populate("project_leader");
+      (project.project_leader as Employee).salary = null
+
+      await session.commitTransaction();
+      return project;
+
+    } catch (error) {
+      await session.abortTransaction();
+      throw error
+    
+    } finally {
+      await session.endSession(); 
+    }
   }
 
   async update(id: string, updateProjectInput: UpdateProjectInput, user: User): Promise<Project> {

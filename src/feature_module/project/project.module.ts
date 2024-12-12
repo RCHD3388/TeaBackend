@@ -9,6 +9,7 @@ import { ProjectService } from './project.service';
 import { ProjectEmployeeService } from './project_employee.service';
 import { ProjectEmployeeResolver } from './project_employee.resolver';
 import { PersonModule } from '../person/person.module';
+import { InventoryModule } from '../inventory/inventory.module';
 
 @Module({
   imports: [
@@ -18,7 +19,8 @@ import { PersonModule } from '../person/person.module';
       { name: Project.name, schema: ProjectSchema},
       { name: CategoryData.name, schema: CategoryDataSchema},
     ]),
-    PersonModule
+    PersonModule,
+    InventoryModule
   ],
   providers: [
     ProjectResolver, ProjectEmployeeResolver,

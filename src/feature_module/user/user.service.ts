@@ -122,9 +122,9 @@ export class UserService {
       throw new ForbiddenException("User tidak diperbolehkan untuk melakukan aksi tersebut")
     }
     user.password = newPassword
-    user.save();
     let returnObject = user.toObject();
     delete returnObject.password
+    user.save();
     return returnObject
   }
 

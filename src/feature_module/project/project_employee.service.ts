@@ -42,12 +42,9 @@ export class ProjectEmployeeService {
     // check if admin / owner
     if (current_loggedin_user_role == "admin" || current_loggedin_user_role == "owner") {
       // find all using employe service (employee_filter, custom_filter)
-      let all_employee = await this.employeeService.findAll({ filter: ["pegawai"] }, { _id: { $nin: target_return_value.registered }, status: "Active" });
+      let all_employee = await this.employeeService.findAll({ filter: ["pegawai"] }, { _id: { $nin: target_return_value.registered }, status: "Active" }, false);
       // remove salary from unregistered employee return
-      target_return_value.unregistered = all_employee.map((emp) => {
-        emp.salary = null;
-        return emp
-      })
+      target_return_value.unregistered = all_employee
     }
 
     return target_return_value
@@ -69,7 +66,8 @@ export class ProjectEmployeeService {
       employees = this.removeDuplicates(employees)
       const employeesToAdd: Employee[] = [];
       for (const employeeId of employees) {
-        const employee = await this.employeeModel.findById(employeeId).populate(["role", "skill"]);
+        const employee = await this.employeeModel.findById(employeeId, {salary: 0}).populate(["role", "skill"]);
+        
         if (!employee) {
           throw new NotFoundException(`Employee with ID ${employeeId} not found`);
         }
@@ -83,6 +81,8 @@ export class ProjectEmployeeService {
 
         employeesToAdd.push(employee);
       }
+      // supaya hasil populate tersimpan dengan benar setelah save()
+      let targetReturnValue = employeesToAdd.map((emp) => emp.toObject())
 
       // Buat employeeProjectHistory baru
       const projectHistory = {
@@ -95,18 +95,14 @@ export class ProjectEmployeeService {
         employee.project_history.push(projectHistory)
         await employee.save()
       })
-
       // Tambahkan semua employee baru ke dalam project
       project.worker.push(...employeesToAdd.map((employee) => employee._id));
       await project.save();
 
       await session.commitTransaction();
 
-      return employeesToAdd.map((emp) => {
-        emp.salary = null
-        return emp
-      });
-    } catch (error) {
+      return targetReturnValue
+    } catch (error) { 
       await session.abortTransaction();
       throw error;
     } finally {
@@ -119,7 +115,7 @@ export class ProjectEmployeeService {
     const project = await this.projectModel.findById(id);
     if (!project) {
       throw new NotFoundException(`Project with ID ${id} not found`);
-    }
+    } 
 
     // Validasi employee
     const target_employee = await this.employeeModel.findById(employee).populate(["role", "skill"]);
@@ -148,9 +144,11 @@ export class ProjectEmployeeService {
       throw new BadRequestException(`Tidak ditemukan riwayat proyek aktif untuk pegawai dalam proyek tersebut.`);
     }
 
+    let return_value = target_employee.toObject()
+    delete return_value.salary
     // Simpan perubahan pada employee
     await target_employee.save();
-    target_employee.salary = null;
-    return target_employee;
+
+    return return_value;
   }
 }
