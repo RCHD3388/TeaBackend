@@ -123,7 +123,6 @@ export class ProjectEmployeeService {
 
     // Validasi employee
     const target_employee = await this.employeeModel.findById(employee).populate(["role", "skill"]);
-
     if (!target_employee) {
       throw new NotFoundException(`Employee with ID ${employee} not found`);
     }
