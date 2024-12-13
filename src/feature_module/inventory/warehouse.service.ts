@@ -68,7 +68,7 @@ export class WarehouseService {
       if (constraint_warehouse) throw new BadRequestException(`Warehouse dengan jenis ${target_warehouse.type} dengan nama tersebut telah ada`)
     }
 
-    if (status && target_warehouse.type == WarehouseType.PROJECT) {
+    if (status && target_warehouse.status != status && target_warehouse.type == WarehouseType.PROJECT) {
       throw new BadRequestException('Hanya warehouse dengan jenis inventory yang dapat diubah status')
     }
 

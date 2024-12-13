@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Supplier } from './schema/supplier.schema';
@@ -26,6 +26,9 @@ export class SupplierService {
   async create(createSupplierInput: CreateSupplierInput): Promise<Supplier> {
     const { person, name, status } = createSupplierInput;
 
+    let targetSupplierConstraint = await this.supplierModel.findOne({ name }).exec() 
+    if(targetSupplierConstraint) throw new BadRequestException('Supplier dengan nama tersebut sudah ada')
+
     const newEmployee = new this.supplierModel({
       person, name, status,
     })
@@ -42,7 +45,11 @@ export class SupplierService {
     if (updateSupplierInput.address) updateData['person.address'] = updateSupplierInput.address;
 
     if (updateSupplierInput.status) updateData.status = updateSupplierInput.status;
-    if (updateSupplierInput.company_name) updateData.name = updateSupplierInput.company_name;
+    if (updateSupplierInput.company_name) {
+      let targetSupplierConstraint = await this.supplierModel.findOne({ name: updateSupplierInput.company_name, _id: { $ne: id } }).exec()
+      if(targetSupplierConstraint) throw new BadRequestException('Supplier dengan nama tersebut sudah ada')
+      updateData.name = updateSupplierInput.company_name;
+    }
 
     let updatedSupplier = await this.supplierModel.findByIdAndUpdate(id, updateData, { new: true }).exec();
     if (!updatedSupplier) { throw new NotFoundException(`Supplier with id ${id} Not found`) }
