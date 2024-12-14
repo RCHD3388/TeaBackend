@@ -1,5 +1,5 @@
 import { Field, InputType } from "@nestjs/graphql";
-import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
+import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, Min } from "class-validator";
 import { MaterialStatus } from "../schema/inventory.schema";
 
 @InputType()
@@ -36,6 +36,7 @@ export class CreateMaterialInput {
 
   @Field(() => Number)
   @IsNumber()
+  @Min(1, { message: 'Konversi minimal 1' })
   @IsNotEmpty({ message: 'Konversi tidak boleh kosong' })
   conversion: number;
 

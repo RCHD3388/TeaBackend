@@ -29,11 +29,11 @@ export class MaterialService {
   }
 
   async findAll(): Promise<Material[]> {
-    return this.materialModel.find().populate(["merk", "unit_measure", "minimum_unit_measure"]).exec();
+    return this.materialModel.find().populate(["merk", "unit_measure", "minimum_unit_measure", "item_category"]).exec();
   }
 
   async findOne(id: string): Promise<Material> {
-    let material = await this.materialModel.findById(id).populate(["merk", "unit_measure", "minimum_unit_measure"]).exec();
+    let material = await this.materialModel.findById(id).populate(["merk", "unit_measure", "minimum_unit_measure", "item_category"]).exec();
     if (!material) throw new NotFoundException('Material not found');
     return material;
   }
