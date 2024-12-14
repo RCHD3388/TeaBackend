@@ -18,6 +18,7 @@ export class CreateSupplierInput {
   person: PersonInput;
 
   @Field(() => String)
+  @IsNotEmpty({ message: 'Status should not be empty' })
   @IsEnum(SupplierStatus, { message: "Invalid Type Status" })
   status: string;  
 }

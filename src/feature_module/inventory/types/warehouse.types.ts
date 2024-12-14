@@ -10,7 +10,7 @@ export class CreateWarehouseInput {
 
   @Field(() => String, {nullable: true})
   @IsOptional()
-  @IsNotEmpty({ message: 'Description is required.' })
+  @IsString()
   description?: string;
 
   @Field(() => String, {nullable: true})

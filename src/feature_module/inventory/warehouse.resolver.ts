@@ -18,7 +18,7 @@ export class WarehouseResolver {
 
   @Query(() => [Warehouse], { name: 'getAllWarehouses' })
   @UseGuards(RolesGuard)
-  @Roles("owner", "admin")
+  @Roles("owner", "admin", "staff_pembelian")
   async getAllWarehouses() {
     return this.warehouseService.findAll();
   }
@@ -35,7 +35,7 @@ export class WarehouseResolver {
 
   @Mutation(() => Warehouse)
   @UseGuards(RolesGuard)
-  @Roles("owner", "admin")
+  @Roles("owner", "admin", "staff_pembelian")
   async createWarehouse(
     @Args('createWarehouseInput') createWarehouseInput: CreateWarehouseInput
   ): Promise<Warehouse> {
@@ -45,7 +45,7 @@ export class WarehouseResolver {
 
   @Mutation(() => Warehouse)
   @UseGuards(RolesGuard)
-  @Roles("owner", "admin")
+  @Roles("owner", "admin", "staff_pembelian")
   async updateWarehouse(
     @Args('id') id: string,
     @Args('updateWarehouseInput') updateWarehouseInput: UpdateWarehouseInput

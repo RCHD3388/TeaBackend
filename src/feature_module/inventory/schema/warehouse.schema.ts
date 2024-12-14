@@ -2,7 +2,7 @@ import { Field, ObjectType } from "@nestjs/graphql";
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Types, Document } from "mongoose";
 import { Project } from "src/feature_module/project/schema/project.schema";
-import { MaterialTransaction, ToolTransaction } from "./material.schema";
+import { MaterialTransaction, ToolTransaction } from "./inventory_trans.schema";
 
 export enum WarehouseStatus {
   ACTIVE = 'Active',

@@ -7,8 +7,9 @@ export enum CategoryType {
   PROJECT_COST="pengeluaran_proyek",
   PRIORITY="prioritas",
   COMPLETION_STATUS="status_penyelesaian",
-  ITEM="item",
+  ITEM="kategori_item",
   REQUEST_STATUS="status_permintaan",
+  TOOL_STATUS="status_alat"
 }
 
 @ObjectType()
@@ -21,8 +22,8 @@ export class CategoryData extends Document {
   @Prop({ type: String, required: true })
   name: string;
 
-  @Field(() => String)
-  @Prop({ type: String, required: true })
+  @Field(() => String, {nullable: true})
+  @Prop({ type: String, default: "" })
   description: string;
 
   @Field(() => String)

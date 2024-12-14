@@ -29,14 +29,14 @@ export class CategoryService {
 
   async create(createCategoryDto: CreateCategoryDto): Promise<CategoryData> {
     let { name } = createCategoryDto;
-    if (await this.doesCategoryExist(name) == true) throw new BadRequestException(`Category with name ${name} already exist`);
+    if (await this.doesCategoryExist(name) == true) throw new BadRequestException(`Kategori dengan nama ${name} sudah ada`);
     const createdCategory = new this.categoryModel(createCategoryDto);
     return createdCategory.save();
   }
 
   async update(id: string, updateCategoryInput: UpdateCategoryInput): Promise<CategoryData> {
     if (await this.doesCategoryExist(updateCategoryInput.name, id)) {
-      throw new BadRequestException(`Category with name ${updateCategoryInput.name} already exist`);
+      throw new BadRequestException(`Kategori dengan nama ${updateCategoryInput.name} sudah ada`);
     }
     const updatedCategory = await this.categoryModel.findByIdAndUpdate(
       id,

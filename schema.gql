@@ -14,7 +14,7 @@ type Person {
 type CategoryData {
   _id: ID!
   name: String!
-  description: String!
+  description: String
   type: String!
 }
 
@@ -136,6 +136,39 @@ type Supplier {
   status: String!
 }
 
+type UnitMeasure {
+  _id: ID!
+  name: String!
+  description: String
+}
+
+type Merk {
+  _id: ID!
+  name: String!
+  description: String
+}
+
+type Sku {
+  _id: ID!
+  name: String!
+  description: String
+  merk: Merk!
+  item_category: CategoryData!
+}
+
+type Material {
+  _id: ID!
+  id: String!
+  name: String!
+  description: String
+  merk: Merk!
+  unit_measure: UnitMeasure!
+  status: String!
+  minimum_unit_measure: UnitMeasure!
+  conversion: Float!
+  item_category: CategoryData!
+}
+
 type Query {
   getHello: String!
   getAllUsers: [User!]!
@@ -151,6 +184,14 @@ type Query {
   getSupplierById(id: String!): Supplier!
   getAllWarehouses: [Warehouse!]!
   getWarehouseById(id: String!): Warehouse!
+  getAllUnitMeasures: [UnitMeasure!]!
+  getUnitMeasureById(id: String!): UnitMeasure!
+  getAllMerks: [Merk!]!
+  getMerkById(id: String!): Merk!
+  getAllMaterials: [Material!]!
+  getMaterialById(id: String!): Material!
+  getAllSkus: [Sku!]!
+  getSkuById(id: String!): Sku!
   getCategories(categoryFilter: CategoryFilter): [CategoryData!]!
 }
 
@@ -182,6 +223,16 @@ type Mutation {
   updateSupplier(id: String!, updateSupplierInput: UpdateSupplierInput!): Supplier!
   createWarehouse(createWarehouseInput: CreateWarehouseInput!): Warehouse!
   updateWarehouse(id: String!, updateWarehouseInput: UpdateWarehouseInput!): Warehouse!
+  createUnitMeasure(createInventoryCategoryInput: CreateInventoryCategoryInput!): UnitMeasure!
+  updateUnitMeasure(id: String!, updateInventoryCategoryInput: UpdateInventoryCategoryInput!): UnitMeasure!
+  deleteUnitMeasure(id: String!): UnitMeasure!
+  createMerk(createInventoryCategoryInput: CreateInventoryCategoryInput!): Merk!
+  updateMerk(id: String!, updateInventoryCategoryInput: UpdateInventoryCategoryInput!): Merk!
+  deleteMerk(id: String!): Merk!
+  createMaterial(createMaterialInput: CreateMaterialInput!): Material!
+  updateMaterial(id: String!, updateMaterialInput: UpdateMaterialInput!): Material!
+  createSku(createSkuInput: CreateSkuInput!): Sku!
+  updateSku(id: String!, updateSkuInput: UpdateSkuInput!): Sku!
   createCategory(createCategoryInput: CreateCategoryInput!): CategoryData!
   updateCategory(id: String!, updateCategoryInput: UpdateCategoryInput!): CategoryData!
   deleteCategory(id: String!): CategoryData!
@@ -286,9 +337,55 @@ input UpdateWarehouseInput {
   status: String
 }
 
+input CreateInventoryCategoryInput {
+  name: String!
+  description: String
+}
+
+input UpdateInventoryCategoryInput {
+  name: String
+  description: String
+}
+
+input CreateMaterialInput {
+  name: String!
+  description: String
+  merk: String!
+  unit_measure: String!
+  status: String!
+  minimum_unit_measure: String!
+  conversion: Float!
+  item_category: String!
+}
+
+input UpdateMaterialInput {
+  name: String!
+  description: String
+  merk: String!
+  unit_measure: String!
+  status: String!
+  minimum_unit_measure: String!
+  conversion: Float!
+  item_category: String!
+}
+
+input CreateSkuInput {
+  name: String!
+  description: String
+  merk: String!
+  item_category: String!
+}
+
+input UpdateSkuInput {
+  name: String
+  description: String
+  merk: String
+  item_category: String!
+}
+
 input CreateCategoryInput {
   name: String!
-  description: String!
+  description: String
   type: String!
 }
 

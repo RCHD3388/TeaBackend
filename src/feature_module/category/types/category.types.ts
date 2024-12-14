@@ -1,6 +1,6 @@
 import { Field, InputType } from "@nestjs/graphql";
 import { CategoryType } from "../schema/category.schema";
-import { IsEnum, IsNotEmpty, IsOptional, IsString, Matches } from "class-validator";
+import { IsEnum, IsNotEmpty, IsOptional, isString, IsString, Matches } from "class-validator";
 
 @InputType()
 export class CreateCategoryInput {
@@ -8,8 +8,8 @@ export class CreateCategoryInput {
   @IsNotEmpty({ message: 'Name is required.' })
   name: string;
 
-  @Field(() => String)
-  @IsNotEmpty({ message: 'Description is required.' })
+  @Field(() => String, {nullable: true})
+  @IsString()
   description: string;
 
   @Field(() => String)
@@ -29,8 +29,6 @@ export class UpdateCategoryInput {
   @Field(() => String, { nullable: true })
   @IsOptional()
   @IsString()
-  @IsNotEmpty({ message: 'Description should not be empty' })
-  @Matches(/^(?!\s*$).+/, { message: 'Description should not be empty or whitespace' })
   description?: string;
 }
 
