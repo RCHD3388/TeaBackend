@@ -36,3 +36,24 @@ export class CategoryData extends Document {
 }
 
 export const CategoryDataSchema = SchemaFactory.createForClass(CategoryData);
+
+@ObjectType()
+@Schema()
+export class TransactionCategory extends Document {
+  @Field(() => ID) // Menyertakan _id dalam GraphQL response
+  _id: string;
+
+  @Field(() => String)
+  @Prop({ type: String, required: true, unique: true })
+  id: string;
+
+  @Field(() => String, {nullable: true})
+  @Prop({ type: String, default: "" })
+  description: string;
+
+  @Field(() => Number)
+  @Prop({ type: Number, required: true, default: 0 })
+  counter: number;
+}
+
+export const TransactionCategorySchema = SchemaFactory.createForClass(TransactionCategory);

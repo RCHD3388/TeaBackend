@@ -8,6 +8,7 @@ import { CustomLoggerModule } from '../custom_logger/custom-logger.module';
 import { User, UserSchema } from '../../feature_module/user/schema/user.schema'
 import databaseConfig from '../../common/configs/database.config';
 import { Employee, EmployeeRole, EmployeeRoleSchema, EmployeeSchema, EmployeeSkill, EmployeeSkillSchema } from '../../feature_module/person/schema/employee.schema';
+import { CategoryData, CategoryDataSchema } from 'src/feature_module/category/schema/category.schema';
 
 @Module({
   imports: [
@@ -25,7 +26,8 @@ import { Employee, EmployeeRole, EmployeeRoleSchema, EmployeeSchema, EmployeeSki
       { name: EmployeeRole.name, schema: EmployeeRoleSchema},
       { name: EmployeeSkill.name, schema: EmployeeSkillSchema},
       { name: Employee.name, schema: EmployeeSchema},
-      { name: User.name, schema: UserSchema}
+      { name: User.name, schema: UserSchema},
+      { name: CategoryData.name, schema: CategoryDataSchema}
     ]),
     CustomLoggerModule
   ],
