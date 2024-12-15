@@ -1,4 +1,4 @@
-import { CategoryData, CategoryType, TransactionCategory } from "src/feature_module/category/schema/category.schema";
+import { CategoryData, CategoryType, TransactionCategory } from "./../../../feature_module/category/schema/category.schema";
 
 export const categoryData: Partial<CategoryData>[] = [
   { name: "Sukses", description: "proses sudah selesai", type: CategoryType.COMPLETION_STATUS },
@@ -10,4 +10,5 @@ export const transactionCategoryData: Partial<TransactionCategory>[] = [
   { id: "PUR", description: "Transfer hasil pembelian perusahaan ke warehouse tertentu" },
   { id: "TRF", description: "Hasil transfer antar warehouse atau gudang proyek" },
   { id: "ADD", description: "Penambahan langsung ke warehouse atau gudang" },
+  { id: "USE", description: "Penggunaan langsung dari warehouse atau gudang" },
 ]

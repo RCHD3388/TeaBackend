@@ -1,8 +1,8 @@
 import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { AppAuthGuard } from '../user/auth_related/auth.guard';
-import { RolesGuard } from 'src/common/guard/roles.guard';
-import { Roles } from 'src/common/decorators/roles.decorator';
+import { RolesGuard } from '../../common/guard/roles.guard';
+import { Roles } from '../../common/decorators/roles.decorator';
 import { UnitMeasureService } from './unit_measure.service';
 import { Merk, UnitMeasure } from './schema/inventory.schema';
 import { CreateInventoryCategoryInput, UpdateInventoryCategoryInput } from './types/inventory_category.types';

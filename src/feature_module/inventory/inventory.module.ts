@@ -12,8 +12,12 @@ import { MaterialResolver } from "./material/material.resolver";
 import { MaterialService } from "./material/material.service";
 import { ToolSkuResolver } from "./tool/toolsku.resolver";
 import { ToolSkuService } from "./tool/toolsku.service";
-import { CategoryModule } from "../category/category.module";
-import { CategoryData, CategoryDataSchema } from "../category/schema/category.schema";
+import { CategoryData, CategoryDataSchema, TransactionCategory, TransactionCategorySchema } from "../category/schema/category.schema";
+import { MaterialTransaction, MaterialTransactionSchema, ToolTransaction, ToolTransactionSchema } from "./schema/inventory_trans.schema";
+import { MasterTransactionService } from "./transaction/master_transaction.service";
+import { ToolTransactionService } from "./transaction/tool_transaction.service";
+import { MaterialTransactionService } from "./transaction/material_transaction.service";
+import { TransactionResolver } from "./transaction/transaction.resolver";
 
 @Module({
   imports: [
@@ -25,13 +29,17 @@ import { CategoryData, CategoryDataSchema } from "../category/schema/category.sc
       {name: Material.name, schema: MaterialSchema},
       {name: Tool.name, schema: ToolSchema},
       {name: Sku.name, schema: SkuSchema},
-      {name: CategoryData.name, schema: CategoryDataSchema}
+      {name: CategoryData.name, schema: CategoryDataSchema},
+      {name: MaterialTransaction.name, schema: MaterialTransactionSchema},
+      {name: ToolTransaction.name, schema: ToolTransactionSchema},
+      {name: TransactionCategory.name, schema: TransactionCategorySchema}
     ]),
   ],
   providers: [WarehouseResolver , WarehouseService,
     InventoryResolver, UnitMeasureService, MerkService,
     MaterialResolver, MaterialService,
-    ToolSkuResolver, ToolSkuService
+    ToolSkuResolver, ToolSkuService,
+    TransactionResolver, MasterTransactionService, MaterialTransactionService, ToolTransactionService
   ],
   exports: [WarehouseService]
 })

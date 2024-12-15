@@ -5,7 +5,7 @@ import { User } from '../../feature_module/user/schema/user.schema';
 import { CustomLoggerService } from '../custom_logger/logger.service';
 import { employeeRoleData, employeeSkillData, getEmployeeData, getUserData } from './data/person.data';
 import { Employee, EmployeeRole, EmployeeSkill } from '../../feature_module/person/schema/employee.schema';
-import { CategoryData } from 'src/feature_module/category/schema/category.schema';
+import { CategoryData } from './../../feature_module/category/schema/category.schema';
 import { categoryData } from './data/category.data';
 
 @Injectable()

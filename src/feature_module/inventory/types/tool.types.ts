@@ -1,5 +1,5 @@
 import { Field, InputType } from "@nestjs/graphql";
-import { IsDate, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
+import { IsDate, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, Min } from "class-validator";
 import { MaterialStatus } from "../schema/inventory.schema";
 
 @InputType()
@@ -12,22 +12,23 @@ export class CreateToolInput {
   @Field(() => String, { nullable: true })
   @IsString()
   @IsOptional()
-  warranty_number: string;
+  warranty_number?: string;
 
   @Field(() => Date, { nullable: true })
   @IsDate()
   @IsOptional()
-  warranty_expired_date: Date;
+  warranty_expired_date?: Date;
 
   @Field(() => String)
   @IsString()
   @IsNotEmpty({ message: 'Status tidak boleh kosong' })
   status: string;
 
-  @Field(() => Number)
+  @Field(() => Number, { nullable: true })
   @IsNumber()
-  @IsNotEmpty({ message: 'Price tidak boleh kosong' })
-  price: number;
+  @IsOptional()
+  @Min(0, { message: 'Harga tidak boleh mines' })
+  price?: number;
 
   @Field(() => String)
   @IsString()
@@ -45,28 +46,36 @@ export class UpdateToolInput {
   @Field(() => String, { nullable: true })
   @IsString()
   @IsOptional()
-  warranty_number: string;
+  warranty_number?: string;
 
   @Field(() => Date, { nullable: true })
   @IsDate()
   @IsOptional()
-  warranty_expired_date: Date;
+  warranty_expired_date?: Date;
 
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   @IsString()
   @IsOptional()
   @IsNotEmpty({ message: 'Status tidak boleh kosong' })
-  status: string;
+  status?: string;
 
-  @Field(() => Number)
+  @Field(() => Number, { nullable: true })
   @IsNumber()
   @IsOptional()
-  @IsNotEmpty({ message: 'Price tidak boleh kosong' })
-  price: number;
+  @Min(0, { message: 'Harga tidak boleh mines' })
+  price?: number;
 
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   @IsString()
   @IsOptional()
   @IsNotEmpty({ message: 'Sku tidak boleh kosong' })
-  sku: string;
+  sku?: string;
+}
+
+@InputType()
+export class FilterToolInput {
+  @Field(() => String)
+  @IsString()
+  @IsOptional()
+  sku?: string;
 }

@@ -18,6 +18,13 @@ type CategoryData {
   type: String!
 }
 
+type TransactionCategory {
+  _id: ID!
+  id: String!
+  description: String
+  counter: Float!
+}
+
 type AttendanceDetail {
   employee: Employee!
   check_in: Boolean!
@@ -104,38 +111,6 @@ type LoginResponse {
   name: String!
 }
 
-type MaterialTransaction {
-  name: String!
-}
-
-type ToolTransaction {
-  name: String!
-}
-
-type Warehouse {
-  _id: String!
-  name: String!
-  description: String
-  type: String!
-  project: Project
-  address: String!
-  status: String!
-  material_transaction: [MaterialTransaction!]!
-  tool_transaction: [ToolTransaction!]!
-}
-
-type GetAllProjectEmployeeDto {
-  registered: [Employee!]!
-  unregistered: [Employee!]
-}
-
-type Supplier {
-  _id: String!
-  name: String!
-  person: Person!
-  status: String!
-}
-
 type UnitMeasure {
   _id: ID!
   name: String!
@@ -167,6 +142,54 @@ type Material {
   minimum_unit_measure: UnitMeasure!
   conversion: Float!
   item_category: CategoryData!
+}
+
+type MaterialTransaction {
+  _id: String!
+  material: String!
+  in: Float!
+  out: Float!
+  remain: Float!
+  price: Float!
+  warehouse: String!
+  transaction_code: String!
+  transaction_category: TransactionCategory!
+  date: DateTime!
+}
+
+type ToolTransaction {
+  _id: String!
+  tool: String!
+  date: DateTime!
+  in: Float!
+  out: Float!
+  warehouse: String!
+  transaction_code: String!
+  transaction_category: TransactionCategory!
+}
+
+type Warehouse {
+  _id: String!
+  name: String!
+  description: String
+  type: String!
+  project: Project
+  address: String!
+  status: String!
+  material_transaction: [MaterialTransaction!]!
+  tool_transaction: [ToolTransaction!]!
+}
+
+type GetAllProjectEmployeeDto {
+  registered: [Employee!]!
+  unregistered: [Employee!]
+}
+
+type Supplier {
+  _id: String!
+  name: String!
+  person: Person!
+  status: String!
 }
 
 type Query {
@@ -233,6 +256,7 @@ type Mutation {
   updateMaterial(id: String!, updateMaterialInput: UpdateMaterialInput!): Material!
   createSku(createSkuInput: CreateSkuInput!): Sku!
   updateSku(id: String!, updateSkuInput: UpdateSkuInput!): Sku!
+  addInventoryMaterial(addInventoryMaterialInput: AddInventoryMaterialInput!): Boolean!
   createCategory(createCategoryInput: CreateCategoryInput!): CategoryData!
   updateCategory(id: String!, updateCategoryInput: UpdateCategoryInput!): CategoryData!
   deleteCategory(id: String!): CategoryData!
@@ -381,6 +405,17 @@ input UpdateSkuInput {
   description: String
   merk: String
   item_category: String!
+}
+
+input AddInventoryMaterialInput {
+  materials: [MaterialDetailInput!]!
+  warehouse: String!
+}
+
+input MaterialDetailInput {
+  material: String!
+  price: Float!
+  quantity: Float!
 }
 
 input CreateCategoryInput {

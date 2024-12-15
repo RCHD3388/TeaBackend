@@ -135,7 +135,7 @@ export class Tool extends Document {
   status: String | CategoryData;
 
   @Field(() => Number)
-  @Prop({ type: Number, required: true })
+  @Prop({ type: Number, required: true, default: 0 })
   price: number;
 
   @Field(() => Sku)

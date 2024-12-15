@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Material, Merk, Sku, UnitMeasure } from '../schema/inventory.schema';
 import { CreateMaterialInput, UpdateMaterialInput } from '../types/material.types';
-import { CategoryData } from 'src/feature_module/category/schema/category.schema';
+import { CategoryData } from './../../../feature_module/category/schema/category.schema';
 
 @Injectable()
 export class MaterialService {
@@ -15,17 +15,8 @@ export class MaterialService {
   ) { }
 
   async generateNewId(): Promise<string> {
-    const lastMaterial = await this.materialModel.findOne().sort({ id: -1 }).exec();
-    if (!lastMaterial) return 'MT0001'; // ID default jika tidak ada data sebelumnya
-
-    const id = lastMaterial.id;
-    const prefix = id.substring(0, 2);
-    const numberPart = parseInt(id.substring(2));
-
-    const newNumber = numberPart + 1;
-    const newId = `${prefix}${newNumber.toString().padStart(4, '0')}`;
-
-    return newId;
+    let currentDateToString = Date.now().toString()
+    return `MT${currentDateToString}`;
   }
 
   async findAll(): Promise<Material[]> {

@@ -1,10 +1,10 @@
 import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
-import { AppAuthGuard } from 'src/feature_module/user/auth_related/auth.guard';
+import { AppAuthGuard } from './../../../feature_module/user/auth_related/auth.guard';
 import { MaterialService } from './material.service';
-import { Material } from '../schema/inventory.schema';
-import { RolesGuard } from 'src/common/guard/roles.guard';
-import { Roles } from 'src/common/decorators/roles.decorator';
+import { Material } from './../schema/inventory.schema';
+import { RolesGuard } from './../../../common/guard/roles.guard';
+import { Roles } from './../../../common/decorators/roles.decorator';
 import { CreateMaterialInput, UpdateMaterialInput } from '../types/material.types';
 
 @Resolver()

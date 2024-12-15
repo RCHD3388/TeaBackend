@@ -4,8 +4,8 @@ import { CategoryData } from './schema/category.schema';
 import { CategoryFilter, CreateCategoryInput, UpdateCategoryInput } from './types/category.types';
 import { UseGuards } from '@nestjs/common';
 import { AppAuthGuard } from '../user/auth_related/auth.guard';
-import { RolesGuard } from 'src/common/guard/roles.guard';
-import { Roles } from 'src/common/decorators/roles.decorator';
+import { RolesGuard } from './../../common/guard/roles.guard';
+import { Roles } from './../../common/decorators/roles.decorator';
 
 @Resolver(() => CategoryData)
 @UseGuards(AppAuthGuard)
