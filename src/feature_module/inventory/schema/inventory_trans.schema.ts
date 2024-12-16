@@ -55,7 +55,7 @@ export class ToolTransaction extends Document {
   @Field(() => String)
   _id: string
 
-  @Field(() => String || Tool)
+  @Field(() => Tool)
   @Prop({ type: Types.ObjectId, required: true, ref: "Tool" })
   tool: string | Tool;
 

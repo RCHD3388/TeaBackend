@@ -35,7 +35,19 @@ export class ToolTransactionService {
       { $replaceRoot: { newRoot: "$latestTransaction" } } // Ganti root dengan data transaksi terbaru
     ]);
 
-    const populatedData = await this.toolTransactionModel.populate(remainsData, { path: 'tool' });
+    const populatedData = await this.toolTransactionModel.populate(remainsData, {
+      path: 'tool', // Populate material
+      populate: [
+        {
+          path: 'sku', model: 'Sku',
+          populate: [
+            { path: 'merk', model: 'Merk' },
+            { path: 'item_category', model: 'CategoryData' }
+          ]
+        },
+        { path: 'status', model: 'CategoryData' }
+      ]
+    });
 
     return populatedData
   }
@@ -106,7 +118,7 @@ export class ToolTransactionService {
             .session(session)
 
           // CHECK IF ALREADY EXIST
-          if(to_latestToolTransaction.length > 0 && to_latestToolTransaction[0].in == 1) throw new BadRequestException(`Tool sudah ada di warehouse tujuan`);
+          if (to_latestToolTransaction.length > 0 && to_latestToolTransaction[0].in == 1) throw new BadRequestException(`Tool sudah ada di warehouse tujuan`);
           let newInToolTransaction = new this.toolTransactionModel({
             tool: tool,
             date,
