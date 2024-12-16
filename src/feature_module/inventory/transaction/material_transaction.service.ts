@@ -22,7 +22,7 @@ export class MaterialTransactionService {
     if (!targetWarehouse) throw new NotFoundException('Warehouse tidak ditemukan')
 
     let remainsData = await this.materialTransactionModel.aggregate([
-      { $match: { warehouse } },
+      { $match: { warehouse, remain: { $gt: 0 } } },
       { $sort: { date: -1 } },   // descending date
       {
         $group: {
@@ -33,7 +33,17 @@ export class MaterialTransactionService {
       { $replaceRoot: { newRoot: "$latestTransaction" } } // Ganti root dengan data transaksi terbaru
     ]);
 
-    const populatedData = await this.materialTransactionModel.populate(remainsData, { path: 'material' });
+    console.log(remainsData)
+    const populatedData = await this.materialTransactionModel.populate(remainsData, {
+      path: 'material', // Populate material
+      populate: [
+        { path: 'merk', model: 'Merk' },
+        { path: 'unit_measure', model: 'UnitMeasure' },
+        { path: 'minimum_unit_measure', model: 'UnitMeasure' },
+        { path: 'item_category', model: 'CategoryData' },
+      ]
+    });
+    console.log(populatedData)
 
     return populatedData
   }
@@ -68,9 +78,9 @@ export class MaterialTransactionService {
       session.startTransaction();
 
       // START TRANSACTION
-      
+
       // check transaction category exist
-      let targetTransactionCategory = await this.transactionCategoryModel.findById(transaction_category).session(session);
+      let targetTransactionCategory = await this.transactionCategoryModel.findOne({ id: transaction_category }).session(session);
       if (!targetTransactionCategory) throw new NotFoundException(`Kategori transaksi tidak ditemukan`);
 
       // check target warehouse & source warehouse
@@ -84,7 +94,7 @@ export class MaterialTransactionService {
       }
 
       // ======================= PROSES START =======================
-      
+
       for (let curMaterial of materials) {
         // GET MATERIAL DETAIL
         let { material, qty, price } = curMaterial
@@ -93,7 +103,7 @@ export class MaterialTransactionService {
         if (qty <= 0) throw new BadRequestException('Jumlah material harus lebih besar dari 0');
 
         // CHECK MATERIAL EXIST
-        
+
         let targetMaterial = await this.materialModel.findById(material).session(session);
         if (!targetMaterial) throw new NotFoundException(`Material tidak ditemukan`);
 
@@ -101,15 +111,16 @@ export class MaterialTransactionService {
         let newTransCode = `${targetTransactionCategory.id}${targetTransactionCategory.counter + 1}`
         let date = new Date();
 
+        // latest material transaction for warehouse_from with material_id
+        const warehouseFrom_latestMaterialTransaction = await this.materialTransactionModel.find({ material: material, warehouse: warehouse_from })
+          .sort({ date: -1 })
+          .limit(1)
+          .session(session)
+
         // used material and transfer out from warehouse_from
         if (targetTransactionCategory.id == "USE" || targetTransactionCategory.id == "TRF") {
-          // latest material transaction for warehouse_from with material_id
-          const warehouseFrom_latestMaterialTransaction = await this.materialTransactionModel.find({ material: material, warehouse: warehouse_from })
-            .sort({ date: -1 })
-            .limit(1)
-            .session(session)
-
           // process transfer
+          // CHECK REMAIN MATERIAL FROM WAREHOUSE_FROM
           if (warehouseFrom_latestMaterialTransaction.length <= 0 || warehouseFrom_latestMaterialTransaction[0].remain < qty) {
             throw new BadRequestException(`Material tidak cukup di warehouse sumber`);
           }
@@ -138,7 +149,13 @@ export class MaterialTransactionService {
             .session(session)
 
           // process transfer
-          let { newRemainItems, newPrice } = this.add_getNewRemainAndPrice(warehouseTo_latestMaterialTransaction, qty, price)
+          let actualPrice = price;
+          // GET PRICE IF TRANSCATEGORY = TRF
+          if (targetTransactionCategory.id == "TRF") {
+            actualPrice = warehouseFrom_latestMaterialTransaction[0].price;
+          }
+          
+          let { newRemainItems, newPrice } = this.add_getNewRemainAndPrice(warehouseTo_latestMaterialTransaction, qty, actualPrice)
           let newInMaterialTransaction = new this.materialTransactionModel({
             material: material,
             in: qty,

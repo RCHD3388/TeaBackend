@@ -11,7 +11,7 @@ export class MaterialTransaction extends Document {
   @Field(() => String)
   _id: string
 
-  @Field(() => String || Material)
+  @Field(() => Material)
   @Prop({ type: Types.ObjectId, required: true, ref: "Material" })
   material: string | Material;
 

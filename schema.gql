@@ -146,7 +146,7 @@ type Material {
 
 type MaterialTransaction {
   _id: String!
-  material: String!
+  material: Material!
   in: Float!
   out: Float!
   remain: Float!
@@ -215,6 +215,7 @@ type Query {
   getMaterialById(id: String!): Material!
   getAllSkus: [Sku!]!
   getSkuById(id: String!): Sku!
+  getWarehouseMaterials(warehouse_id: String!): [MaterialTransaction!]!
   getCategories(categoryFilter: CategoryFilter): [CategoryData!]!
 }
 
@@ -257,6 +258,7 @@ type Mutation {
   createSku(createSkuInput: CreateSkuInput!): Sku!
   updateSku(id: String!, updateSkuInput: UpdateSkuInput!): Sku!
   addInventoryMaterial(createMaterialTransactionInput: CreateMaterialTransactionInput!): Boolean!
+  addInventoryTool(addOnlyToolTransactionInput: AddOnlyToolTransactionInput!): Boolean!
   createCategory(createCategoryInput: CreateCategoryInput!): CategoryData!
   updateCategory(id: String!, updateCategoryInput: UpdateCategoryInput!): CategoryData!
   deleteCategory(id: String!): CategoryData!
@@ -411,13 +413,26 @@ input CreateMaterialTransactionInput {
   materials: [MaterialDetailInput!]!
   warehouse_to: String
   warehouse_from: String
-  transaction_category: String!
 }
 
 input MaterialDetailInput {
   material: String!
   qty: Float!
   price: Float
+}
+
+input AddOnlyToolTransactionInput {
+  tool: [CreateToolInput!]!
+  warehouse_to: String
+}
+
+input CreateToolInput {
+  description: String
+  warranty_number: String
+  warranty_expired_date: DateTime
+  status: String!
+  price: Float
+  sku: String!
 }
 
 input CreateCategoryInput {

@@ -17,6 +17,7 @@ import { MaterialTransaction, MaterialTransactionSchema, ToolTransaction, ToolTr
 import { ToolTransactionService } from "./transaction/tool_transaction.service";
 import { MaterialTransactionService } from "./transaction/material_transaction.service";
 import { TransactionResolver } from "./transaction/transaction.resolver";
+import { ToolService } from "./tool/tool.service";
 
 @Module({
   imports: [
@@ -37,7 +38,7 @@ import { TransactionResolver } from "./transaction/transaction.resolver";
   providers: [WarehouseResolver , WarehouseService,
     InventoryResolver, UnitMeasureService, MerkService,
     MaterialResolver, MaterialService,
-    ToolSkuResolver, ToolSkuService,
+    ToolSkuResolver, ToolSkuService, ToolService,
     TransactionResolver, MaterialTransactionService, ToolTransactionService
   ],
   exports: [WarehouseService]

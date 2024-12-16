@@ -15,8 +15,13 @@ export class MaterialService {
   ) { }
 
   async generateNewId(): Promise<string> {
-    let currentDateToString = Date.now().toString()
-    return `MT${currentDateToString}`;
+    let currentDateToString: string;
+    let newId: string;
+    do {
+      currentDateToString = Date.now().toString()
+      newId = `MT${currentDateToString}`;
+    } while (await this.materialModel.exists({ id: newId }))
+    return newId;
   }
 
   async findAll(): Promise<Material[]> {

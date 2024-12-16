@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { ClientSession, Model } from 'mongoose';
 import { Material, Merk, Sku, Tool, UnitMeasure } from '../schema/inventory.schema';
 import { CreateMaterialInput, UpdateMaterialInput } from '../types/material.types';
 import { CreateSkuInput, UpdateSkuInput } from '../types/inventory_category.types';
@@ -16,6 +16,16 @@ export class ToolService {
     @InjectModel(CategoryData.name) private categoryDataModel: Model<CategoryData>,
   ) { }
 
+  async generateNewId(): Promise<string> {
+    let currentDateToString: string;
+    let newId: string;
+    do {
+      currentDateToString = Date.now().toString()
+      newId = `TL${currentDateToString}`;
+    } while (await this.toolModel.exists({ id: newId }))
+    return newId;
+  }
+
   async findAll(sku?: string): Promise<Tool[]> {
     let filter = {}
     if (sku) {
@@ -30,7 +40,7 @@ export class ToolService {
     return tool;
   }
 
-  async create(createToolInput: CreateToolInput) {
+  async create(createToolInput: CreateToolInput, session: ClientSession): Promise<string> {
     const { sku, status } = createToolInput;
 
     const targetSku = await this.skuModel.findById(sku).exec();
@@ -39,21 +49,25 @@ export class ToolService {
     let targetStatus = await this.categoryDataModel.findById(status).exec();
     if (!targetStatus) throw new NotFoundException(`Status tidak ditemukan`);
 
-    const newTool = new this.toolModel(createToolInput);
-    await newTool.save();
+    let newId = await this.generateNewId();
+
+    const newTool = new this.toolModel({ ...createToolInput, id: newId });
+    await newTool.save({ session });
+
+    return newTool._id;
   }
 
   async update(id: string, updateToolInput: UpdateToolInput) {
     const { sku, status } = updateToolInput;
 
-    if(sku) {
+    if (sku) {
       const targetSku = await this.skuModel.findById(sku).exec();
       if (!targetSku) throw new NotFoundException(`Sku tidak ditemukan`);
     }
 
-    if(status) {
+    if (status) {
       let targetStatus = await this.categoryDataModel.findById(status).exec();
-      if (!targetStatus) throw new NotFoundException(`Status tidak ditemukan`);      
+      if (!targetStatus) throw new NotFoundException(`Status tidak ditemukan`);
     }
 
     await this.toolModel.findByIdAndUpdate(id, updateToolInput);

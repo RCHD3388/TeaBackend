@@ -1,5 +1,6 @@
 import { Field, InputType } from "@nestjs/graphql";
 import { ArrayNotEmpty, IsArray, isNotEmpty, IsNotEmpty, IsNumber, IsOptional, IsString, Min, ValidateNested } from "class-validator";
+import { CreateToolInput } from "./tool.types";
 
 @InputType()
 export class MaterialDetailInput {
@@ -38,18 +39,19 @@ export class CreateMaterialTransactionInput {
   @IsNotEmpty()
   warehouse_from?: string;
 
-  @Field(() => String)
-  @IsString()
-  @IsNotEmpty({ message: 'Transaction Category tidak boleh kosong' })
+  // @Field(() => String)
+  // @IsString()
+  // @IsNotEmpty({ message: 'Transaction Category tidak boleh kosong' })
   transaction_category: String;
 }
 
+
 @InputType()
 export class CreateToolTransactionInput {
-  @Field(() => String)
+  @Field(() => [String])
   @IsString()
   @IsNotEmpty({ message: 'Tool tidak boleh kosong' })
-  tool: string;
+  tool: string[];
 
   @Field(() => String, { nullable: true })
   @IsString()
@@ -63,8 +65,24 @@ export class CreateToolTransactionInput {
   @IsNotEmpty()
   warehouse_from?: string;
 
-  @Field(() => String)
+  // @Field(() => String)
+  // @IsString()
+  // @IsNotEmpty({ message: 'Transaction Category tidak boleh kosong' })
+  transaction_category: String;
+}
+
+@InputType()
+export class AddOnlyToolTransactionInput {
+  @Field(() => [CreateToolInput])
+  @IsArray()
+  @IsNotEmpty({ message: 'Tool tidak boleh kosong' })
+  tool: CreateToolInput[];
+
+  @Field(() => String, { nullable: true })
   @IsString()
-  @IsNotEmpty({ message: 'Transaction Category tidak boleh kosong' })
+  @IsOptional()
+  @IsNotEmpty()
+  warehouse_to?: string;
+
   transaction_category: String;
 }
