@@ -256,7 +256,7 @@ type Mutation {
   updateMaterial(id: String!, updateMaterialInput: UpdateMaterialInput!): Material!
   createSku(createSkuInput: CreateSkuInput!): Sku!
   updateSku(id: String!, updateSkuInput: UpdateSkuInput!): Sku!
-  addInventoryMaterial(addInventoryMaterialInput: AddInventoryMaterialInput!): Boolean!
+  addInventoryMaterial(createMaterialTransactionInput: CreateMaterialTransactionInput!): Boolean!
   createCategory(createCategoryInput: CreateCategoryInput!): CategoryData!
   updateCategory(id: String!, updateCategoryInput: UpdateCategoryInput!): CategoryData!
   deleteCategory(id: String!): CategoryData!
@@ -407,15 +407,17 @@ input UpdateSkuInput {
   item_category: String!
 }
 
-input AddInventoryMaterialInput {
+input CreateMaterialTransactionInput {
   materials: [MaterialDetailInput!]!
-  warehouse: String!
+  warehouse_to: String
+  warehouse_from: String
+  transaction_category: String!
 }
 
 input MaterialDetailInput {
   material: String!
-  price: Float!
-  quantity: Float!
+  qty: Float!
+  price: Float
 }
 
 input CreateCategoryInput {

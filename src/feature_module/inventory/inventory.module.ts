@@ -14,7 +14,6 @@ import { ToolSkuResolver } from "./tool/toolsku.resolver";
 import { ToolSkuService } from "./tool/toolsku.service";
 import { CategoryData, CategoryDataSchema, TransactionCategory, TransactionCategorySchema } from "../category/schema/category.schema";
 import { MaterialTransaction, MaterialTransactionSchema, ToolTransaction, ToolTransactionSchema } from "./schema/inventory_trans.schema";
-import { MasterTransactionService } from "./transaction/master_transaction.service";
 import { ToolTransactionService } from "./transaction/tool_transaction.service";
 import { MaterialTransactionService } from "./transaction/material_transaction.service";
 import { TransactionResolver } from "./transaction/transaction.resolver";
@@ -39,7 +38,7 @@ import { TransactionResolver } from "./transaction/transaction.resolver";
     InventoryResolver, UnitMeasureService, MerkService,
     MaterialResolver, MaterialService,
     ToolSkuResolver, ToolSkuService,
-    TransactionResolver, MasterTransactionService, MaterialTransactionService, ToolTransactionService
+    TransactionResolver, MaterialTransactionService, ToolTransactionService
   ],
   exports: [WarehouseService]
 })

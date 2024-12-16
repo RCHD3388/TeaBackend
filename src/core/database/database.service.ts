@@ -19,9 +19,8 @@ export class DatabaseService {
     const name = configService.get<string>("database.name");
 
     let uri = url.replace("<USERNAME>", username).replace("<PASSWORD>", password).replace("<DATABASE>", name);
-
     return {
-      uri 
+      uri
     };
   }
   checkConnection(){  

@@ -5,23 +5,23 @@ import { Sku } from '../schema/inventory.schema';
 import { RolesGuard } from 'src/common/guard/roles.guard';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { CreateSkuInput, UpdateSkuInput } from '../types/inventory_category.types';
-import { MasterTransactionService } from './master_transaction.service';
-import { AddInventoryMaterialInput } from '../types/inventory_trans.types';
+import { MaterialTransactionService } from './material_transaction.service';
+import { CreateMaterialTransactionInput } from '../types/inventory_trans.types';
 
 @Resolver()
 @UseGuards(AppAuthGuard)
 export class TransactionResolver {
   constructor(
-    private readonly masterTransactionService: MasterTransactionService
+    private readonly materialTransactionService: MaterialTransactionService
   ) { }
 
   @Mutation(() => Boolean)
   @UseGuards(RolesGuard)
   @Roles("owner", "admin", "staff_pembelian")
   async addInventoryMaterial(
-    @Args('addInventoryMaterialInput') addInventoryMaterialInput: AddInventoryMaterialInput
+    @Args('createMaterialTransactionInput') createMaterialTransactionInput: CreateMaterialTransactionInput
   ): Promise<Boolean> {
-    return this.masterTransactionService.addNewMaterial(addInventoryMaterialInput);
+    return this.materialTransactionService.create(createMaterialTransactionInput);
   }
 
   // @Query(() => Sku, { name: 'getSkuById' })

@@ -1,8 +1,8 @@
 import { Field, InputType } from "@nestjs/graphql";
-import { IsArray, isNotEmpty, IsNotEmpty, IsNumber, IsOptional, IsString, Min } from "class-validator";
+import { ArrayNotEmpty, IsArray, isNotEmpty, IsNotEmpty, IsNumber, IsOptional, IsString, Min, ValidateNested } from "class-validator";
 
 @InputType()
-export class CreateMaterialTransactionInput {
+export class MaterialDetailInput {
   @Field(() => String)
   @IsString()
   @IsNotEmpty({ message: 'Material tidak boleh kosong' })
@@ -17,6 +17,14 @@ export class CreateMaterialTransactionInput {
   @IsNumber()
   @IsOptional()
   price?: number;
+}
+
+@InputType()
+export class CreateMaterialTransactionInput {
+  @Field(() => [MaterialDetailInput])
+  @IsArray()
+  @ArrayNotEmpty()
+  materials: MaterialDetailInput[];
 
   @Field(() => String, { nullable: true })
   @IsString()
@@ -59,37 +67,4 @@ export class CreateToolTransactionInput {
   @IsString()
   @IsNotEmpty({ message: 'Transaction Category tidak boleh kosong' })
   transaction_category: String;
-}
-
-
-@InputType()
-export class MaterialDetailInput {
-  @Field(() => String)
-  @IsString()
-  @IsNotEmpty({ message: 'Material tidak boleh kosong' })
-  material: string;
-
-  @Field(() => Number)
-  @IsNumber()
-  @Min(0, { message: 'Harga tidak boleh mines' })
-  @IsNotEmpty({ message: 'Harga tidak boleh kosong' })
-  price: number;
-
-  @Field(() => Number)
-  @IsNumber()
-  @IsNotEmpty({ message: 'Quantity tidak boleh kosong' })
-  quantity: number;
-}
-
-@InputType()
-export class AddInventoryMaterialInput {
-  @Field(() => [MaterialDetailInput])
-  @IsArray()
-  @IsNotEmpty({ message: 'Material tidak boleh kosong' })
-  materials: MaterialDetailInput[];
-
-  @Field(() => String)
-  @IsString()
-  @IsNotEmpty({ message: 'Warehouse tidak boleh kosong' })
-  warehouse: string;
 }
