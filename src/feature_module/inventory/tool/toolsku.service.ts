@@ -4,7 +4,7 @@ import { Model } from 'mongoose';
 import { Material, Merk, Sku, UnitMeasure } from '../schema/inventory.schema';
 import { CreateMaterialInput, UpdateMaterialInput } from '../types/material.types';
 import { CreateSkuInput, UpdateSkuInput } from '../types/inventory_category.types';
-import { CategoryData } from 'src/feature_module/category/schema/category.schema';
+import { CategoryData, CategoryType } from 'src/feature_module/category/schema/category.schema';
 
 @Injectable()
 export class ToolSkuService {
@@ -33,7 +33,7 @@ export class ToolSkuService {
     let targetMerk = await this.merkModel.findById(merk).exec();
     if (!targetMerk) throw new NotFoundException(`Merk tidak ditemukan`);
 
-    let targetItemCategory = await this.categoryDataModel.findById(item_category).exec();
+    let targetItemCategory = await this.categoryDataModel.findOne({_id: item_category, type: CategoryType.ITEM}).exec();
     if (!targetItemCategory) throw new NotFoundException(`Kategori item tidak ditemukan`);
 
     const newSku = new this.skuModel(CreateSkuInput);
@@ -53,7 +53,7 @@ export class ToolSkuService {
 
     // check if item category exist
     if (item_category) {
-      let targetItemCategory = await this.categoryDataModel.findById(item_category).exec();
+      let targetItemCategory = await this.categoryDataModel.findOne({_id: item_category, type: CategoryType.ITEM}).exec();
       if (!targetItemCategory) throw new NotFoundException(`Kategori item tidak ditemukan`);
     }
 

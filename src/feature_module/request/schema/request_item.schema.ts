@@ -6,30 +6,7 @@ import { Material, Tool } from "src/feature_module/inventory/schema/inventory.sc
 import { Warehouse } from "src/feature_module/inventory/schema/warehouse.schema";
 import { Employee } from "src/feature_module/person/schema/employee.schema";
 import { Project } from "src/feature_module/project/schema/project.schema";
-
-export enum RequestItemType {
-  PEMINJAMAN = 'peminjaman',
-  PENGEMBALIAN = 'pengembalian',
-}
-
-export enum RequestItem_ItemType {
-  MATERIAL = 'Material',
-  TOOL = 'Tool',
-}
-
-export const MaterialOrTool = createUnionType({
-  name: "MaterialOrTool",
-  types: () => [Material, Tool] as const,
-  resolveType(value) {
-    if (value.name) {
-      return Material;
-    }
-    if (value.tool_name) {
-      return Tool;
-    }
-    return null;
-  },
-});
+import { MaterialOrTool, RequestItem_ItemType, RequestItemType, RequestStatus } from "../types/request.types";
 
 @ObjectType()
 @Schema()
@@ -84,9 +61,9 @@ export class RequestItemHeader extends Document {
   @Prop({ type: [Types.ObjectId], required: true, ref: "Warehouse" })
   requested_to: String[] | Warehouse[];
 
-  @Field(() => CategoryData)
-  @Prop({ type: Types.ObjectId, required: true, ref: "CategoryData" })
-  status: String | CategoryData;
+  @Field(() => String)
+  @Prop({ type: String, required: true, enum: RequestStatus })
+  status: String;
 
   @Field(() => Date, { nullable: true })
   @Prop({ type: Date })

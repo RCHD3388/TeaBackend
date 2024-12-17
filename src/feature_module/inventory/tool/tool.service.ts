@@ -4,7 +4,7 @@ import { ClientSession, Model } from 'mongoose';
 import { Material, Merk, Sku, Tool, UnitMeasure } from '../schema/inventory.schema';
 import { CreateMaterialInput, UpdateMaterialInput } from '../types/material.types';
 import { CreateSkuInput, UpdateSkuInput } from '../types/inventory_category.types';
-import { CategoryData } from 'src/feature_module/category/schema/category.schema';
+import { CategoryData, CategoryType } from 'src/feature_module/category/schema/category.schema';
 import { CreateToolInput, UpdateToolInput } from '../types/tool.types';
 import { stat } from 'fs';
 
@@ -46,7 +46,7 @@ export class ToolService {
     const targetSku = await this.skuModel.findById(sku).exec();
     if (!targetSku) throw new NotFoundException(`Sku tidak ditemukan`);
 
-    let targetStatus = await this.categoryDataModel.findById(status).exec();
+    let targetStatus = await this.categoryDataModel.findOne({_id: status, type: CategoryType.TOOL_STATUS}).exec();
     if (!targetStatus) throw new NotFoundException(`Status tidak ditemukan`);
 
     let newId = await this.generateNewId();
@@ -66,7 +66,7 @@ export class ToolService {
     }
 
     if (status) {
-      let targetStatus = await this.categoryDataModel.findById(status).exec();
+      let targetStatus = await this.categoryDataModel.findOne({_id: status, type: CategoryType.TOOL_STATUS}).exec();
       if (!targetStatus) throw new NotFoundException(`Status tidak ditemukan`);
     }
 

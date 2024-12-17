@@ -5,12 +5,7 @@ import { CategoryData } from "src/feature_module/category/schema/category.schema
 import { Warehouse } from "src/feature_module/inventory/schema/warehouse.schema";
 import { Employee } from "src/feature_module/person/schema/employee.schema";
 import { Supplier } from "src/feature_module/person/schema/supplier.schema";
-import { MaterialOrTool, RequestItem_ItemType } from "src/feature_module/request/schema/request_item.schema";
-
-export enum PODetailStatus {
-  PROCESSED = 'processed',
-  UNPROCESSED = 'unprocessed',
-}
+import { MaterialOrTool, RequestItem_ItemType, RequestStatus } from "src/feature_module/request/types/request.types";
 
 @ObjectType()
 @Schema()
@@ -31,8 +26,8 @@ export class PurchaseOrderDetail {
   quantity: number;
 
   @Field(() => String)
-  @Prop({ type: String, required: true, enum: PODetailStatus })
-  status: string;
+  @Prop({ type: String, required: true, enum: RequestStatus })
+  status: String;
 }
 
 @ObjectType()
@@ -61,9 +56,9 @@ export class PurchaseOrder extends Document {
   @Prop({ type: Date, required: true })
   date: Date;
 
-  @Field(() => CategoryData)
-  @Prop({ type: Types.ObjectId, required: true, ref: "CategoryData" })
-  status: String | CategoryData;
+  @Field(() => String)
+  @Prop({ type: String, required: true, enum: RequestStatus })
+  status: String;
 
   @Field(() => Employee, { nullable: true })
   @Prop({ type: Types.ObjectId, ref: 'Employee' })
@@ -123,8 +118,8 @@ export class PurchaseTransaction extends Document {
   @Prop({ type: Types.ObjectId, required: true, ref: 'Employee' })
   purchasing_staff: string | Employee;
 
-  @Field(() => String, {nullable: true})
-  @Prop({ type: String, default : "" })
+  @Field(() => String, { nullable: true })
+  @Prop({ type: String, default: "" })
   description?: string;
 
   @Field(() => Date)
@@ -144,7 +139,7 @@ export class PurchaseTransaction extends Document {
   purchase_order: string | PurchaseOrder;
 
   @Field(() => [PurchaseTransactionDetail])
-  @Prop({ type: [PurchaseTransactionDetail], required: true})
+  @Prop({ type: [PurchaseTransactionDetail], required: true })
   purchase_transaction_detail: PurchaseTransactionDetail[];
 }
 

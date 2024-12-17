@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Material, Merk, Sku, UnitMeasure } from '../schema/inventory.schema';
 import { CreateMaterialInput, UpdateMaterialInput } from '../types/material.types';
-import { CategoryData } from './../../../feature_module/category/schema/category.schema';
+import { CategoryData, CategoryType } from './../../../feature_module/category/schema/category.schema';
 
 @Injectable()
 export class MaterialService {
@@ -51,7 +51,7 @@ export class MaterialService {
     if (!targetMinimumUnitMeasure) throw new NotFoundException(`Satuan unit terkecil tidak ditemukan`);
 
     // check item category exist
-    let targetItemCategory = await this.categoryDataModel.findById(item_category).exec();
+    let targetItemCategory = await this.categoryDataModel.findOne({ _id: item_category, type: CategoryType.ITEM }).exec();
     if (!targetItemCategory) throw new NotFoundException(`Kategori item tidak ditemukan`);
 
     // check if already exist
@@ -94,7 +94,7 @@ export class MaterialService {
 
     // check item category exist
     if (item_category) {
-      let targetItemCategory = await this.categoryDataModel.findById(item_category).exec();
+      let targetItemCategory = await this.categoryDataModel.findOne({ _id: item_category, type: CategoryType.ITEM }).exec();
       if (!targetItemCategory) throw new NotFoundException(`Kategori item tidak ditemukan`);
     }
 
