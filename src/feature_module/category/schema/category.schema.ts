@@ -8,7 +8,6 @@ export enum CategoryType {
   PRIORITY="prioritas",
   COMPLETION_STATUS="status_penyelesaian",
   ITEM="kategori_item",
-  REQUEST_STATUS="status_permintaan",
   TOOL_STATUS="status_alat"
 }
 

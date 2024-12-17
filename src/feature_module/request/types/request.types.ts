@@ -2,8 +2,8 @@ import { createUnionType } from "@nestjs/graphql";
 import { Material, Tool } from "src/feature_module/inventory/schema/inventory.schema";
 
 export enum RequestItemType {
-  PEMINJAMAN = 'peminjaman',
-  PENGEMBALIAN = 'pengembalian',
+  PEMINJAMAN = 'Peminjaman',
+  PENGEMBALIAN = 'Pengembalian',
 }
 
 export enum RequestItem_ItemType {
