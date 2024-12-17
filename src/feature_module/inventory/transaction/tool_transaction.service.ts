@@ -11,7 +11,6 @@ import { ToolService } from '../tool/tool.service';
 @Injectable()
 export class ToolTransactionService {
   constructor(
-    @InjectConnection() private readonly connection: Connection,
     @InjectModel(Tool.name) private toolModel: Model<Tool>,
     @InjectModel(ToolTransaction.name) private toolTransactionModel: Model<ToolTransaction>,
     @InjectModel(TransactionCategory.name) private transactionCategoryModel: Model<TransactionCategory>,
@@ -51,12 +50,13 @@ export class ToolTransactionService {
 
     return populatedData
   }
-  async create(createToolTransactionInput: CreateToolTransactionInput): Promise<Boolean> {
+  async create(
+    createToolTransactionInput: CreateToolTransactionInput,
+    session: ClientSession
+  ): Promise<Boolean> {
     let { warehouse_to, warehouse_from, transaction_category, tool } = createToolTransactionInput
-    const session = await this.connection.startSession();
-
+    
     try {
-      session.startTransaction();
 
       // START TRANSACTION
       // check transaction category exist
@@ -137,23 +137,19 @@ export class ToolTransactionService {
         await targetTransactionCategory.save({ session });
       }
 
-      await session.commitTransaction();
       return true
     } catch (error) {
-      await session.abortTransaction();
       throw error;
-    } finally {
-      session.endSession();
-    }
+    } 
   }
 
-  async addOnlyTool(addOnlyToolTransactionInput: AddOnlyToolTransactionInput): Promise<Boolean> {
+  async addOnlyTool(
+    addOnlyToolTransactionInput: AddOnlyToolTransactionInput,
+    session: ClientSession
+  ): Promise<Boolean> {
     let { warehouse_to, tool, transaction_category } = addOnlyToolTransactionInput
-    const session = await this.connection.startSession();
-
+    
     try {
-      session.startTransaction();
-
       // START TRANSACTION
       // check transaction category exist
       let targetTransactionCategory = await this.transactionCategoryModel.findOne({ id: transaction_category }).session(session);
@@ -189,14 +185,9 @@ export class ToolTransactionService {
         await targetTransactionCategory.save({ session });
       }
 
-      await session.commitTransaction();
-
       return true
     } catch (error) {
-      await session.abortTransaction();
       throw error;
-    } finally {
-      session.endSession();
-    }
+    } 
   }
 }

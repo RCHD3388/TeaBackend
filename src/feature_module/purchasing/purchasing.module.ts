@@ -2,14 +2,14 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { JwtModule } from '@nestjs/jwt';
 import { Employee, EmployeeSchema } from '../person/schema/employee.schema';
-import { ProjectCostResolver } from './project_cost/request_cost.resolver';
-import { ProjectCostService } from './project_cost/request_cost.service';
+import { PurchasingService } from './purchasing.service';
+import { PurchasingResolver } from './purchasing.resolver';
 
 @Module({
   imports: [
     MongooseModule.forFeature([]),
   ],
-  providers: [ProjectCostResolver, ProjectCostService],
+  providers: [PurchasingResolver, PurchasingService],
   exports: []
 })
-export class RequestModule {}
+export class PurchasingModule {}

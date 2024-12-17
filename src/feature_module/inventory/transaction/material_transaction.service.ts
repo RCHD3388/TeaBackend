@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
-import { Connection, Model, startSession } from 'mongoose';
+import { ClientSession, Connection, Model, startSession } from 'mongoose';
 import { TransactionCategory } from 'src/feature_module/category/schema/category.schema';
 import { Warehouse } from '../schema/warehouse.schema';
 import { MaterialTransaction } from '../schema/inventory_trans.schema';
@@ -10,7 +10,6 @@ import { CreateMaterialTransactionInput } from '../types/inventory_trans.types';
 @Injectable()
 export class MaterialTransactionService {
   constructor(
-    @InjectConnection() private readonly connection: Connection,
     @InjectModel(Material.name) private materialModel: Model<Material>,
     @InjectModel(MaterialTransaction.name) private materialTransactionModel: Model<MaterialTransaction>,
     @InjectModel(TransactionCategory.name) private transactionCategoryModel: Model<TransactionCategory>,
@@ -69,14 +68,13 @@ export class MaterialTransactionService {
     return { newRemainItems, newPrice }
   }
 
-  async create(createMaterialTransactionInput: CreateMaterialTransactionInput): Promise<Boolean> {
+  async create(
+    createMaterialTransactionInput: CreateMaterialTransactionInput,
+    session: ClientSession
+  ): Promise<Boolean> {
     let { transaction_category, warehouse_from, warehouse_to, materials } = createMaterialTransactionInput
 
-    const session = await this.connection.startSession();
-
     try {
-      session.startTransaction();
-
       // START TRANSACTION
 
       // check transaction category exist
@@ -177,14 +175,9 @@ export class MaterialTransactionService {
 
       // ======================= PROSES END =======================
 
-      await session.commitTransaction();
-
       return true
     } catch (error) {
-      await session.abortTransaction();
       throw error;
-    } finally {
-      session.endSession();
-    }
+    } 
   }
 }

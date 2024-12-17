@@ -13,6 +13,7 @@ import { createGraphqlConfig } from './common/configs/graphql.config';
 import { CategoryModule } from './feature_module/category/category.module';
 import { InventoryModule } from './feature_module/inventory/inventory.module';
 import { RequestModule } from './feature_module/request/request.module';
+import { PurchasingModule } from './feature_module/purchasing/purchasing.module';
 
 @Module({
   imports: [
@@ -29,7 +30,8 @@ import { RequestModule } from './feature_module/request/request.module';
     PersonModule,
     CategoryModule,
     InventoryModule,
-    RequestModule
+    RequestModule,
+    PurchasingModule
   ],
   providers: [AppResolver],
 })

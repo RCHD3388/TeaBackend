@@ -13,11 +13,14 @@ import { ToolTransactionService } from './tool_transaction.service';
 import { CurrentUser } from 'src/common/decorators/auth_user.decorator';
 import { User } from 'src/feature_module/user/schema/user.schema';
 import { WarehouseService } from '../warehouse.service';
+import { Connection } from 'mongoose';
+import { InjectConnection } from '@nestjs/mongoose';
 
 @Resolver()
 @UseGuards(AppAuthGuard)
 export class TransactionResolver {
   constructor(
+    @InjectConnection() private readonly connection: Connection,
     private readonly materialTransactionService: MaterialTransactionService,
     private readonly toolTransactionService: ToolTransactionService,
     private readonly warehouseService: WarehouseService
@@ -30,7 +33,22 @@ export class TransactionResolver {
     @Args('createMaterialTransactionInput') createMaterialTransactionInput: CreateMaterialTransactionInput
   ): Promise<Boolean> {
     createMaterialTransactionInput.transaction_category = "ADD";
-    return this.materialTransactionService.create(createMaterialTransactionInput);
+    
+    let session = await this.connection.startSession();
+
+    try {
+      session.startTransaction();
+
+      let return_value = await this.materialTransactionService.create(createMaterialTransactionInput, session);
+      
+      await session.commitTransaction();
+      return return_value
+    } catch (error) {
+      await session.abortTransaction();
+      throw error
+    } finally {
+      session.endSession();
+    }
   }
 
   @Query(() => [MaterialTransaction], { name: 'getWarehouseMaterials' })
@@ -52,7 +70,23 @@ export class TransactionResolver {
     @Args('addOnlyToolTransactionInput') addOnlyToolTransactionInput: AddOnlyToolTransactionInput
   ): Promise<Boolean> {
     addOnlyToolTransactionInput.transaction_category = "ADD";
-    return this.toolTransactionService.addOnlyTool(addOnlyToolTransactionInput);
+
+    const session = await this.connection.startSession();
+
+    try {
+      session.startTransaction();
+
+      let return_value = this.toolTransactionService.addOnlyTool(addOnlyToolTransactionInput, session);
+      
+      await session.commitTransaction();
+      return return_value
+    } catch (error) {
+      await session.abortTransaction();
+      throw error
+    } finally {
+      await session.endSession();
+    }
+
   }
 
   @Query(() => [ToolTransaction], { name: 'getWarehouseTools' })

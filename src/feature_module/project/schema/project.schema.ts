@@ -3,7 +3,11 @@ import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 import { CategoryData } from '../../category/schema/category.schema';
 import { Employee } from '../../person/schema/employee.schema';
+import { RequestCost } from 'src/feature_module/request/schema/request_cost.schema';
+import { MaterialTransaction, ToolTransaction } from 'src/feature_module/inventory/schema/inventory_trans.schema';
+import { RequestProjectClosing } from 'src/feature_module/request/schema/request_closing.schema';
 
+// ===== ATTENDANCE MODULE START =====
 @ObjectType()
 @Schema()
 export class AttendanceDetail {
@@ -20,48 +24,70 @@ export class AttendanceDetail {
   check_out: boolean;
 
   @Field(() => String)
-  @Prop({ type: String, required: true,  default: "" })
+  @Prop({ type: String, default: "" })
   note: string;
 }
 @ObjectType()
 @Schema()
-export class Attendance extends Document {
+export class Attendance {
   @Field(() => Date)
   @Prop({ type: Date, required: true })
   date: Date;
 
   @Field(() => String)
-  @Prop({ type: String, required: true })
+  @Prop({ type: String, default: "" })
   description: string;
 
-  @Field(() => Employee)
-  @Prop({ type: Types.ObjectId, required: true })
-  created_by: string | Employee;
-
   @Field(() => [AttendanceDetail])
-  @Prop({ type: [Types.ObjectId], required: true, ref: "AttendanceDetail" })
+  @Prop({ type: [AttendanceDetail], required: true })
   attendance_detail: string[] | AttendanceDetail[];
 }
+@ObjectType()
+@Schema()
+export class AttendanceModule {
+  @Field(() => Date)
+  @Prop({ type: Date, required: true })
+  start_date: Date;
 
+  @Field(() => Date)
+  @Prop({ type: Date, required: true })  
+  end_date: Date;
+
+  @Field(() => Boolean)
+  @Prop({ type: Boolean, default: true })
+  submit_status: Boolean;
+
+  @Field(() => [Attendance])
+  @Prop({ type: [Attendance], required: true})
+  attendances: string[] | Attendance[];
+}
+// ===== ATTENDANCE MODULE END =====
+
+// ===== PROJECT CLOSING START =====
 @ObjectType()
 @Schema({ timestamps: true })
 export class ProjectClosing {
-  @Field(() => Employee)
-  @Prop({ type: Types.ObjectId, required: true, ref: "Employee" })
-  closed_by: string | Employee;
-
   @Field(() => String, { nullable: true })
   @Prop({ type: String, required: true, default: "" })
   note: string;
 
-  @Field(() => CategoryData)
-  @Prop({ type: Types.ObjectId, required: true, ref: "CategoryData" })
-  status: String | CategoryData;
-
   @Field(() => String, { nullable: true })
   @Prop({ type: String, required: true, default: "" })
   document: string;
+
+  @Field(() => [MaterialTransaction])
+  @Prop({ type: [Types.ObjectId], required: true, ref: "MaterialTransaction" })
+  material_left: String[] | MaterialTransaction[];
+
+  @Field(() => [ToolTransaction])
+  @Prop({ type: [Types.ObjectId], required: true, ref: "ToolTransaction" })
+  tool_left: String[] | ToolTransaction[];
+
+  @Field(() => RequestProjectClosing)
+  @Prop({ type: Types.ObjectId, required: true, ref: "RequestProjectClosing" })
+  request_project_closing: String | RequestProjectClosing;
 }
+// ===== PROJECT CLOSING END =====
 
 @ObjectType()
 @Schema({ timestamps: true })
@@ -85,11 +111,11 @@ export class Project extends Document {
   @Field(() => Date)
   createdAt: Date
 
-  @Field(() => Date, {nullable: true})
+  @Field(() => Date, { nullable: true })
   @Prop({ type: Date })
   finished_at?: Date;
 
-  @Field(() => Date, {nullable: true})
+  @Field(() => Date, { nullable: true })
   @Prop({ type: Date, default: null })
   target_date?: Date;
 
@@ -109,9 +135,9 @@ export class Project extends Document {
   @Prop({ type: [Types.ObjectId], required: true, ref: "Employee" })
   worker: String[];
 
-  @Field(() => [Attendance])
-  @Prop({ type: [Types.ObjectId], required: true, ref: "Attendance" })
-  attendace: string[] | Attendance[];
+  @Field(() => [AttendanceModule])
+  @Prop({ type: [Types.ObjectId], required: true, ref: "AttendanceModule" })
+  attendace: string[] | AttendanceModule[];
 
   @Field(() => ProjectClosing, { nullable: true })
   @Prop({ type: ProjectClosing })
@@ -119,3 +145,46 @@ export class Project extends Document {
 }
 
 export const ProjectSchema = SchemaFactory.createForClass(Project);
+
+// PROJECT COST LOG
+
+@ObjectType()
+@Schema({ timestamps: true })
+export class ProjectCostLog extends Document {
+  @Field(() => String)
+  _id: string;
+
+  @Field(() => String)
+  @Prop({ type: String, required: true })
+  title: string;
+
+  @Field(() => String, { nullable: true })
+  @Prop({ type: String, default: "" })
+  description?: string;
+
+  @Field(() => Date)
+  @Prop({ type: Date, required: true })
+  requested_at: Date;
+
+  @Field(() => Number)
+  @Prop({ type: Number, required: true })
+  price: Number;
+
+  @Field(() => CategoryData)
+  @Prop({ type: Types.ObjectId, required: true, ref: "CategoryData" })
+  category: String | CategoryData;
+
+  @Field(() => Employee)
+  @Prop({ type: Types.ObjectId, required: true, ref: "Employee" })
+  created_by: String | Employee;
+
+  @Field(() => Project)
+  @Prop({ type: Types.ObjectId, ref: "Employee" })
+  project: String | Project;
+
+  @Field(() => RequestCost)
+  @Prop({ type: Types.ObjectId, ref: "RequestCost" })
+  request_cost: String | RequestCost;
+}
+
+export const ProjectCostLogSchema = SchemaFactory.createForClass(ProjectCostLog);
