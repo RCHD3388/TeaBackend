@@ -67,6 +67,10 @@ export class AttendanceModule {
 @ObjectType()
 @Schema({ timestamps: true })
 export class ProjectClosing {
+  @Field(() => Employee)
+  @Prop({ type: Types.ObjectId, required: true, ref: "Employee" })
+  closed_by: String | Employee;
+
   @Field(() => String, { nullable: true })
   @Prop({ type: String, required: true, default: "" })
   note: string;
@@ -164,7 +168,7 @@ export class ProjectCostLog extends Document {
 
   @Field(() => Date)
   @Prop({ type: Date, required: true })
-  requested_at: Date;
+  date: Date;
 
   @Field(() => Number)
   @Prop({ type: Number, required: true })

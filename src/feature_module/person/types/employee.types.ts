@@ -138,25 +138,24 @@ export class CreateEmployeeSkillInput {
   @IsNotEmpty({ message: 'Name should not be empty' })
   name: string;
 
-  @Field(() => String)
+  @Field(() => String, {nullable: true})
   @IsString()
-  @IsNotEmpty({ message: 'Description should not be empty' })
-  description: string;
+  @IsOptional()
+  description?: string;
 }
 
 @InputType()
 export class UpdateEmployeeSkillInput {
-  @Field(() => String)
+  @Field(() => String, {nullable: true})
   @IsString()
   @IsOptional()
   @IsNotEmpty({ message: 'Name should not be empty' })
   name: string;
 
-  @Field(() => String)
+  @Field(() => String, {nullable: true})
   @IsString()
   @IsOptional()
-  @IsNotEmpty({ message: 'Description should not be empty' })
-  description: string;
+  description?: string;
 }
 
 @InputType()

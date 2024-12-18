@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { UserService } from '../user.service';
+import { Employee } from 'src/feature_module/person/schema/employee.schema';
+import { AuthenticationError } from '@nestjs/apollo';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -17,6 +19,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
   async validate(payload: any) {
     const user = await this.userService.findOneUser({id: payload.id});
+    if(user.status  == "Inactive") throw new AuthenticationError("User tidak ditemukan")
     return user;
   }
 }

@@ -57,9 +57,9 @@ export class EmployeeSkill extends Document {
   @Prop({ type: String, required: true })
   name: string;
 
-  @Field(() => String)
-  @Prop({ type: String, required: true })
-  description: string;
+  @Field(() => String, {nullable: true})
+  @Prop({ type: String })
+  description?: string;
 }
 export const EmployeeSkillSchema = SchemaFactory.createForClass(EmployeeSkill)
 

@@ -157,6 +157,7 @@ type AttendanceModule {
 }
 
 type ProjectClosing {
+  closed_by: Employee!
   note: String
   document: String
   material_left: [MaterialTransaction!]!
@@ -196,7 +197,7 @@ type EmployeeRole {
 type EmployeeSkill {
   _id: String!
   name: String!
-  description: String!
+  description: String
 }
 
 type Employee {
@@ -262,6 +263,7 @@ type Query {
   getWarehouseMaterials(warehouse_id: String!): [MaterialTransaction!]!
   getWarehouseTools(warehouse_id: String!): [ToolTransaction!]!
   getCategories(categoryFilter: CategoryFilter): [CategoryData!]!
+  findAllRequestCosts(projectId: String): [RequestCost!]!
 }
 
 input EmployeeFilter {
@@ -307,6 +309,8 @@ type Mutation {
   createCategory(createCategoryInput: CreateCategoryInput!): CategoryData!
   updateCategory(id: String!, updateCategoryInput: UpdateCategoryInput!): CategoryData!
   deleteCategory(id: String!): CategoryData!
+  createRequestCost(createRequestCostInput: CreateRequestCostInput!): RequestCost!
+  updateRequestCost(id: String!, updateRequestCostStatusInput: UpdateRequestCostStatusInput!): RequestCost!
 }
 
 input LoginInput {
@@ -375,7 +379,7 @@ input UpdateEmployeeInput {
 
 input CreateEmployeeSkillInput {
   name: String!
-  description: String!
+  description: String
 }
 
 input CreateSupplierInput {
@@ -489,4 +493,16 @@ input CreateCategoryInput {
 input UpdateCategoryInput {
   name: String
   description: String
+}
+
+input CreateRequestCostInput {
+  title: String!
+  description: String
+  project_cost_category: String!
+  requested_from: String!
+  price: Float!
+}
+
+input UpdateRequestCostStatusInput {
+  status: String!
 }

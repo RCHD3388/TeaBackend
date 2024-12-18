@@ -32,14 +32,14 @@ export class RoleSkillService {
   }
 
   async createEmployeeSkill(createEmployeeSkillInput: CreateEmployeeSkillInput): Promise<EmployeeSkill> {
-    let { name, description } = createEmployeeSkillInput
+    let { name } = createEmployeeSkillInput
     if (await this.doesSkillExist(name) == true) throw new BadRequestException(`Skill with name ${name} already exist`);
-    const newSkill = new this.employeeSkillModel({ name, description });
+    const newSkill = new this.employeeSkillModel(createEmployeeSkillInput);
     return newSkill.save();
   }
 
   async updateEmployeeSkill(id: string, updateEmployeeSkillInput: UpdateEmployeeSkillInput): Promise<EmployeeSkill> {
-    if (await this.doesSkillExist(updateEmployeeSkillInput.name, id)) {
+    if (updateEmployeeSkillInput.name && await this.doesSkillExist(updateEmployeeSkillInput.name, id)) {
       throw new BadRequestException(`Skill with name ${updateEmployeeSkillInput.name} already exist`);
     }
     let skill = await this.employeeSkillModel.findByIdAndUpdate(
