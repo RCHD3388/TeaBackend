@@ -3,7 +3,7 @@ import { ProjectResolver } from './project.resolver';
 import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from '../user/schema/user.schema';
 import { Employee, EmployeeSchema } from '../person/schema/employee.schema';
-import { Attendance, AttendanceModule, Project, ProjectCostLog, ProjectCostLogSchema, ProjectSchema } from './schema/project.schema';
+import { Attendance, AttendanceModule, AttendanceModuleSchema, Project, ProjectCostLog, ProjectCostLogSchema, ProjectSchema } from './schema/project.schema';
 import { CategoryData, CategoryDataSchema } from '../category/schema/category.schema';
 import { ProjectService } from './project.service';
 import { ProjectEmployeeService } from './project_employee.service';
@@ -22,6 +22,7 @@ import { ProjectAttendService } from './project_att_cost/project_attend.service'
       { name: Project.name, schema: ProjectSchema},
       { name: CategoryData.name, schema: CategoryDataSchema},
       { name: ProjectCostLog.name, schema: ProjectCostLogSchema},
+      { name: AttendanceModule.name, schema: AttendanceModuleSchema},
     ]),
     PersonModule,
     InventoryModule

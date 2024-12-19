@@ -6,6 +6,8 @@ import { Roles } from 'src/common/decorators/roles.decorator';
 import { CurrentUser } from 'src/common/decorators/auth_user.decorator';
 import { User } from 'src/feature_module/user/schema/user.schema';
 import { ProjectAttendService } from './project_attend.service';
+import { AttendanceModule } from '../schema/project.schema';
+import { CreateAttendanceModuleInput, UpdateAttendanceModuleInput } from '../types/project_sub.types';
 
 @Resolver()
 @UseGuards(AppAuthGuard)
@@ -14,35 +16,69 @@ export class ProjectAttendResolver {
     private readonly projectAttendService: ProjectAttendService
   ) { }
 
-  // @Mutation(() => RequestCost)
-  // @UseGuards(RolesGuard)
-  // @Roles("owner", "admin", "mandor")
-  // async createRequestCost(
-  //   @Args('createRequestCostInput') createRequestCostInput: CreateRequestCostInput,
-  //   @CurrentUser() user: User
-  // ): Promise<RequestCost> {
-  //   return this.requestCostService.createRequestCost(createRequestCostInput, user);
-  // }
+  @Mutation(() => AttendanceModule, { name: 'createAttendance' })
+  @UseGuards(RolesGuard)
+  @Roles("owner", "admin", "mandor")
+  async createAttendance(
+    @Args('createAttendanceInput') createAttendanceInput: CreateAttendanceModuleInput,
+    @CurrentUser() user: User
+  ): Promise<AttendanceModule> {
+    return this.projectAttendService.createModule(createAttendanceInput, user);
+  }
 
-  // @Query(() => [RequestCost], { name: 'findAllRequestCosts' })
-  // @UseGuards(RolesGuard)
-  // @Roles("owner", "admin", "mandor")
-  // async findAllRequestCosts(
-  //   @CurrentUser() user: User,
-  //   @Args('projectId', { nullable: true }) projectId?: string
-  // ): Promise<RequestCost[]> {
-  //   return this.requestCostService.findAll(user, projectId);
-  // }
+  @Mutation(() => AttendanceModule, { name: 'submitAttendanceModule' })
+  @UseGuards(RolesGuard)
+  @Roles("owner", "admin", "mandor")
+  async submitAttendanceModule(
+    @Args('projectId') projectId: string,
+    @Args('moduleId') moduleId: string,
+    @CurrentUser() user: User
+  ): Promise<AttendanceModule> {
+    return this.projectAttendService.submitModule(projectId, moduleId, user);
+  }
 
-  // @Mutation(() => RequestCost, { name: 'updateRequestCost' })
-  // @UseGuards(RolesGuard)
-  // @Roles("owner", "admin")
-  // async updateRequestCost(
-  //   @Args('id') id: string,
-  //   @Args('updateRequestCostStatusInput') updateRequestCostStatusInput: UpdateRequestCostStatusInput,
-  //   @CurrentUser() user: User
-  // ): Promise<RequestCost> {
-  //   return this.requestCostService.updateStatus(id, updateRequestCostStatusInput, user);
-  // }
+  @Query(() => [AttendanceModule], { name: 'findAllAttendanceModules' })
+  @UseGuards(RolesGuard)
+  @Roles("owner", "admin", "mandor")
+  async findAllAttendanceModules(
+    @Args('projectId') projectId: string,
+    @CurrentUser() user: User
+  ): Promise<AttendanceModule[]> {
+    return this.projectAttendService.findAll(projectId, user);
+  }
+
+  @Query(() => AttendanceModule, { name: 'findOneAttendanceModule' })
+  @UseGuards(RolesGuard)
+  @Roles("owner", "admin", "mandor")
+  async findOneAttendanceModule(
+    @Args('projectId') projectId: string,
+    @Args('moduleId') moduleId: string,
+    @CurrentUser() user: User
+  ): Promise<AttendanceModule> {
+    return this.projectAttendService.findOne(projectId, moduleId, user);
+  }
+
+  @Mutation(() => AttendanceModule, { name: 'deleteAttendanceModule' })
+  @UseGuards(RolesGuard)
+  @Roles("owner", "admin", "mandor")
+  async deleteAttendanceModule(
+    @Args('projectId') projectId: string,
+    @Args('moduleId') moduleId: string,
+    @CurrentUser() user: User
+  ): Promise<AttendanceModule> {
+    return this.projectAttendService.deleteOne(projectId, moduleId, user);
+  }
+
+  @Mutation(() => AttendanceModule, { name: 'updateAttendanceModule' })
+  @UseGuards(RolesGuard)
+  @Roles("owner", "admin", "mandor")
+  async updateAttendanceModule(
+    @Args('projectId') projectId: string,
+    @Args('moduleId') moduleId: string,
+    @Args('updateAttendanceModuleInput') updateAttendanceModuleInput: UpdateAttendanceModuleInput,
+    @CurrentUser() user: User
+  ): Promise<AttendanceModule> {
+    return this.projectAttendService.updateModule(projectId, moduleId, updateAttendanceModuleInput, user);
+  }
 
 }

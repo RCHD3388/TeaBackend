@@ -1,12 +1,13 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
-import { InjectModel } from "@nestjs/mongoose";
+import { InjectConnection, InjectModel } from "@nestjs/mongoose";
 import { User } from "../user/schema/user.schema";
 import { Employee, EmployeeRole } from "../person/schema/employee.schema";
-import { Model, ObjectId, Types } from "mongoose";
+import { Connection, Model, ObjectId, Types } from "mongoose";
 import { Project } from "./schema/project.schema";
 import { CreateProjectInput, GetAllProjectEmployeeDto, UpdateProjectInput } from "./types/project.types";
 import { CategoryData, CategoryType } from "../category/schema/category.schema";
 import { EmployeeService } from "../person/employee.service";
+import { ProjectAttendService } from "./project_att_cost/project_attend.service";
 
 @Injectable()
 export class ProjectEmployeeService {
@@ -14,7 +15,9 @@ export class ProjectEmployeeService {
     @InjectModel(Employee.name) private employeeModel: Model<Employee>,
     @InjectModel(CategoryData.name) private categoryDataModel: Model<CategoryData>,
     @InjectModel(Project.name) private projectModel: Model<Project>,
-    private readonly employeeService: EmployeeService
+    @InjectConnection() private readonly connection: Connection,
+    private readonly employeeService: EmployeeService,
+    private readonly projectAttendService: ProjectAttendService
   ) { }
 
   private removeDuplicates(arr: string[]) {
@@ -33,7 +36,7 @@ export class ProjectEmployeeService {
       throw new ForbiddenException("User tidak diperbolehkan melakukan aksi tersebut")
     }
     let target_return_value: GetAllProjectEmployeeDto = {
-      registered: project.worker.map((pw: any) => {  
+      registered: project.worker.map((pw: any) => {
         (pw as Employee).salary = null;
         return pw
       })
@@ -51,13 +54,13 @@ export class ProjectEmployeeService {
   }
 
   async addNewProjectEmployee(id: string, employees: string[]): Promise<Employee[]> {
-    const session = await this.projectModel.db.startSession()
+    const session = await this.connection.startSession();
 
     try {
       session.startTransaction();
 
       // Validasi project
-      const project = await this.projectModel.findById(id);
+      const project = await this.projectModel.findById(id).session(session);
       if (!project) {
         throw new NotFoundException(`Project with ID ${id} not found`);
       }
@@ -66,19 +69,15 @@ export class ProjectEmployeeService {
       employees = this.removeDuplicates(employees)
       const employeesToAdd: Employee[] = [];
       for (const employeeId of employees) {
-        const employee = await this.employeeModel.findById(employeeId, {salary: 0}).populate(["role", "skill"]);
-        
-        if (!employee) {
-          throw new NotFoundException(`Employee with ID ${employeeId} not found`);
-        }
+        const employee = await this.employeeModel.findById(employeeId, { salary: 0 }).populate(["role", "skill"]).session(session);
 
+        if (!employee) throw new NotFoundException(`Employee with ID ${employeeId} not found`);
         if ((employee.role as EmployeeRole).name != "pegawai") throw new BadRequestException("Pegawai yang didaftarkan harus memiliki role PEGAWAI")
 
         // Cek apakah employee sudah menjadi bagian dari project
         if (project.worker.findIndex((wo: any) => wo == employeeId) != -1) {
           throw new BadRequestException(`Pegawai ${employee.person.name} telah terdaftar sebagai pegawai project tersebut`);
         }
-
         employeesToAdd.push(employee);
       }
       // supaya hasil populate tersimpan dengan benar setelah save()
@@ -93,16 +92,19 @@ export class ProjectEmployeeService {
       };
       employeesToAdd.forEach(async (employee) => {
         employee.project_history.push(projectHistory)
-        await employee.save()
+        await employee.save({ session })
       })
       // Tambahkan semua employee baru ke dalam project
       project.worker.push(...employeesToAdd.map((employee) => employee._id));
-      await project.save();
+      await project.save({ session });
+
+      // add employee to attendance
+      await this.projectAttendService.addNewEmployee(project._id, employeesToAdd.map((employee) => employee._id), session);
 
       await session.commitTransaction();
 
       return targetReturnValue
-    } catch (error) { 
+    } catch (error) {
       await session.abortTransaction();
       throw error;
     } finally {
@@ -111,44 +113,62 @@ export class ProjectEmployeeService {
   }
 
   async removeProjectEmployee(id: string, employee: string, description: string): Promise<Employee> {
-    // Validasi project
-    const project = await this.projectModel.findById(id);
-    if (!project) {
-      throw new NotFoundException(`Project with ID ${id} not found`);
-    } 
+    const session = await this.connection.startSession();
 
-    // Validasi employee
-    const target_employee = await this.employeeModel.findById(employee).populate(["role", "skill"]);
-    if (!target_employee) {
-      throw new NotFoundException(`Employee with ID ${employee} not found`);
+    try {
+      session.startTransaction();
+
+      // ============= PROSES START TRANSACTION =============
+      // Validasi project
+      const project = await this.projectModel.findById(id).session(session);
+      if (!project) {
+        throw new NotFoundException(`Project with ID ${id} not found`);
+      }
+      // Validasi employee
+      const target_employee = await this.employeeModel.findById(employee).populate(["role", "skill"]).session(session);
+      if (!target_employee) {
+        throw new NotFoundException(`Employee with ID ${employee} not found`);
+      }
+
+      // Cek apakah employee terdaftar dalam project
+      const removeIndex = project.worker.findIndex((workerId: any) => workerId.toString() === employee);
+
+
+      if (removeIndex == -1) {
+        throw new BadRequestException(`Pegawai ${target_employee.person.name} bukan bagian dari pegawai project`);
+      }
+
+      // Hapus employee dari daftar worker di project
+      project.worker = project.worker.filter((value, index) => index != removeIndex);
+      await project.save({session});
+
+      // Perbarui project history pada employee
+      const projectHistoryIndex = target_employee.project_history.findIndex((history: any) => history.project.toString() === id && !history.left_at);
+      if (projectHistoryIndex != -1) {
+        target_employee.project_history[projectHistoryIndex].left_at = new Date();
+        target_employee.project_history[projectHistoryIndex].description = description;
+      } else {
+        throw new BadRequestException(`Tidak ditemukan riwayat proyek aktif untuk pegawai dalam proyek tersebut.`);
+      }
+
+      let return_value = target_employee.toObject()
+      delete return_value.salary
+      // Simpan perubahan pada employee
+      await target_employee.save({session});
+
+      // remove employee from attendance detail
+      await this.projectAttendService.removeEmployee(project._id, employee, session);
+
+      // ============= PROSES START TRANSACTION =============
+      
+      session.commitTransaction();
+      return return_value;
+    } catch (error) {
+      session.abortTransaction();
+      throw error
+    } finally {
+      session.endSession();
     }
 
-    // Cek apakah employee terdaftar dalam project
-    const removeIndex = project.worker.findIndex((workerId: any) => workerId.toString() === employee);
-
-
-    if (removeIndex == -1) {
-      throw new BadRequestException(`Pegawai ${target_employee.person.name} bukan bagian dari pegawai project`);
-    }
-
-    // Hapus employee dari daftar worker di project
-    project.worker = project.worker.filter((value, index) => index != removeIndex);
-    await project.save();
-
-    // Perbarui project history pada employee
-    const projectHistoryIndex = target_employee.project_history.findIndex((history: any) => history.project.toString() === id && !history.left_at);
-    if (projectHistoryIndex != -1) {
-      target_employee.project_history[projectHistoryIndex].left_at = new Date();
-      target_employee.project_history[projectHistoryIndex].description = description;
-    } else {
-      throw new BadRequestException(`Tidak ditemukan riwayat proyek aktif untuk pegawai dalam proyek tersebut.`);
-    }
-
-    let return_value = target_employee.toObject()
-    delete return_value.salary
-    // Simpan perubahan pada employee
-    await target_employee.save();
-
-    return return_value;
   }
 }

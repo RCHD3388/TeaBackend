@@ -16,16 +16,12 @@ export class AttendanceDetail {
   employee: string | Employee;
 
   @Field(() => Boolean)
-  @Prop({ type: Boolean, required: true, default: false })
+  @Prop({ type: Boolean, required: true })
   check_in: boolean;
 
   @Field(() => Boolean)
-  @Prop({ type: Boolean, required: true, default: false })
+  @Prop({ type: Boolean, required: true })
   check_out: boolean;
-
-  @Field(() => String)
-  @Prop({ type: String, default: "" })
-  note: string;
 }
 @ObjectType()
 @Schema()
@@ -34,33 +30,37 @@ export class Attendance {
   @Prop({ type: Date, required: true })
   date: Date;
 
-  @Field(() => String)
-  @Prop({ type: String, default: "" })
-  description: string;
-
   @Field(() => [AttendanceDetail])
   @Prop({ type: [AttendanceDetail], required: true })
-  attendance_detail: string[] | AttendanceDetail[];
+  attendance_detail: AttendanceDetail[];
 }
 @ObjectType()
 @Schema()
 export class AttendanceModule {
+  @Field(() => String)
+  _id: string;
+
   @Field(() => Date)
   @Prop({ type: Date, required: true })
   start_date: Date;
 
   @Field(() => Date)
-  @Prop({ type: Date, required: true })  
+  @Prop({ type: Date, required: true })
   end_date: Date;
 
   @Field(() => Boolean)
   @Prop({ type: Boolean, default: true })
   submit_status: Boolean;
 
+  @Field(() => String)
+  @Prop({ type: String, default: "" })
+  description: string;
+
   @Field(() => [Attendance])
-  @Prop({ type: [Attendance], required: true})
-  attendances: string[] | Attendance[];
+  @Prop({ type: [Attendance], required: true })
+  attendance: Attendance[];
 }
+export const AttendanceModuleSchema = SchemaFactory.createForClass(AttendanceModule);
 // ===== ATTENDANCE MODULE END =====
 
 // ===== PROJECT CLOSING START =====
@@ -141,7 +141,7 @@ export class Project extends Document {
 
   @Field(() => [AttendanceModule])
   @Prop({ type: [Types.ObjectId], required: true, ref: "AttendanceModule" })
-  attendace: string[] | AttendanceModule[];
+  attendance: string[] | AttendanceModule[];
 
   @Field(() => ProjectClosing, { nullable: true })
   @Prop({ type: ProjectClosing })

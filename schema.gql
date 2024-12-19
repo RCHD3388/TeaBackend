@@ -140,20 +140,20 @@ type AttendanceDetail {
   employee: Employee!
   check_in: Boolean!
   check_out: Boolean!
-  note: String!
 }
 
 type Attendance {
   date: DateTime!
-  description: String!
   attendance_detail: [AttendanceDetail!]!
 }
 
 type AttendanceModule {
+  _id: String!
   start_date: DateTime!
   end_date: DateTime!
   submit_status: Boolean!
-  attendances: [Attendance!]!
+  description: String!
+  attendance: [Attendance!]!
 }
 
 type ProjectClosing {
@@ -177,7 +177,7 @@ type Project {
   status: CategoryData!
   project_leader: Employee!
   worker: [Employee!]!
-  attendace: [AttendanceModule!]!
+  attendance: [AttendanceModule!]!
   project_closing: ProjectClosing
 }
 
@@ -244,6 +244,8 @@ type Query {
   findAllProjects: [Project!]!
   findProjectById(id: String!): Project!
   getAllProjectEmployees(id: String!): GetAllProjectEmployeeDto!
+  findAllAttendanceModules(projectId: String!): [AttendanceModule!]!
+  findOneAttendanceModule(projectId: String!, moduleId: String!): AttendanceModule!
   getAllEmployees(employeeFilter: EmployeeFilter): [Employee!]!
   getEmployeeById(id: String!): Employee!
   getAllRole: [EmployeeRole!]!
@@ -285,6 +287,10 @@ type Mutation {
   updateProject(id: String!, updateProjectInput: UpdateProjectInput!): Project!
   addNewProjectEmployee(id: String!, employees: [String!]!): [Employee!]!
   removeProjectEmployee(id: String!, employee: String!, description: String!): Employee!
+  createAttendance(createAttendanceInput: CreateAttendanceModuleInput!): AttendanceModule!
+  submitAttendanceModule(projectId: String!, moduleId: String!): AttendanceModule!
+  deleteAttendanceModule(projectId: String!, moduleId: String!): AttendanceModule!
+  updateAttendanceModule(projectId: String!, moduleId: String!, updateAttendanceModuleInput: UpdateAttendanceModuleInput!): AttendanceModule!
   createEmployee(createEmployeeInput: CreateEmployeeInput!): Employee!
   updateEmployee(id: String!, updateEmployeeInput: UpdateEmployeeInput!): Employee!
   createEmployeeSkill(createEmployeeSkillInput: CreateEmployeeSkillInput!): EmployeeSkill!
@@ -347,6 +353,27 @@ input UpdateProjectInput {
   priority: String
   status: String
   project_leader: String
+}
+
+input CreateAttendanceModuleInput {
+  start_date: DateTime!
+  project_id: String!
+}
+
+input UpdateAttendanceModuleInput {
+  description: String
+  attendance: [UpdateAttendanceInput!]!
+}
+
+input UpdateAttendanceInput {
+  date: DateTime!
+  attendance_detail: [UpdateAttendanceDetailInput!]!
+}
+
+input UpdateAttendanceDetailInput {
+  employee: String!
+  check_in: Boolean
+  check_out: Boolean
 }
 
 input CreateEmployeeInput {
