@@ -3,7 +3,7 @@ import { ProjectResolver } from './project.resolver';
 import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from '../user/schema/user.schema';
 import { Employee, EmployeeSchema } from '../person/schema/employee.schema';
-import { Project, ProjectCostLog, ProjectCostLogSchema, ProjectSchema } from './schema/project.schema';
+import { Attendance, AttendanceModule, Project, ProjectCostLog, ProjectCostLogSchema, ProjectSchema } from './schema/project.schema';
 import { CategoryData, CategoryDataSchema } from '../category/schema/category.schema';
 import { ProjectService } from './project.service';
 import { ProjectEmployeeService } from './project_employee.service';
@@ -11,6 +11,8 @@ import { ProjectEmployeeResolver } from './project_employee.resolver';
 import { PersonModule } from '../person/person.module';
 import { InventoryModule } from '../inventory/inventory.module';
 import { ProjectCostService } from './project_att_cost/project_cost.service';
+import { ProjectAttendResolver } from './project_att_cost/project_attend.resolver';
+import { ProjectAttendService } from './project_att_cost/project_attend.service';
 
 @Module({
   imports: [
@@ -27,7 +29,8 @@ import { ProjectCostService } from './project_att_cost/project_cost.service';
   providers: [
     ProjectResolver, ProjectEmployeeResolver,
     ProjectService, ProjectEmployeeService,
-    ProjectCostService
+    ProjectCostService,
+    ProjectAttendResolver, ProjectAttendService
   ],
 
   exports: [ProjectService, ProjectEmployeeService, ProjectCostService]
