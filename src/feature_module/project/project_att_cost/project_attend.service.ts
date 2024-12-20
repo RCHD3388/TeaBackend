@@ -18,7 +18,7 @@ export class ProjectAttendService {
     let { start_date, project_id } = createAttendanceModuleInput;
 
     // check if project exist
-    let targetProject = await this.projectModel.findById(project_id).select(["attendance", "worker"]).populate(["attendance", "worker"]).exec();
+    let targetProject = await this.projectModel.findById(project_id).select(["attendance", "worker"]).populate(["attendance"]).exec();
     if (!targetProject || !targetProject.attendance) throw new NotFoundException('Project tidak ditemukan');
 
     // check if user is project leader of the project
@@ -35,9 +35,12 @@ export class ProjectAttendService {
     }
 
     const existingWorker: String[] = targetProject.worker as String[];
+    let actual_start_date = new Date(start_date.getTime());
     let end_date = new Date(start_date.getTime() + 6 * 24 * 60 * 60 * 1000);
+
     let attendances: Attendance[] = [];
     let currentLoopDate = start_date;
+
     while (currentLoopDate <= end_date) {
       // create attendance detail
       let attendance_details: AttendanceDetail[] = [];
@@ -58,7 +61,7 @@ export class ProjectAttendService {
     }
 
     const attendanceModule = new this.attendanceModuleModel({
-      start_date: start_date,
+      start_date: actual_start_date,
       end_date: end_date,
       submit_status: false,
       attendance: attendances,
@@ -88,7 +91,7 @@ export class ProjectAttendService {
     return await attendanceModule.save();
   }
 
-  
+
   async updateModule(project_id: string, module_id: string, updateInput: UpdateAttendanceModuleInput, user: User): Promise<AttendanceModule> {
     let { description, attendance } = updateInput;
 
@@ -136,7 +139,8 @@ export class ProjectAttendService {
     let targetProject = await this.projectModel.findById(project_id).select(["attendance"]).populate({
       path: "attendance",
       populate: {
-        path: "attendance.attendance_detail.employee",
+        path: 'attendance.attendance_detail.employee',
+        model: 'Employee'
       }
     }).exec();
     if (!targetProject) throw new NotFoundException('Project tidak ditemukan');
@@ -166,8 +170,12 @@ export class ProjectAttendService {
       throw new BadRequestException('Module absensi tidak ditemukan');
     }
 
-    let targetModule = this.attendanceModuleModel.findById(module_id).populate("attendance.attendance_detail.employee").exec();
-
+    let targetModule = await this.attendanceModuleModel.findById(module_id)
+      .populate({
+        path: 'attendance.attendance_detail.employee',
+        model: 'Employee'
+      })
+      .exec();
     return targetModule;
   }
 
@@ -187,7 +195,7 @@ export class ProjectAttendService {
     let targetModule = existingModules.find((module) => module._id.toString() == module_id);
     if (!targetModule) throw new BadRequestException('Module absensi tidak ditemukan');
 
-    if(targetModule.submit_status = true) throw new BadRequestException('Module absensi telah disubmit, tidak dapat dihapus');
+    if (targetModule.submit_status = true) throw new BadRequestException('Module absensi telah disubmit, tidak dapat dihapus');
 
     return await this.attendanceModuleModel.findByIdAndDelete(module_id).exec();
   }
