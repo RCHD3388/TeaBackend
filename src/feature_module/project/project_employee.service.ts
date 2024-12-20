@@ -161,10 +161,10 @@ export class ProjectEmployeeService {
 
       // ============= PROSES START TRANSACTION =============
       
-      session.commitTransaction();
+      await session.commitTransaction();
       return return_value;
     } catch (error) {
-      session.abortTransaction();
+      await session.abortTransaction();
       throw error
     } finally {
       session.endSession();

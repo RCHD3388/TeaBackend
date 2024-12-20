@@ -1,6 +1,6 @@
 import { Field, InputType } from "@nestjs/graphql";
 import { Type } from "class-transformer";
-import { IsArray, IsDate, isDate, IsNotEmpty, IsOptional, IsString, Min, ValidateNested } from "class-validator";
+import { IsArray, IsDate, isDate, IsNotEmpty, IsOptional, IsString, Min, MinLength, ValidateNested } from "class-validator";
 
 @InputType()
 export class CreateProjectCostLogInput {
@@ -58,7 +58,6 @@ class UpdateAttendanceInput {
 
   @Field(() => [UpdateAttendanceDetailInput])
   @IsArray()
-  @Min(7, { message: 'Harus diisi 7 hari dalam seminggu' })
   @ValidateNested({ each: true })
   @Type(() => UpdateAttendanceDetailInput)
   attendance_detail: UpdateAttendanceDetailInput[];

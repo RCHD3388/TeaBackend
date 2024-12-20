@@ -207,9 +207,9 @@ export class ProjectAttendService {
     // find existing modules
     let existingModules = await this.attendanceModuleModel.find({ _id: { $in: targetProject.attendance }, submit_status: false }).session(session);
 
-    existingModules = existingModules.map((module) => {
+    existingModules = await Promise.all(existingModules.map(async(module) => {
       // edit all attendance
-      module.attendance = module.attendance.map((attendance) => {
+      module.attendance = await Promise.all(module.attendance.map((attendance) => {
         // batch add attendance detail
         let newAttendanceDetail: AttendanceDetail[] = [];
         for (let i = 0; i < employee_ids.length; i++) {
@@ -221,11 +221,11 @@ export class ProjectAttendService {
         }
         attendance.attendance_detail.push(...newAttendanceDetail);
         return attendance;
-      })
+      }))
 
-      module.save({ session })
+      await module.save({ session })
       return module;
-    });
+    }));
   }
 
   async removeEmployee(project_id: string, employee_id: string, session: ClientSession) {
@@ -239,17 +239,17 @@ export class ProjectAttendService {
     // find existing modules
     let existingModules = await this.attendanceModuleModel.find({ _id: { $in: targetProject.attendance }, submit_status: false }).session(session);
 
-    existingModules = existingModules.map((module) => {
+    existingModules = await Promise.all(existingModules.map(async(module) => {
       // edit all attendance
-      module.attendance = module.attendance.map((attendance) => {
+      module.attendance =  module.attendance.map((attendance) => {
         // remove employee from all attendance detail
         attendance.attendance_detail = attendance.attendance_detail.filter(
           (detail) => detail.employee !== employee_id
         );
         return attendance;
       })
-      module.save({ session })
+      await module.save({ session })
       return module;
-    });
+    }));
   }
 }
