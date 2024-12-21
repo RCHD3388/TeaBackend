@@ -32,7 +32,7 @@ export class MaterialTransactionService {
       { $replaceRoot: { newRoot: "$latestTransaction" } } // Ganti root dengan data transaksi terbaru
     ]);
 
-    console.log(remainsData)
+    
     const populatedData = await this.materialTransactionModel.populate(remainsData, {
       path: 'material', // Populate material
       populate: [
@@ -42,8 +42,8 @@ export class MaterialTransactionService {
         { path: 'item_category', model: 'CategoryData' },
       ]
     });
-    console.log(populatedData)
-
+    
+    
     return populatedData
   }
 

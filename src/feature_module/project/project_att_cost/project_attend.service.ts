@@ -214,7 +214,7 @@ export class ProjectAttendService {
         let newAttendanceDetail: AttendanceDetail[] = [];
         for (let i = 0; i < employee_ids.length; i++) {
           newAttendanceDetail.push({
-            employee: employee_ids[i],
+            employee: employee_ids[i].toString(),
             check_in: false,
             check_out: false,
           })
@@ -244,7 +244,9 @@ export class ProjectAttendService {
       module.attendance =  module.attendance.map((attendance) => {
         // remove employee from all attendance detail
         attendance.attendance_detail = attendance.attendance_detail.filter(
-          (detail) => detail.employee !== employee_id
+          (detail) => {
+            return detail.employee.toString() !== employee_id.toString()
+          }
         );
         return attendance;
       })
