@@ -160,8 +160,7 @@ type ProjectClosing {
   closed_by: Employee!
   note: String
   document: String
-  material_left: [MaterialTransaction!]!
-  tool_left: [ToolTransaction!]!
+  material_used: [MaterialTransaction!]!
   request_project_closing: RequestProjectClosing!
 }
 
@@ -266,6 +265,7 @@ type Query {
   getWarehouseTools(warehouse_id: String!): [ToolTransaction!]!
   getCategories(categoryFilter: CategoryFilter): [CategoryData!]!
   findAllRequestCosts(projectId: String): [RequestCost!]!
+  findAllRequestClosing(projectId: String): [RequestProjectClosing!]!
 }
 
 input EmployeeFilter {
@@ -285,6 +285,7 @@ type Mutation {
   deleteUserPassword(id: String!): User!
   createProject(createProjectInput: CreateProjectInput!): Project!
   updateProject(id: String!, updateProjectInput: UpdateProjectInput!): Project!
+  updateProjectClosing(id: String!, updateProjectClosingInput: UpdateProjectClosingInput!): Project!
   addNewProjectEmployee(id: String!, employees: [String!]!): [Employee!]!
   removeProjectEmployee(id: String!, employee: String!, description: String!): Employee!
   createAttendance(createAttendanceInput: CreateAttendanceModuleInput!): AttendanceModule!
@@ -310,13 +311,15 @@ type Mutation {
   updateMaterial(id: String!, updateMaterialInput: UpdateMaterialInput!): Material!
   createSku(createSkuInput: CreateSkuInput!): Sku!
   updateSku(id: String!, updateSkuInput: UpdateSkuInput!): Sku!
-  addInventoryMaterial(createMaterialTransactionInput: CreateMaterialTransactionInput!): Boolean!
+  addInventoryMaterial(createMaterialTransactionInput: CreateMaterialTransactionInput!): [MaterialTransaction!]!
   addInventoryTool(addOnlyToolTransactionInput: AddOnlyToolTransactionInput!): Boolean!
   createCategory(createCategoryInput: CreateCategoryInput!): CategoryData!
   updateCategory(id: String!, updateCategoryInput: UpdateCategoryInput!): CategoryData!
   deleteCategory(id: String!): CategoryData!
   createRequestCost(createRequestCostInput: CreateRequestCostInput!): RequestCost!
   updateRequestCost(id: String!, updateRequestCostStatusInput: UpdateRequestCostStatusInput!): RequestCost!
+  createRequestClosing(createRequestClosingInput: CreateRequestClosingInput!): RequestProjectClosing!
+  updateRequestClosing(id: String!, updateRequestStatusInput: UpdateRequestStatusInput!): RequestProjectClosing!
 }
 
 input LoginInput {
@@ -353,6 +356,18 @@ input UpdateProjectInput {
   priority: String
   status: String
   project_leader: String
+}
+
+input UpdateProjectClosingInput {
+  note: String
+  material_left: [MaterialDetailInput!]
+  warehouse_to: String
+}
+
+input MaterialDetailInput {
+  material: String!
+  qty: Float!
+  price: Float
 }
 
 input CreateAttendanceModuleInput {
@@ -491,12 +506,6 @@ input CreateMaterialTransactionInput {
   warehouse_from: String
 }
 
-input MaterialDetailInput {
-  material: String!
-  qty: Float!
-  price: Float
-}
-
 input AddOnlyToolTransactionInput {
   tool: [CreateToolInput!]!
   warehouse_to: String
@@ -531,5 +540,15 @@ input CreateRequestCostInput {
 }
 
 input UpdateRequestCostStatusInput {
+  status: String!
+}
+
+input CreateRequestClosingInput {
+  title: String!
+  description: String
+  requested_from: String!
+}
+
+input UpdateRequestStatusInput {
   status: String!
 }

@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import { ClientSession, Connection, Model, startSession } from 'mongoose';
 import { TransactionCategory } from 'src/feature_module/category/schema/category.schema';
-import { Warehouse } from '../schema/warehouse.schema';
+import { Warehouse, WarehouseStatus } from '../schema/warehouse.schema';
 import { MaterialTransaction } from '../schema/inventory_trans.schema';
 import { Material } from '../schema/inventory.schema';
 import { CreateMaterialTransactionInput } from '../types/inventory_trans.types';
@@ -16,8 +16,8 @@ export class MaterialTransactionService {
     @InjectModel(Warehouse.name) private warehouseModel: Model<Warehouse>,
   ) { }
 
-  async getRemainItems(warehouse: string): Promise<MaterialTransaction[]> {
-    let targetWarehouse = await this.warehouseModel.findById(warehouse).exec()
+  async getRemainItems(warehouse: string, session?: ClientSession): Promise<MaterialTransaction[]> {
+    let targetWarehouse = await this.warehouseModel.findById(warehouse).session(session || null).exec()
     if (!targetWarehouse) throw new NotFoundException('Warehouse tidak ditemukan')
 
     let remainsData = await this.materialTransactionModel.aggregate([
@@ -30,7 +30,7 @@ export class MaterialTransactionService {
         }
       },
       { $replaceRoot: { newRoot: "$latestTransaction" } } // Ganti root dengan data transaksi terbaru
-    ]);
+    ]).session(session || null).exec();
 
     
     const populatedData = await this.materialTransactionModel.populate(remainsData, {
@@ -71,19 +71,19 @@ export class MaterialTransactionService {
   async create(
     createMaterialTransactionInput: CreateMaterialTransactionInput,
     session: ClientSession
-  ): Promise<Boolean> {
+  ): Promise<MaterialTransaction[]> {
     let { transaction_category, warehouse_from, warehouse_to, materials } = createMaterialTransactionInput
-
     try {
       // START TRANSACTION
+      if(warehouse_from && warehouse_to && warehouse_from == warehouse_to) throw new BadRequestException('Warehouse sumber dan tujuan tidak boleh sama');
 
       // check transaction category exist
       let targetTransactionCategory = await this.transactionCategoryModel.findOne({ id: transaction_category }).session(session);
       if (!targetTransactionCategory) throw new NotFoundException(`Kategori transaksi tidak ditemukan`);
 
       // check target warehouse & source warehouse
-      let target_warehouse = await this.warehouseModel.findById(warehouse_to).session(session)
-      let source_warehouse = await this.warehouseModel.findById(warehouse_from).session(session)
+      let target_warehouse = await this.warehouseModel.findOne({_id: warehouse_to, status: WarehouseStatus.ACTIVE}).session(session)
+      let source_warehouse = await this.warehouseModel.findOne({_id: warehouse_from}).session(session)
       if (targetTransactionCategory.id == "PUR" || targetTransactionCategory.id == "TRF" || targetTransactionCategory.id == "ADD") {
         if (!target_warehouse) throw new NotFoundException(`Warehouse tujuan tidak ditemukan`);
       }
@@ -92,6 +92,7 @@ export class MaterialTransactionService {
       }
 
       // ======================= PROSES START =======================
+      let listOfNewTransaction: MaterialTransaction[] = [];
 
       for (let curMaterial of materials) {
         // GET MATERIAL DETAIL
@@ -136,6 +137,7 @@ export class MaterialTransactionService {
           })
 
           await newOutMaterialTransaction.save({ session });
+          listOfNewTransaction.push(newOutMaterialTransaction);
         }
 
         // receive transfer tools to warehouse_to
@@ -166,6 +168,7 @@ export class MaterialTransactionService {
             date,
           })
           await newInMaterialTransaction.save({ session });
+          listOfNewTransaction.push(newInMaterialTransaction);
         }
 
         // udpate transaction counter
@@ -174,8 +177,8 @@ export class MaterialTransactionService {
       }
 
       // ======================= PROSES END =======================
-
-      return true
+      
+      return listOfNewTransaction
     } catch (error) {
       throw error;
     } 

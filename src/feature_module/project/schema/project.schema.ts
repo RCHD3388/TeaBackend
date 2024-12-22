@@ -72,20 +72,16 @@ export class ProjectClosing {
   closed_by: String | Employee;
 
   @Field(() => String, { nullable: true })
-  @Prop({ type: String, required: true, default: "" })
+  @Prop({ type: String, default: "" })
   note: string;
 
   @Field(() => String, { nullable: true })
-  @Prop({ type: String, required: true, default: "" })
+  @Prop({ type: String })
   document: string;
 
   @Field(() => [MaterialTransaction])
   @Prop({ type: [Types.ObjectId], required: true, ref: "MaterialTransaction" })
-  material_left: String[] | MaterialTransaction[];
-
-  @Field(() => [ToolTransaction])
-  @Prop({ type: [Types.ObjectId], required: true, ref: "ToolTransaction" })
-  tool_left: String[] | ToolTransaction[];
+  material_used: String[] | MaterialTransaction[];
 
   @Field(() => RequestProjectClosing)
   @Prop({ type: Types.ObjectId, required: true, ref: "RequestProjectClosing" })

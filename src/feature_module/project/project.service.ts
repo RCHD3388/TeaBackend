@@ -1,21 +1,29 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
-import { InjectModel } from "@nestjs/mongoose";
+import { InjectConnection, InjectModel } from "@nestjs/mongoose";
 import { User } from "../user/schema/user.schema";
 import { Employee, EmployeeRole } from "../person/schema/employee.schema";
-import { Model, ObjectId, Types } from "mongoose";
+import { ClientSession, Connection, Model, ObjectId, Types } from "mongoose";
 import { Project } from "./schema/project.schema";
 import { CreateProjectInput, UpdateProjectInput } from "./types/project.types";
-import { CategoryData, CategoryType } from "../category/schema/category.schema";
+import { CategoryData, CategoryType, TransactionCategory } from "../category/schema/category.schema";
 import { WarehouseService } from "../inventory/warehouse.service";
-import { WarehouseType } from "../inventory/schema/warehouse.schema";
+import { Warehouse, WarehouseStatus, WarehouseType } from "../inventory/schema/warehouse.schema";
+import { UpdateProjectClosingInput } from "./types/project_sub.types";
+import { MaterialTransactionService } from "../inventory/transaction/material_transaction.service";
+import { ToolTransactionService } from "../inventory/transaction/tool_transaction.service";
+import { Material, Tool } from "../inventory/schema/inventory.schema";
 
 @Injectable()
 export class ProjectService {
   constructor(
+    @InjectConnection() private readonly connection: Connection,
     @InjectModel(Employee.name) private employeeModel: Model<Employee>,
     @InjectModel(CategoryData.name) private categoryDataModel: Model<CategoryData>,
     @InjectModel(Project.name) private projectModel: Model<Project>,
-    private readonly warehouseService: WarehouseService
+    @InjectModel(Warehouse.name) private warehouseModel: Model<Warehouse>,
+    private readonly warehouseService: WarehouseService,
+    private readonly materialTransactionService: MaterialTransactionService,
+    private readonly toolTransactionService: ToolTransactionService
   ) { }
 
   private isValidTargetDate(target_date: string | Date): boolean {
@@ -46,7 +54,7 @@ export class ProjectService {
     }
 
     let project = await this.projectModel.find(filter).populate(["project_leader", "status", "priority"]).exec();
-    
+
     project = project.map((proj) => {
       (proj.project_leader as Employee).salary = null
       return proj
@@ -111,10 +119,10 @@ export class ProjectService {
       // create warehouse
       await this.warehouseService.create({
         name: `Warehouse ${new_project.name}`,
-        description : `Warehouse untuk project ${new_project.name}`,
+        description: `Warehouse untuk project ${new_project.name}`,
         project: new_project._id,
-        address : `${new_project.location}`, 
-        type: WarehouseType.PROJECT, 
+        address: `${new_project.location}`,
+        type: WarehouseType.PROJECT,
       })
 
       // add project leader new project history
@@ -135,9 +143,9 @@ export class ProjectService {
     } catch (error) {
       await session.abortTransaction();
       throw error
-    
+
     } finally {
-      await session.endSession(); 
+      await session.endSession();
     }
   }
 
@@ -219,5 +227,107 @@ export class ProjectService {
     (updatedProject.project_leader as Employee).salary = null
 
     return updatedProject
+  }
+
+  async createProjectClosing(
+    project_id: String,
+    closed_by: String,
+    request_project_closing: String,
+    session: ClientSession
+  ): Promise<Boolean> {
+    let targetProject = await this.projectModel.findById(project_id).session(session).exec();
+
+    targetProject.project_closing = {
+      closed_by: closed_by,
+      note: "",
+      document: null,
+      material_used: [],
+      request_project_closing: request_project_closing
+    }
+
+    targetProject.finished_at = new Date();
+    let targetWarehouse = await this.warehouseModel.findOne({ project: targetProject._id }).session(session).exec(); 
+    targetWarehouse.status = WarehouseStatus.INACTIVE
+    await targetWarehouse.save({ session })
+
+    targetProject.save({ session })
+    return true;
+  }
+
+  async updateProjectClosing(project_id: string, updateProjectClosingInput: UpdateProjectClosingInput, user: User): Promise<Project> {
+    const session = await this.connection.startSession();
+
+    try {
+      session.startTransaction();
+
+      let targetProject = await this.projectModel.findById(project_id).session(session);
+      if (!targetProject) throw new NotFoundException('Project tidak ditemukan');
+
+      if (((user.employee as Employee).role as EmployeeRole).name == "mandor"
+        && targetProject.project_leader.toString() != (user.employee as Employee)._id.toString()) {
+        throw new ForbiddenException("User tidak diperbolehkan melakukan aksi tersebut")
+      }
+
+      // get warehouse data
+      let currentWarehouse = await this.warehouseModel.findOne({ project: targetProject._id }).session(session).exec();
+      if (!currentWarehouse) throw new NotFoundException('Terjadi kesalahan, warehouse tidak ditemukan');
+
+      // UPDATE NOTE PROJECT CLOSING
+      if (updateProjectClosingInput.note) targetProject.project_closing.note = updateProjectClosingInput.note;
+
+      // UPDATE ITEMS INVENTORY
+      if (updateProjectClosingInput.material_left) {
+        if (!updateProjectClosingInput.warehouse_to) {
+          throw new BadRequestException("Warehouse tujuan harus diisi, untuk pengembalian barang")
+        } else {
+          // PENGEMBALIAN
+          if (updateProjectClosingInput.material_left && updateProjectClosingInput.material_left.length > 0) {
+            await this.materialTransactionService.create({
+              materials: updateProjectClosingInput.material_left,
+              transaction_category: "TRF",
+              warehouse_from: currentWarehouse._id.toString(),
+              warehouse_to: updateProjectClosingInput.warehouse_to.toString()
+            }, session)
+          }
+          // PENGGUNAAN
+          let remainMaterials = await this.materialTransactionService.getRemainItems(currentWarehouse._id.toString(), session);
+          let remainTools = await this.toolTransactionService.getRemainItems(currentWarehouse._id.toString(), session);
+          let material_remain_formatted = await Promise.all(remainMaterials.map((materialtrf) => {
+            return {
+              material: (materialtrf.material as Material)._id.toString(),
+              qty: materialtrf.remain
+            }
+          }))
+
+          let tool_remain_formatted = await Promise.all(remainTools.map((tooltrf) => {
+            return (tooltrf.tool as Tool)._id.toString()
+          }))
+
+          await this.materialTransactionService.create({
+            materials: material_remain_formatted,
+            transaction_category: "USE",
+            warehouse_from: currentWarehouse._id.toString(),
+          }, session)
+
+          targetProject.project_closing.material_used = remainMaterials;
+
+          await this.toolTransactionService.create({
+            tool: tool_remain_formatted,
+            transaction_category: "TRF",
+            warehouse_from: currentWarehouse._id.toString(),
+            warehouse_to: updateProjectClosingInput.warehouse_to.toString()
+          }, session)
+        }
+      }
+
+      await targetProject.save({ session })
+      await session.commitTransaction();
+      return targetProject
+    } catch (error) {
+      await session.abortTransaction();
+      throw error;
+    } finally {
+      await session.endSession();
+    }
   }
 }

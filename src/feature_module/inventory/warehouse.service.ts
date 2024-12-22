@@ -23,8 +23,13 @@ export class WarehouseService {
     if (!target_warehouse) throw new NotFoundException('Warehouse tidak ditemukan')
 
     // check if user is project leader of the project
-    if (((user.employee as Employee).role as EmployeeRole).name == "mandor"
-      && (target_warehouse.project as Project).project_leader.toString() != (user.employee as Employee)._id.toString()
+    if ((((user.employee as Employee).role as EmployeeRole).name == "mandor"
+      && (
+        target_warehouse.project == null
+        ||
+        (target_warehouse.project as Project).project_leader.toString() != (user.employee as Employee)._id.toString()
+      )
+    )
     ) {
       throw new ForbiddenException('User tidak diperbolehkan melakukan aksi tersebut')
     }
@@ -72,7 +77,7 @@ export class WarehouseService {
       throw new BadRequestException('Hanya warehouse dengan jenis inventory yang dapat diubah status')
     }
 
-    let updatedProject = this.warehouseModel.findByIdAndUpdate(id, updateWarehouseInput, {new: true}).populate('project').exec()
+    let updatedProject = this.warehouseModel.findByIdAndUpdate(id, updateWarehouseInput, { new: true }).populate('project').exec()
     return updatedProject
   }
 }

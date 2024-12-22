@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import { ClientSession, Connection, Model, startSession } from 'mongoose';
 import { TransactionCategory } from 'src/feature_module/category/schema/category.schema';
-import { Warehouse } from '../schema/warehouse.schema';
+import { Warehouse, WarehouseStatus } from '../schema/warehouse.schema';
 import { MaterialTransaction, ToolTransaction } from '../schema/inventory_trans.schema';
 import { AddOnlyToolTransactionInput, CreateToolTransactionInput } from '../types/inventory_trans.types';
 import { Tool } from '../schema/inventory.schema';
@@ -18,8 +18,8 @@ export class ToolTransactionService {
     private readonly toolService: ToolService
   ) { }
 
-  async getRemainItems(warehouse: string): Promise<ToolTransaction[]> {
-    let targetWarehouse = await this.warehouseModel.findById(warehouse).exec()
+  async getRemainItems(warehouse: string, session?: ClientSession): Promise<ToolTransaction[]> {
+    let targetWarehouse = await this.warehouseModel.findById(warehouse).session(session || null).exec()
     if (!targetWarehouse) throw new NotFoundException('Warehouse tidak ditemukan')
 
     let remainsData = await this.toolTransactionModel.aggregate([
@@ -32,7 +32,7 @@ export class ToolTransactionService {
         }
       },
       { $replaceRoot: { newRoot: "$latestTransaction" } } // Ganti root dengan data transaksi terbaru
-    ]);
+    ]).session(session || null).exec();
 
     const populatedData = await this.toolTransactionModel.populate(remainsData, {
       path: 'tool', // Populate material
@@ -53,19 +53,20 @@ export class ToolTransactionService {
   async create(
     createToolTransactionInput: CreateToolTransactionInput,
     session: ClientSession
-  ): Promise<Boolean> {
+  ): Promise<ToolTransaction[]> {
     let { warehouse_to, warehouse_from, transaction_category, tool } = createToolTransactionInput
-    
+
     try {
 
       // START TRANSACTION
+      if (warehouse_from && warehouse_to && warehouse_from == warehouse_to) throw new BadRequestException('Warehouse sumber dan tujuan tidak boleh sama');
       // check transaction category exist
       let targetTransactionCategory = await this.transactionCategoryModel.findOne({ id: transaction_category }).session(session);
       if (!targetTransactionCategory) throw new NotFoundException(`Kategori transaksi tidak ditemukan`);
 
       // check target warehouse
-      let target_warehouse = await this.warehouseModel.findById(warehouse_to).session(session)
-      let source_warehouse = await this.warehouseModel.findById(warehouse_from).session(session)
+      let target_warehouse = await this.warehouseModel.findOne({ _id: warehouse_to, status: WarehouseStatus.ACTIVE }).session(session)
+      let source_warehouse = await this.warehouseModel.findOne({ _id: warehouse_from }).session(session)
 
       if (targetTransactionCategory.id == "PUR" || targetTransactionCategory.id == "TRF" || targetTransactionCategory.id == "ADD") {
         if (!target_warehouse) throw new NotFoundException(`Warehouse tujuan tidak ditemukan`);
@@ -75,6 +76,8 @@ export class ToolTransactionService {
       }
 
       // ======================= PROSES START =======================
+      let listOfNewTransaction: ToolTransaction[] = [];
+
       for (let curTool of tool) {
 
         // CHECK TOOL AVAILABILITY
@@ -108,6 +111,7 @@ export class ToolTransactionService {
             transaction_category: transaction_category,
           })
           await newOutToolTransaction.save({ session });
+          listOfNewTransaction.push(newOutToolTransaction)
         }
 
         // receive transfer tools to warehouse_to
@@ -130,6 +134,7 @@ export class ToolTransactionService {
           })
 
           await newInToolTransaction.save({ session });
+          listOfNewTransaction.push(newInToolTransaction)
         }
 
         // udpate transaction counter
@@ -137,10 +142,10 @@ export class ToolTransactionService {
         await targetTransactionCategory.save({ session });
       }
 
-      return true
+      return listOfNewTransaction
     } catch (error) {
       throw error;
-    } 
+    }
   }
 
   async addOnlyTool(
@@ -148,7 +153,7 @@ export class ToolTransactionService {
     session: ClientSession
   ): Promise<Boolean> {
     let { warehouse_to, tool, transaction_category } = addOnlyToolTransactionInput
-    
+
     try {
       // START TRANSACTION
       // check transaction category exist
@@ -188,6 +193,6 @@ export class ToolTransactionService {
       return true
     } catch (error) {
       throw error;
-    } 
+    }
   }
 }

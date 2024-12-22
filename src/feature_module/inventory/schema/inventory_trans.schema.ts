@@ -36,7 +36,7 @@ export class MaterialTransaction extends Document {
   warehouse: string | Warehouse;
 
   @Field(() => String)
-  @Prop({ type: String, required: true, unique: true })
+  @Prop({ type: String, required: true })
   transaction_code: string;
 
   @Field(() => TransactionCategory)
@@ -76,7 +76,7 @@ export class ToolTransaction extends Document {
   warehouse: string | Warehouse;
 
   @Field(() => String)
-  @Prop({ type: String, required: true, unique: true })
+  @Prop({ type: String, required: true })
   transaction_code: string;
 
   @Field(() => TransactionCategory)

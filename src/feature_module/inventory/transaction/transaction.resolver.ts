@@ -26,12 +26,12 @@ export class TransactionResolver {
     private readonly warehouseService: WarehouseService
   ) { }
 
-  @Mutation(() => Boolean, { name: 'addInventoryMaterial' })
+  @Mutation(() => [MaterialTransaction], { name: 'addInventoryMaterial' })
   @UseGuards(RolesGuard)
   @Roles("owner", "admin", "staff_pembelian")
   async addInventoryMaterial(
     @Args('createMaterialTransactionInput') createMaterialTransactionInput: CreateMaterialTransactionInput
-  ): Promise<Boolean> {
+  ): Promise<MaterialTransaction[]> {
     createMaterialTransactionInput.transaction_category = "ADD";
     
     let session = await this.connection.startSession();
@@ -63,6 +63,7 @@ export class TransactionResolver {
     return this.materialTransactionService.getRemainItems(warehouse_id);
   }
 
+  
   @Mutation(() => Boolean, { name: 'addInventoryTool' })
   @UseGuards(RolesGuard)
   @Roles("owner", "admin", "staff_pembelian")

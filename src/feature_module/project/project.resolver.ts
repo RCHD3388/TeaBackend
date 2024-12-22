@@ -9,6 +9,7 @@ import { ValidationError } from "class-validator";
 import { ProjectService } from "./project.service";
 import { Project } from "./schema/project.schema";
 import { CreateProjectInput, UpdateProjectInput } from "./types/project.types";
+import { UpdateProjectClosingInput } from "./types/project_sub.types";
 
 @Resolver()
 @UseGuards(AppAuthGuard)
@@ -53,5 +54,16 @@ export class ProjectResolver {
     @CurrentUser() user: User
   ): Promise<Project> {
     return this.projectService.update(id, updateProjectInput, user);
+  }
+
+  @Mutation(() => Project, { name: 'updateProjectClosing' })
+  @UseGuards(RolesGuard)
+  @Roles("owner", "admin", "mandor")
+  async updateProjectClosing(
+    @Args('id', { type: () => String }) id: string,
+    @Args('updateProjectClosingInput') updateProjectClosingInput: UpdateProjectClosingInput,
+    @CurrentUser() user: User
+  ): Promise<Project> {
+    return this.projectService.updateProjectClosing(id, updateProjectClosingInput, user);
   }
 }

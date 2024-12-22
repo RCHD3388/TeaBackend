@@ -1,6 +1,7 @@
 import { Field, InputType } from "@nestjs/graphql";
 import { Type } from "class-transformer";
 import { IsArray, IsDate, isDate, IsNotEmpty, IsOptional, IsString, Min, MinLength, ValidateNested } from "class-validator";
+import { MaterialDetailInput } from "src/feature_module/inventory/types/inventory_trans.types";
 
 @InputType()
 export class CreateProjectCostLogInput {
@@ -79,3 +80,22 @@ class UpdateAttendanceDetailInput {
   check_out: boolean;
 }
 
+@InputType()
+export class UpdateProjectClosingInput {
+  @Field(() => String, { nullable: true })
+  @IsOptional()
+  @IsString()
+  note?: string;
+
+  @Field(() => [MaterialDetailInput], {nullable: true})
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => MaterialDetailInput)
+  material_left?: MaterialDetailInput[];
+
+  @Field(() => String, { nullable: true })
+  @IsOptional()
+  @IsString()
+  warehouse_to?: string;
+}

@@ -13,6 +13,7 @@ import { InventoryModule } from '../inventory/inventory.module';
 import { ProjectCostService } from './project_att_cost/project_cost.service';
 import { ProjectAttendResolver } from './project_att_cost/project_attend.resolver';
 import { ProjectAttendService } from './project_att_cost/project_attend.service';
+import { Warehouse, WarehouseSchema } from '../inventory/schema/warehouse.schema';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { ProjectAttendService } from './project_att_cost/project_attend.service'
       { name: CategoryData.name, schema: CategoryDataSchema},
       { name: ProjectCostLog.name, schema: ProjectCostLogSchema},
       { name: AttendanceModule.name, schema: AttendanceModuleSchema},
+      { name: Warehouse.name, schema: WarehouseSchema},
     ]),
     PersonModule,
     InventoryModule
@@ -31,7 +33,7 @@ import { ProjectAttendService } from './project_att_cost/project_attend.service'
     ProjectResolver, ProjectEmployeeResolver,
     ProjectService, ProjectEmployeeService,
     ProjectCostService,
-    ProjectAttendResolver, ProjectAttendService
+    ProjectAttendResolver, ProjectAttendService,
   ],
 
   exports: [ProjectService, ProjectEmployeeService, ProjectCostService]

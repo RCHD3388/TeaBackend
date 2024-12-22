@@ -1,4 +1,5 @@
-import { createUnionType } from "@nestjs/graphql";
+import { createUnionType, Field, InputType } from "@nestjs/graphql";
+import { IsEnum, IsNotEmpty, IsString } from "class-validator";
 import { Material, Tool } from "src/feature_module/inventory/schema/inventory.schema";
 
 export enum RequestItemType {
@@ -33,3 +34,14 @@ export const MaterialOrTool = createUnionType({
     return null;
   },
 });
+
+
+@InputType()
+export class UpdateRequestStatusInput {
+
+  @Field(() => String)
+  @IsNotEmpty({ message: 'Status tidak boleh kosong' })
+  @IsEnum(RequestStatus, { message: 'Status harus sesuai' })
+  @IsString()
+  status: String;
+}

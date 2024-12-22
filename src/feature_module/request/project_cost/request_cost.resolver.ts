@@ -38,7 +38,7 @@ export class RequestCostResolver {
 
   @Mutation(() => RequestCost, { name: 'updateRequestCost' })
   @UseGuards(RolesGuard)
-  @Roles("owner", "admin")
+  @Roles("owner", "admin", "mandor")
   async updateRequestCost(
     @Args('id') id: string,
     @Args('updateRequestCostStatusInput') updateRequestCostStatusInput: UpdateRequestCostStatusInput,
