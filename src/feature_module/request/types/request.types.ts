@@ -1,6 +1,6 @@
 import { createUnionType, Field, InputType } from "@nestjs/graphql";
 import { IsEnum, IsNotEmpty, IsString } from "class-validator";
-import { Material, Tool } from "src/feature_module/inventory/schema/inventory.schema";
+import { Material, Tool } from "../../inventory/schema/inventory.schema";
 
 export enum RequestItemType {
   PEMINJAMAN = 'Peminjaman',

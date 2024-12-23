@@ -108,22 +108,27 @@ export class ProjectService {
       if ((employee_data.role as EmployeeRole).name != "mandor") throw new BadRequestException("Pegawai yang bertugas sebagai mandor harus memiliki role sesuai")
     }
 
-    let session = await this.projectModel.db.startSession();
+    let session = await this.connection.startSession();
 
     try {
       session.startTransaction();
 
       // create new project
-      let new_project = await this.projectModel.create(createProjectInput);
+      let new_project = new this.projectModel(createProjectInput);
+      await new_project.save({ session });
 
       // create warehouse
-      await this.warehouseService.create({
-        name: `Warehouse ${new_project.name}`,
+      let newWarehouse = await this.warehouseService.create({
+        name: `Warehouse Proyek ${new_project.name}`,
         description: `Warehouse untuk project ${new_project.name}`,
         project: new_project._id,
         address: `${new_project.location}`,
         type: WarehouseType.PROJECT,
-      })
+      }, session)
+
+      // add warehouse information to project
+      new_project.warehouse = newWarehouse._id
+      await new_project.save({ session });
 
       // add project leader new project history
       employee_data.project_history.push({
@@ -132,9 +137,9 @@ export class ProjectService {
         left_at: null,
         description: ""
       })
-      employee_data.save();
+      employee_data.save({ session });
 
-      let project = await this.projectModel.findById(new_project._id).populate("project_leader");
+      let project = await this.projectModel.findById(new_project._id).populate("project_leader").session(session).exec();
       (project.project_leader as Employee).salary = null
 
       await session.commitTransaction();
@@ -246,7 +251,7 @@ export class ProjectService {
     }
 
     targetProject.finished_at = new Date();
-    let targetWarehouse = await this.warehouseModel.findOne({ project: targetProject._id }).session(session).exec(); 
+    let targetWarehouse = await this.warehouseModel.findOne({ project: targetProject._id }).session(session).exec();
     targetWarehouse.status = WarehouseStatus.INACTIVE
     await targetWarehouse.save({ session })
 

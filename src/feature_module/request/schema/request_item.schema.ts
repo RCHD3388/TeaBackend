@@ -1,11 +1,9 @@
-import { createUnionType, Field, ObjectType } from "@nestjs/graphql";
+import { Field, ObjectType } from "@nestjs/graphql";
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { Types } from "mongoose";
-import { CategoryData } from "src/feature_module/category/schema/category.schema";
-import { Material, Tool } from "src/feature_module/inventory/schema/inventory.schema";
-import { Warehouse } from "src/feature_module/inventory/schema/warehouse.schema";
-import { Employee } from "src/feature_module/person/schema/employee.schema";
-import { Project } from "src/feature_module/project/schema/project.schema";
+import { Types, Document } from "mongoose";
+import { Material, Tool } from "../../inventory/schema/inventory.schema";
+import { Warehouse } from "../../inventory/schema/warehouse.schema";
+import { Employee } from "../../person/schema/employee.schema";
 import { MaterialOrTool, RequestItem_ItemType, RequestItemType, RequestStatus } from "../types/request.types";
 
 @ObjectType()

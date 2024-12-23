@@ -177,6 +177,7 @@ type Project {
   project_leader: Employee!
   worker: [Employee!]!
   attendance: [AttendanceModule!]!
+  warehouse: String!
   project_closing: ProjectClosing
 }
 
@@ -235,6 +236,15 @@ type Supplier {
   person: Person!
   status: String!
 }
+
+type RequestItemDetail {
+  _id: String!
+  item: MaterialOrTool!
+  quantity: Float!
+  item_type: String!
+}
+
+union MaterialOrTool = Material | Tool
 
 type Query {
   getHello: String!

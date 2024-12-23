@@ -12,12 +12,18 @@ import { RequestClosingResolver } from './project_closing/request_closing.resolv
 import { RequestClosingService } from './project_closing/request_closing.service';
 import { RequestProjectClosing, RequestProjectClosingSchema } from './schema/request_closing.schema';
 import { CategoryData, CategoryDataSchema } from '../category/schema/category.schema';
+import { ItemTransactionResolver } from './item_transaction/item_transaction.resolver';
+import { ItemTransactionService } from './item_transaction/item_transaction.service';
+import { RequestItemHeader, RequestItemHeaderSchema } from './schema/request_item.schema';
+import { Warehouse, WarehouseSchema } from '../inventory/schema/warehouse.schema';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: RequestCost.name, schema: RequestCostSchema },
       { name: RequestProjectClosing.name, schema: RequestProjectClosingSchema },
+      { name: RequestItemHeader.name, schema: RequestItemHeaderSchema },
+      { name: Warehouse.name, schema: WarehouseSchema },
       { name: Project.name, schema: ProjectSchema },
       { name: CategoryData.name, schema: CategoryDataSchema },
     ]),
@@ -25,7 +31,8 @@ import { CategoryData, CategoryDataSchema } from '../category/schema/category.sc
     InventoryModule
   ],
   providers: [RequestCostResolver, RequestCostService,
-    RequestClosingResolver, RequestClosingService
+    RequestClosingResolver, RequestClosingService,
+    ItemTransactionResolver, ItemTransactionService
   ],
   exports: []
 })

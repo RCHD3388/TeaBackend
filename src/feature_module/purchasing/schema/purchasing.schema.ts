@@ -1,11 +1,11 @@
 import { Field, ObjectType } from "@nestjs/graphql";
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Types } from "mongoose";
-import { CategoryData } from "src/feature_module/category/schema/category.schema";
-import { Warehouse } from "src/feature_module/inventory/schema/warehouse.schema";
-import { Employee } from "src/feature_module/person/schema/employee.schema";
-import { Supplier } from "src/feature_module/person/schema/supplier.schema";
-import { MaterialOrTool, RequestItem_ItemType, RequestStatus } from "src/feature_module/request/types/request.types";
+import { CategoryData } from "../../category/schema/category.schema";
+import { Warehouse } from "../../inventory/schema/warehouse.schema";
+import { Employee } from "../../person/schema/employee.schema";
+import { Supplier } from "../../person/schema/supplier.schema";
+import { MaterialOrTool, RequestItem_ItemType, RequestStatus } from "../../request/types/request.types";
 
 @ObjectType()
 @Schema()

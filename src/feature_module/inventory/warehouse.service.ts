@@ -1,6 +1,6 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { InjectConnection, InjectModel } from '@nestjs/mongoose';
+import { ClientSession, Connection, Model } from 'mongoose';
 import { Warehouse, WarehouseType } from './schema/warehouse.schema';
 import { Project } from '../project/schema/project.schema';
 import { CreateWarehouseInput, UpdateWarehouseInput } from './types/warehouse.types';
@@ -10,12 +10,16 @@ import { Employee, EmployeeRole } from '../person/schema/employee.schema';
 @Injectable()
 export class WarehouseService {
   constructor(
+    @InjectConnection() private readonly connection: Connection,
     @InjectModel(Warehouse.name) private warehouseModel: Model<Warehouse>,
     @InjectModel(Project.name) private projectModel: Model<Project>,
   ) { }
 
-  async findAll(): Promise<Warehouse[]> {
-    return this.warehouseModel.find().populate('project').exec();
+  async findAll(user: User): Promise<Warehouse[]> {
+    if(((user.employee as Employee).role as EmployeeRole).name == "mandor"){
+      return await this.warehouseModel.find().exec();
+    }
+    return await this.warehouseModel.find().populate('project').exec() 
   }
 
   async findWarehouseById(id: string, user: User): Promise<Warehouse> {
@@ -37,25 +41,26 @@ export class WarehouseService {
     return target_warehouse
   }
 
-  async create(createWarehouseInput: CreateWarehouseInput): Promise<Warehouse> {
-
+  async create(createWarehouseInput: CreateWarehouseInput, session?: ClientSession): Promise<Warehouse> {
+    
     let { type, project, name } = createWarehouseInput
     if (type === 'project') {
       // check if project exist
-      let target_project = await this.projectModel.findById(project).exec()
+      let target_project = await this.projectModel.findById(project).session(session).exec()
       if (!target_project) throw new BadRequestException('Project tidak ditemukan')
 
       // check if project already have an warehouse
-      let target_project_warehouse = await this.warehouseModel.findOne({ project: target_project._id }).exec()
+      let target_project_warehouse = await this.warehouseModel.findOne({ project: target_project._id }).session(session).exec()
       if (target_project_warehouse) throw new BadRequestException('Project ini sudah memiliki warehouse')
     }
 
     if (type === 'warehouse') {
-      let target_project_warehouse = await this.warehouseModel.findOne({ name: name }).exec()
+      let target_project_warehouse = await this.warehouseModel.findOne({ name: name }).session(session).exec()
       if (target_project_warehouse) throw new BadRequestException('Warehouse perusahaan dengan nama tersebut telah ada')
     }
 
-    const new_warehouse = await this.warehouseModel.create(createWarehouseInput);
+    const new_warehouse = new this.warehouseModel(createWarehouseInput);
+    new_warehouse.save({ session })
 
     return new_warehouse
   }

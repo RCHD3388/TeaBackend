@@ -1,7 +1,7 @@
 import { Field, ID, ObjectType } from "@nestjs/graphql";
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Document, Types } from "mongoose";
-import { CategoryData } from "src/feature_module/category/schema/category.schema";
+import { CategoryData } from "../../category/schema/category.schema";
 
 export enum MaterialStatus {
   ACTIVE = 'Active',

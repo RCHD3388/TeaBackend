@@ -3,9 +3,10 @@ import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 import { CategoryData } from '../../category/schema/category.schema';
 import { Employee } from '../../person/schema/employee.schema';
-import { RequestCost } from 'src/feature_module/request/schema/request_cost.schema';
-import { MaterialTransaction, ToolTransaction } from 'src/feature_module/inventory/schema/inventory_trans.schema';
-import { RequestProjectClosing } from 'src/feature_module/request/schema/request_closing.schema';
+import { RequestCost } from '../../request/schema/request_cost.schema';
+import { MaterialTransaction, ToolTransaction } from '../../inventory/schema/inventory_trans.schema';
+import { RequestProjectClosing } from '../../request/schema/request_closing.schema';
+import { Warehouse } from '../../inventory/schema/warehouse.schema';
 
 // ===== ATTENDANCE MODULE START =====
 @ObjectType()
@@ -138,6 +139,10 @@ export class Project extends Document {
   @Field(() => [AttendanceModule])
   @Prop({ type: [Types.ObjectId], required: true, ref: "AttendanceModule" })
   attendance: string[] | AttendanceModule[];
+
+  @Field(() => String)
+  @Prop({ type: Types.ObjectId, ref: "Warehouse"})
+  warehouse: String | Warehouse
 
   @Field(() => ProjectClosing, { nullable: true })
   @Prop({ type: ProjectClosing })

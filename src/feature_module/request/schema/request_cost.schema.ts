@@ -1,9 +1,9 @@
 import { Field, ObjectType } from "@nestjs/graphql";
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Types, Document } from "mongoose";
-import { CategoryData } from "src/feature_module/category/schema/category.schema";
-import { Employee } from "src/feature_module/person/schema/employee.schema";
-import { Project } from "src/feature_module/project/schema/project.schema";
+import { CategoryData } from "../../category/schema/category.schema";
+import { Employee } from "../../person/schema/employee.schema";
+import { Project } from "../../project/schema/project.schema";
 import { RequestStatus } from "../types/request.types";
 
 @ObjectType()

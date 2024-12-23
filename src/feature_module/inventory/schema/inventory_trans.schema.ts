@@ -3,7 +3,7 @@ import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Date, Document, Types } from 'mongoose';
 import { Material, Tool } from "./inventory.schema";
 import { Warehouse } from "./warehouse.schema";
-import { TransactionCategory } from "src/feature_module/category/schema/category.schema";
+import { TransactionCategory } from "../../category/schema/category.schema";
 
 @ObjectType()
 @Schema({ timestamps: true })
