@@ -88,7 +88,7 @@ export class Material extends Document {
 
   @Field(() => UnitMeasure)
   @Prop({ type: Types.ObjectId, required: true, ref: "UnitMeasure" })
-  unit_measure: String | Merk;
+  unit_measure: String | UnitMeasure;
 
   @Field(() => String)
   @Prop({ type: String, required: true, enum: MaterialStatus })
@@ -96,7 +96,7 @@ export class Material extends Document {
 
   @Field(() => UnitMeasure)
   @Prop({ type: Types.ObjectId, required: true, ref: "UnitMeasure" })
-  minimum_unit_measure: String | Merk;
+  minimum_unit_measure: String | UnitMeasure;
 
   @Field(() => Number)
   @Prop({ type: Number, required: true })
