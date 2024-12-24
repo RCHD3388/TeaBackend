@@ -184,7 +184,7 @@ export class ProjectCostLog extends Document {
   created_by: String | Employee;
 
   @Field(() => Project)
-  @Prop({ type: Types.ObjectId, ref: "Employee" })
+  @Prop({ type: Types.ObjectId, ref: "Project" })
   project: String | Project;
 
   @Field(() => RequestCost)
