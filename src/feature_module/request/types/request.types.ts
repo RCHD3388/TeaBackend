@@ -1,5 +1,5 @@
 import { createUnionType, Field, InputType } from "@nestjs/graphql";
-import { IsEnum, IsNotEmpty, IsString } from "class-validator";
+import { IsEnum, IsNotEmpty, IsOptional, IsString } from "class-validator";
 import { Material, Tool } from "../../inventory/schema/inventory.schema";
 
 export enum RequestItemType {
@@ -44,4 +44,10 @@ export class UpdateRequestStatusInput {
   @IsEnum(RequestStatus, { message: 'Status harus sesuai' })
   @IsString()
   status: String;
+
+  @Field(() => String)
+  @IsOptional()
+  @IsNotEmpty({ message: 'handled warehouse tidak boleh kosong' })
+  @IsString()
+  handled_warehouse?: String;
 }

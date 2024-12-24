@@ -18,23 +18,13 @@ export class RequestClosingService {
     private readonly projectService: ProjectService
   ) { }
 
-  async findAll(user: User, project_id?: string): Promise<RequestProjectClosing[]> {
+  async findAll(user: User): Promise<RequestProjectClosing[]> {
     let currentEmployee = user.employee as Employee;
     let role = (currentEmployee.role as EmployeeRole).name;
 
+    let filter = {}
     if(role == "mandor"){
-      if(!project_id) throw new NotFoundException('Request tidak ditemukan');
-      let targetProject = await this.projectModel.findById(project_id).exec();
-      if(!targetProject) throw new NotFoundException('Project tidak ditemukan');
-
-      if(targetProject.project_leader.toString() != (user.employee as Employee)._id.toString()){
-        throw new BadRequestException('User tidak diperbolehkan melakukan aksi tersebut');
-      }
-    }
-
-    let filter = {};
-    if (project_id) {
-      filter = { requested_from: project_id };
+      filter = {requested_by: (user.employee as Employee)._id.toString()}
     }
 
     let targetRequestClosing = await this.requestClosingModel.find(filter).populate(["requested_by", "requested_from", "handled_by"]).exec()

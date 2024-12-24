@@ -17,6 +17,9 @@ export class LoginInput {
 @ObjectType()
 export class LoginResponse {
   @Field()
+  _id: string
+
+  @Field()
   username: string
 
   @Field()

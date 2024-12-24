@@ -20,23 +20,13 @@ export class RequestCostService {
     private readonly projectCostService: ProjectCostService
   ) { }
 
-  async findAll(user: User, projectId?: string): Promise<RequestCost[]> {
+  async findAll(user: User): Promise<RequestCost[]> {
     let currentEmployee = user.employee as Employee;
     let role = (currentEmployee.role as EmployeeRole).name;
 
+    let filter = {}
     if(role == "mandor"){
-      if(!projectId) throw new NotFoundException('Request tidak ditemukan');
-      let targetProject = await this.projectModel.findById(projectId).exec();
-      if(!targetProject) throw new NotFoundException('Project tidak ditemukan');
-
-      if(targetProject.project_leader.toString() != (user.employee as Employee)._id.toString()){
-        throw new BadRequestException('User tidak diperbolehkan melakukan aksi tersebut');
-      }
-    }
-
-    let filter = {};
-    if (projectId) {
-      filter = { requested_from: projectId };
+      filter = {requested_by: (user.employee as Employee)._id.toString()}
     }
 
     let targetRequestCosts = await this.requestCostModel.find(filter).populate(["requested_by", "requested_from", "handled_by", "project_cost_category"]).exec()

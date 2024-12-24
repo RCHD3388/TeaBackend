@@ -122,6 +122,7 @@ export class ProjectService {
         name: `Warehouse Proyek ${new_project.name}`,
         description: `Warehouse untuk project ${new_project.name}`,
         project: new_project._id,
+        project_leader: String(new_project.project_leader),
         address: `${new_project.location}`,
         type: WarehouseType.PROJECT,
       }, session)

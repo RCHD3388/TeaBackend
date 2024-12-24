@@ -3,6 +3,7 @@ import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Types, Document } from "mongoose";
 import { Project } from "../../project/schema/project.schema";
 import { MaterialTransaction, ToolTransaction } from "./inventory_trans.schema";
+import { Employee } from "src/feature_module/person/schema/employee.schema";
 
 export enum WarehouseStatus {
   ACTIVE = 'Active',
@@ -35,6 +36,10 @@ export class Warehouse extends Document {
   @Field(() => Project, {nullable: true})
   @Prop({ type: Types.ObjectId, ref: "Project" })
   project: string | Project | null;
+
+  @Field(() => String, {nullable: true})
+  @Prop({ type: Types.ObjectId, ref: "Employee" })
+  project_leader: string | Employee | null;
 
   @Field(() => String)
   @Prop({ type: String, required: true })

@@ -22,6 +22,14 @@ export class WarehouseService {
     return await this.warehouseModel.find().populate('project').exec() 
   }
 
+  async findAllByProjectLeader(user: User): Promise<Warehouse[]> {
+    if(((user.employee as Employee).role as EmployeeRole).name == "mandor"){
+      return await this.warehouseModel.find({project_leader: (user.employee as Employee)._id.toString()}).exec();
+    }else{
+      return await this.warehouseModel.find({$or: [{project: null}, {project: { $size: 0 }}]}).exec();
+    }
+  }
+
   async findWarehouseById(id: string, user: User): Promise<Warehouse> {
     let target_warehouse = await this.warehouseModel.findById(id).populate('project').exec();
     if (!target_warehouse) throw new NotFoundException('Warehouse tidak ditemukan')

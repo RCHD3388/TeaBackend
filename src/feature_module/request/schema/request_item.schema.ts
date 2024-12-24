@@ -71,6 +71,10 @@ export class RequestItemHeader extends Document {
   @Prop({ type: Types.ObjectId, ref: "Employee" })
   handled_by?: String | Employee;
 
+  @Field(() => Employee, { nullable: true })
+  @Prop({ type: Types.ObjectId, ref: "Warehouse" })
+  handled_warehouse?: String | Warehouse;
+
   @Field(() => [RequestItemDetail])
   @Prop({ type: [RequestItemDetail], required: true })
   request_item_detail?: RequestItemDetail[];

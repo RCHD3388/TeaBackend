@@ -1,6 +1,8 @@
-import { Field, InputType } from "@nestjs/graphql";
+import { Field, InputType, ObjectType } from "@nestjs/graphql";
 import { IsNotEmpty, IsOptional, IsString, IsNumber, Min, IsEnum, IsArray } from "class-validator";
 import { RequestItemType, RequestStatus } from "./request.types";
+import { RequestItemHeader } from "../schema/request_item.schema";
+import { Warehouse } from "src/feature_module/inventory/schema/warehouse.schema";
 
 @InputType()
 export class CreateRequestItemDetailInput {
@@ -55,13 +57,12 @@ export class CreateRequestItemInput {
   request_item_detail: CreateRequestItemDetailInput[];
 }
 
-@InputType()
-export class UpdateRequestItemStatusInput {
-
+@ObjectType()
+export class CustomRequestItem {
   @Field(() => String)
-  @IsNotEmpty({ message: 'Status tidak boleh kosong' })
-  @IsEnum(RequestStatus, { message: 'Status harus sesuai' })
-  @IsString()
-  status: String;
+  request_item_header: RequestItemHeader;
+
+  @Field(() => [Warehouse])
+  warehouse: Warehouse[]
 }
 

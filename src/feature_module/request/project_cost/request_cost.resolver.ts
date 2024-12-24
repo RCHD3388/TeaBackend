@@ -30,10 +30,9 @@ export class RequestCostResolver {
   @UseGuards(RolesGuard)
   @Roles("owner", "admin", "mandor")
   async findAllRequestCosts(
-    @CurrentUser() user: User,
-    @Args('projectId', { nullable: true }) projectId?: string
+    @CurrentUser() user: User
   ): Promise<RequestCost[]> {
-    return this.requestCostService.findAll(user, projectId);
+    return this.requestCostService.findAll(user);
   }
 
   @Mutation(() => RequestCost, { name: 'updateRequestCost' })

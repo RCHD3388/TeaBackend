@@ -16,8 +16,14 @@ export class CreateWarehouseInput {
   @Field(() => String, {nullable: true})
   @IsOptional()
   @IsString()
-  @IsNotEmpty({ message: 'Project should not be empty' })
+  @IsNotEmpty({ message: 'Project tidak boleh kosong' })
   project?: string;
+
+  @Field(() => String, {nullable: true})
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty({ message: 'Project leader tidak boleh kosong' })
+  project_leader?: string;
 
   @Field(() => String)
   @IsString()
