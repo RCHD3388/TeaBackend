@@ -23,7 +23,7 @@ export class ToolTransactionService {
     if (!targetWarehouse) throw new NotFoundException('Warehouse tidak ditemukan')
 
     let remainsData = await this.toolTransactionModel.aggregate([
-      { $match: { warehouse, in: 1 } },
+      { $match: { warehouse } },
       { $sort: { date: -1 } },   // descending date
       {
         $group: {
@@ -31,7 +31,8 @@ export class ToolTransactionService {
           latestTransaction: { $first: "$$ROOT" } // Ambil data transaksi terbaru untuk setiap item
         }
       },
-      { $replaceRoot: { newRoot: "$latestTransaction" } } // Ganti root dengan data transaksi terbaru
+      { $replaceRoot: { newRoot: "$latestTransaction" } }, // Ganti root dengan data transaksi terbaru
+      { $match: { in: { $ne: 0 } }, }
     ]).session(session || null).exec();
 
     const populatedData = await this.toolTransactionModel.populate(remainsData, {
@@ -90,7 +91,7 @@ export class ToolTransactionService {
 
         // used tools and transfer out from warehouse_from
         if (targetTransactionCategory.id == "USE" || targetTransactionCategory.id == "TRF") {
-          const from_latestToolTransaction = await this.toolTransactionModel.find({ tool: tool, warehouse: warehouse_from })
+          const from_latestToolTransaction = await this.toolTransactionModel.find({ tool: curTool, warehouse: warehouse_from })
             .sort({ date: -1 })
             .limit(1)
             .session(session)
@@ -99,7 +100,7 @@ export class ToolTransactionService {
             throw new BadRequestException(`Tool tidak ada di warehouse sumber`);
           }
           let newOutToolTransaction = new this.toolTransactionModel({
-            tool: tool,
+            tool: curTool,
             date,
             in: 0,
             out: 1,
@@ -113,7 +114,7 @@ export class ToolTransactionService {
 
         // receive transfer tools to warehouse_to
         if (targetTransactionCategory.id == "TRF" || targetTransactionCategory.id == "PUR" || targetTransactionCategory.id == "ADD") {
-          const to_latestToolTransaction = await this.toolTransactionModel.find({ tool: tool, warehouse: warehouse_to })
+          const to_latestToolTransaction = await this.toolTransactionModel.find({ tool: curTool, warehouse: warehouse_to })
             .sort({ date: -1 })
             .limit(1)
             .session(session)
@@ -121,7 +122,7 @@ export class ToolTransactionService {
           // CHECK IF ALREADY EXIST
           if (to_latestToolTransaction.length > 0 && to_latestToolTransaction[0].in == 1) throw new BadRequestException(`Tool sudah ada di warehouse tujuan`);
           let newInToolTransaction = new this.toolTransactionModel({
-            tool: tool,
+            tool: curTool,
             date,
             in: 1,
             out: 0,
@@ -171,7 +172,7 @@ export class ToolTransactionService {
 
         // CREATE NEW TRANSACTION
         let newInToolTransaction = new this.toolTransactionModel({
-          tool: targetTool,
+          tool: targetTool.toString(),
           date,
           in: 1,
           out: 0,
@@ -222,22 +223,23 @@ export class ToolTransactionService {
         if (!targetTool) throw new NotFoundException(`Alat tidak ditemukan`);
 
         // used tools and transfer out from warehouse_from
-        const from_latestToolTransaction = await this.toolTransactionModel.find({ tool: tool, warehouse: warehouse })
+        const from_latestToolTransaction = await this.toolTransactionModel.find({ tool: curTool, warehouse: source_warehouse._id.toString() })
           .sort({ date: -1 })
           .limit(1)
           .session(session)
+
         // CHECK TOOL EXIST
         if (from_latestToolTransaction.length <= 0 || from_latestToolTransaction[0].in == 0) {
           throw new BadRequestException(`Tool tidak ada di warehouse sumber`);
         }
         let newOutToolTransaction = new this.toolTransactionModel({
-          tool: tool,
+          tool: curTool,
           date,
           in: 0,
           out: 1,
           warehouse: warehouse,
           transaction_code: newTransCode,
-          transaction_category: targetTransactionCategory._id,
+          transaction_category: targetTransactionCategory._id.toString(),
         })
         await newOutToolTransaction.save({ session });
         listOfNewTransaction.push(newOutToolTransaction)
@@ -281,7 +283,7 @@ export class ToolTransactionService {
         if (!targetTool) throw new NotFoundException(`Alat tidak ditemukan`);
 
         // receive transfer tools to warehouse_to
-        const to_latestToolTransaction = await this.toolTransactionModel.find({ tool: tool, warehouse: warehouse })
+        const to_latestToolTransaction = await this.toolTransactionModel.find({ tool: curTool, warehouse: target_warehouse._id.toString() })
           .sort({ date: -1 })
           .limit(1)
           .session(session)
@@ -289,13 +291,13 @@ export class ToolTransactionService {
         // CHECK IF ALREADY EXIST
         if (to_latestToolTransaction.length > 0 && to_latestToolTransaction[0].in == 1) throw new BadRequestException(`Tool sudah ada di warehouse tujuan`);
         let newInToolTransaction = new this.toolTransactionModel({
-          tool: tool,
+          tool: curTool,
           date,
           in: 1,
           out: 0,
           warehouse: warehouse,
           transaction_code: newTransCode,
-          transaction_category: targetTransactionCategory._id,
+          transaction_category: targetTransactionCategory._id.toString(),
         })
 
         await newInToolTransaction.save({ session });

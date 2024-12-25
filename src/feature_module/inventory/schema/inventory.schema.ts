@@ -54,6 +54,10 @@ export class Sku extends Document {
   @Prop({ type: String, default: "" })
   description?: string;
 
+  @Field(() => String)
+  @Prop({ type: String, default: MaterialStatus.ACTIVE, enum: MaterialStatus })
+  status: string;
+
   @Field(() => Merk)
   @Prop({ type: Types.ObjectId, required: true, ref: "Merk" })
   merk: String | Merk;

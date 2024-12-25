@@ -33,7 +33,7 @@ export class ItemTransactionResolver {
     return await this.itemTransactionService.findYourRequest(user);
   }
 
-  @Query(() => [CustomRequestItem])
+  @Query(() => [RequestItemHeader])
   @UseGuards(RolesGuard)
   @Roles("owner", "admin", "mandor")
   async findYourApprovalItemTransaction(

@@ -41,6 +41,7 @@ type Sku {
   _id: ID!
   name: String!
   description: String
+  status: String!
   merk: Merk!
   item_category: CategoryData!
 }
@@ -273,11 +274,6 @@ type RequestItemHeader {
   request_item_detail: [RequestItemDetail!]!
 }
 
-type CustomRequestItem {
-  request_item_header: String!
-  warehouse: [Warehouse!]!
-}
-
 type Query {
   getHello: String!
   getAllUsers: [User!]!
@@ -310,7 +306,7 @@ type Query {
   findAllRequestClosing(projectId: String): [RequestProjectClosing!]!
   findAllRequestItemTransaction: [RequestItemHeader!]!
   findYourRequestItemTransaction: [RequestItemHeader!]!
-  findYourApprovalItemTransaction: [CustomRequestItem!]!
+  findYourApprovalItemTransaction: [RequestItemHeader!]!
 }
 
 input EmployeeFilter {
@@ -356,6 +352,7 @@ type Mutation {
   updateMaterial(id: String!, updateMaterialInput: UpdateMaterialInput!): Material!
   createSku(createSkuInput: CreateSkuInput!): Sku!
   updateSku(id: String!, updateSkuInput: UpdateSkuInput!): Sku!
+  updateTool(id: String!, updateToolInput: UpdateToolInput!): Tool!
   addInventoryMaterial(createMaterialTransactionInput: CreateMaterialTransactionInput!): [MaterialTransaction!]!
   addInventoryTool(addOnlyToolTransactionInput: AddOnlyToolTransactionInput!): Boolean!
   createCategory(createCategoryInput: CreateCategoryInput!): CategoryData!
@@ -547,8 +544,18 @@ input CreateSkuInput {
 input UpdateSkuInput {
   name: String
   description: String
+  status: String!
   merk: String
   item_category: String!
+}
+
+input UpdateToolInput {
+  description: String
+  warranty_number: String
+  warranty_expired_date: DateTime
+  status: String
+  price: Float
+  sku: String
 }
 
 input CreateMaterialTransactionInput {

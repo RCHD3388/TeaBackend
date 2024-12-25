@@ -77,7 +77,7 @@ export class TransactionResolver {
     try {
       session.startTransaction();
 
-      let return_value = this.toolTransactionService.addOnlyTool(addOnlyToolTransactionInput, session);
+      let return_value = await this.toolTransactionService.addOnlyTool(addOnlyToolTransactionInput, session);
       
       await session.commitTransaction();
       return return_value

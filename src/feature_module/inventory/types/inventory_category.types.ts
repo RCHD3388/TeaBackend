@@ -1,5 +1,6 @@
 import { Field, InputType } from "@nestjs/graphql";
-import { IsNotEmpty, IsOptional, IsString, Matches } from "class-validator";
+import { IsEnum, IsNotEmpty, IsOptional, IsString, Matches } from "class-validator";
+import { MaterialStatus } from "../schema/inventory.schema";
 
 @InputType()
 export class CreateInventoryCategoryInput {
@@ -64,6 +65,12 @@ export class UpdateSkuInput {
   @IsString()
   description?: string;
 
+  @Field(() => String)
+  @IsOptional()
+  @IsNotEmpty({ message: 'Status should not be empty' })
+  @IsEnum(MaterialStatus, { message: "Invalid Type Status" })
+  status: string;
+  
   @Field(() => String, {nullable: true})
   @IsOptional()
   @IsString()

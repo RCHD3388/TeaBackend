@@ -4,7 +4,7 @@ import { ClientSession, Connection, Model, startSession } from 'mongoose';
 import { TransactionCategory } from 'src/feature_module/category/schema/category.schema';
 import { Warehouse, WarehouseStatus } from '../schema/warehouse.schema';
 import { MaterialTransaction } from '../schema/inventory_trans.schema';
-import { Material } from '../schema/inventory.schema';
+import { Material, MaterialStatus } from '../schema/inventory.schema';
 import { CreateMaterialTransactionInput } from '../types/inventory_trans.types';
 
 @Injectable()
@@ -21,7 +21,7 @@ export class MaterialTransactionService {
     if (!targetWarehouse) throw new NotFoundException('Warehouse tidak ditemukan')
 
     let remainsData = await this.materialTransactionModel.aggregate([
-      { $match: { warehouse, remain: { $gt: 0 } } },
+      { $match: { warehouse } },
       { $sort: { date: -1 } },   // descending date
       {
         $group: {
@@ -29,7 +29,8 @@ export class MaterialTransactionService {
           latestTransaction: { $first: "$$ROOT" } // Ambil data transaksi terbaru untuk setiap item
         }
       },
-      { $replaceRoot: { newRoot: "$latestTransaction" } } // Ganti root dengan data transaksi terbaru
+      { $replaceRoot: { newRoot: "$latestTransaction" } }, // Ganti root dengan data transaksi terbaru
+      { $match: { remain: { $ne: 0 } }, }
     ]).session(session || null).exec();
 
 
@@ -108,7 +109,7 @@ export class MaterialTransactionService {
         let date = new Date();
 
         // CHECK MATERIAL EXIST
-        let targetMaterial = await this.materialModel.findById(material).session(session);
+        let targetMaterial = await this.materialModel.findOne({ _id: material, status: MaterialStatus.ACTIVE }).session(session);
         if (!targetMaterial) throw new NotFoundException(`Material tidak ditemukan`);
 
         // latest material transaction for warehouse_from with material_id
@@ -197,7 +198,7 @@ export class MaterialTransactionService {
       let targetTransactionCategory = await this.transactionCategoryModel.findOne({ id: "SND" }).session(session);
       if (!targetTransactionCategory) throw new NotFoundException(`Kategori transaksi tidak ditemukan`);
       let source_warehouse = await this.warehouseModel.findOne({ _id: warehouse }).session(session)
-
+      if (!source_warehouse) throw new NotFoundException(`Warehouse sumber tidak ditemukan`);
       // ======================= PROSES START =======================
       let listOfNewTransaction: MaterialTransaction[] = [];
 
@@ -216,7 +217,7 @@ export class MaterialTransactionService {
         let date = new Date();
 
         // latest material transaction for warehouse_from with material_id
-        const warehouseFrom_latestMaterialTransaction = await this.materialTransactionModel.find({ material: material, warehouse: source_warehouse._id })
+        const warehouseFrom_latestMaterialTransaction = await this.materialTransactionModel.find({ material: material, warehouse: source_warehouse._id.toString() })
           .sort({ date: -1 })
           .limit(1)
           .session(session)
@@ -234,9 +235,9 @@ export class MaterialTransactionService {
           out: qty,
           remain: newRemainItems,
           price: newPrice,
-          warehouse: source_warehouse._id,
+          warehouse: source_warehouse._id.toString(),
           transaction_code: newTransCode,
-          transaction_category: targetTransactionCategory._id,
+          transaction_category: targetTransactionCategory._id.toString(),
           date,
         })
         await newOutMaterialTransaction.save({ session });
@@ -267,6 +268,10 @@ export class MaterialTransactionService {
       let targetTransactionCategory = await this.transactionCategoryModel.findOne({ id: "REC" }).session(session);
       if (!targetTransactionCategory) throw new NotFoundException(`Kategori transaksi tidak ditemukan`);
 
+      // check target warehouse
+      let target_warehouse = await this.warehouseModel.findOne({ _id: warehouse }).session(session)
+      if (!target_warehouse) throw new NotFoundException(`Warehouse sumber tidak ditemukan`);
+
       // ======================= PROSES START =======================
       let listOfNewTransaction: MaterialTransaction[] = [];
 
@@ -286,7 +291,7 @@ export class MaterialTransactionService {
         if (!targetMaterial) throw new NotFoundException(`Material tidak ditemukan`);
 
         // latest material transaction for warehouse_to with material_id
-        const warehouseTo_latestMaterialTransaction = await this.materialTransactionModel.find({ material: material, warehouse: warehouse })
+        const warehouseTo_latestMaterialTransaction = await this.materialTransactionModel.find({ material: material, warehouse: target_warehouse._id.toString() })
           .sort({ date: -1 })
           .limit(1)
           .session(session)
@@ -303,7 +308,7 @@ export class MaterialTransactionService {
           price: newPrice,
           warehouse: warehouse,
           transaction_code: newTransCode,
-          transaction_category: targetTransactionCategory._id,
+          transaction_category: targetTransactionCategory._id.toString(),
           date,
         })
         await newInMaterialTransaction.save({ session });

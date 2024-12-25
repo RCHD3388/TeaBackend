@@ -101,6 +101,7 @@ export class CreateFinishingDetailInput {
   recipient_phone: string;
 
   @Field(() => String, {nullable: true})
+  @IsOptional()
   @IsString()
   recipient_description?: string;
 }

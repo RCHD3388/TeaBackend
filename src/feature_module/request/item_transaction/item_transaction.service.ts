@@ -52,26 +52,50 @@ export class ItemTransactionService {
   }
 
   async findAll(): Promise<RequestItemHeader[]> {
-    return await this.requestItemHeaderModel.find().populate(["requested_by", "requested_from", "requested_to", "handled_by"]).exec();
+    return await this.requestItemHeaderModel.find().populate(["requested_by", "requested_from", "requested_to"]).exec();
   }
 
   async findYourRequest(user: User): Promise<RequestItemHeader[]> {
     const employeeId = (user.employee as Employee)._id;
 
     return await this.requestItemHeaderModel.find({ requested_by: employeeId })
-      .populate(["requested_by", "requested_from", "requested_to", "handled_by"])
+      .populate(["requested_by", "requested_from", "requested_to"])
       .exec();
   }
 
   async findYourApproval(user: User): Promise<RequestItemHeader[]> {
     // mendapatkan seluruh warehouse milik project leader atau dari warehouse perusahaan admin tertentu
     let currentUserWarehouse = await this.warehouseService.findAllByProjectLeader(user);
+    let target_warehouse = await Promise.all(currentUserWarehouse.map((warehouse) => {
+      return warehouse._id.toString()
+    }))
+    console.log(target_warehouse)
     // mencari request transaction yang mengandung warehouse milik project leader atau admin (untuk warehouse perusahaan)
-    let requestItemHeaders = await this.requestItemHeaderModel.find({ requested_to: { $in: currentUserWarehouse } })
-      .populate(["requested_by", "requested_from", "requested_to", "handled_by"])
+    let requestItemHeaders = await this.requestItemHeaderModel.find({ requested_to: { $in: target_warehouse } })
+      .populate(["requested_by", "requested_from", "requested_to"])
       .exec();
 
     return requestItemHeaders;
+  }
+
+  async checkAvailabilityItem(checked_request_item_detail, requestedFromWarehouse) {
+    let material_item = await Promise.all(checked_request_item_detail.filter((item: CreateRequestItemDetailInput) => {
+      return item.item_type == RequestItem_ItemType.MATERIAL
+    }))
+    let tool_item = await Promise.all(checked_request_item_detail.filter((item: CreateRequestItemDetailInput) => {
+      return item.item_type == RequestItem_ItemType.TOOL
+    }))
+
+    let remainMaterial = await this.materialTransactionService.getRemainItems(requestedFromWarehouse._id.toString());
+    let remainTool = await this.toolTransactionService.getRemainItems(requestedFromWarehouse._id.toString());
+
+    let canFulfillRequest = await this.canFulfillRequest(material_item, remainMaterial);
+    let canFulfillTools = await this.canFulfillTools(tool_item, remainTool);
+
+    if (!canFulfillRequest || !canFulfillTools) {
+      return false
+    }
+    return true
   }
 
   async createRequestItem(createRequestItemInput: CreateRequestItemInput, user: User): Promise<RequestItemHeader> {
@@ -82,8 +106,9 @@ export class ItemTransactionService {
       throw new BadRequestException('warehouse tujuan dan destinasi tidak boleh sama');
     }
     // check detail item tidak boleh kosong
-    if (request_item_detail.length <= 0) {
-      throw new BadRequestException('Detail item tidak boleh kosong');
+    let checked_request_item_detail = await Promise.all(request_item_detail.filter(detail => detail.quantity > 0));
+    if (checked_request_item_detail.length <= 0) {
+      throw new BadRequestException('Detail item tidak boleh kosong dan quantity tidak boleh 0');
     }
 
     // check warehouse asal dan destinasi harus ada
@@ -105,21 +130,9 @@ export class ItemTransactionService {
     }
 
     if (type == RequestItemType.PENGEMBALIAN) {
-      let material_item = await Promise.all(request_item_detail.filter((item: CreateRequestItemDetailInput) => {
-        return item.item_type == RequestItem_ItemType.MATERIAL
-      }))
-      let tool_item = await Promise.all(request_item_detail.filter((item: CreateRequestItemDetailInput) => {
-        return item.item_type == RequestItem_ItemType.TOOL
-      }))
-
-      let remainMaterial = await this.materialTransactionService.getRemainItems(requestedFromWarehouse._id);
-      let remainTool = await this.toolTransactionService.getRemainItems(requestedFromWarehouse._id);
-
-      let canFulfillRequest = await this.canFulfillRequest(material_item, remainMaterial);
-      let canFulfillTools = await this.canFulfillTools(tool_item, remainTool);
-
-      if (!canFulfillRequest || !canFulfillTools) {
-        throw new BadRequestException('Tidak dapat memenuhi request item, pastikan barang dan alat yang diminta tersedia');
+      let condition = await this.checkAvailabilityItem(checked_request_item_detail, requestedFromWarehouse);
+      if(!condition){
+        throw new BadRequestException('Warehouse tujuan tidak memiliki barang yang cukup mencukupi');
       }
     }
 
@@ -133,7 +146,7 @@ export class ItemTransactionService {
       requested_to,
       requested_at: new Date(),
       status: RequestStatus.MENUNGGU,
-      request_item_detail
+      request_item_detail: checked_request_item_detail
     });
 
     return await newRequestItemHeader.save();
@@ -204,9 +217,9 @@ export class ItemTransactionService {
         return String(item.item)
       }))
 
-      let warehouse = targetRequest.requested_from;
+      let warehouse = (targetRequest.requested_to as Warehouse)._id || targetRequest.requested_to;;
       if (targetRequest.type == RequestItemType.PENGEMBALIAN) {
-        warehouse = (targetRequest.requested_to as Warehouse)._id || targetRequest.requested_to;
+        warehouse = targetRequest.requested_from;
       }
 
       if (material_item.length > 0) {

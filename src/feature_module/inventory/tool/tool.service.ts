@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { ClientSession, Model } from 'mongoose';
-import { Material, Merk, Sku, Tool, UnitMeasure } from '../schema/inventory.schema';
+import { Material, MaterialStatus, Merk, Sku, Tool, UnitMeasure } from '../schema/inventory.schema';
 import { CreateMaterialInput, UpdateMaterialInput } from '../types/material.types';
 import { CreateSkuInput, UpdateSkuInput } from '../types/inventory_category.types';
 import { CategoryData, CategoryType } from 'src/feature_module/category/schema/category.schema';
@@ -57,11 +57,11 @@ export class ToolService {
     return newTool._id;
   }
 
-  async update(id: string, updateToolInput: UpdateToolInput) {
+  async update(id: string, updateToolInput: UpdateToolInput): Promise<Tool> {
     const { sku, status } = updateToolInput;
 
     if (sku) {
-      const targetSku = await this.skuModel.findById(sku).exec();
+      const targetSku = await this.skuModel.findOne({_id: sku, status: MaterialStatus.ACTIVE}).exec();
       if (!targetSku) throw new NotFoundException(`Sku tidak ditemukan`);
     }
 
@@ -70,6 +70,6 @@ export class ToolService {
       if (!targetStatus) throw new NotFoundException(`Status tidak ditemukan`);
     }
 
-    await this.toolModel.findByIdAndUpdate(id, updateToolInput);
+    return await this.toolModel.findByIdAndUpdate(id, updateToolInput);
   }
 }
