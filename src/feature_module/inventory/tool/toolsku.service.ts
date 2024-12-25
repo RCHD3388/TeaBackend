@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Material, Merk, Sku, UnitMeasure } from '../schema/inventory.schema';
+import { Material, MaterialStatus, Merk, Sku, UnitMeasure } from '../schema/inventory.schema';
 import { CreateMaterialInput, UpdateMaterialInput } from '../types/material.types';
 import { CreateSkuInput, UpdateSkuInput } from '../types/inventory_category.types';
 import { CategoryData, CategoryType } from 'src/feature_module/category/schema/category.schema';
@@ -22,6 +22,13 @@ export class ToolSkuService {
     let sku = await this.skuModel.findById(id).populate(['merk', 'item_category']).exec();
     if (!sku) throw new NotFoundException('Sku tidak ditemukan');
     return sku;
+  }
+
+  
+  async findByIds(ids: string[], active_only: boolean = false): Promise<Sku[]> {
+    let filter = {};
+    if (active_only) filter = { status: MaterialStatus.ACTIVE };
+    return this.skuModel.find({_id: {$in: ids}, ...filter}).populate(['merk', 'item_category']).exec();
   }
 
   async create(CreateSkuInput: CreateSkuInput): Promise<Sku> {

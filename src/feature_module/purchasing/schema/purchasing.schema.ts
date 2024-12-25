@@ -6,7 +6,23 @@ import { Warehouse } from "../../inventory/schema/warehouse.schema";
 import { Employee } from "../../person/schema/employee.schema";
 import { Supplier } from "../../person/schema/supplier.schema";
 import { RequestItem_ItemType, RequestStatus } from "../../request/types/request.types";
-import { Material, Tool } from "src/feature_module/inventory/schema/inventory.schema";
+import { Material, Sku, Tool } from "src/feature_module/inventory/schema/inventory.schema";
+
+@ObjectType()
+@Schema()
+export class PurchaseOrderSubDetail {
+  @Field(() => String)
+  @Prop({ type: Types.ObjectId, required: true, ref: "PurchaseTransaction" })
+  purchase_transaction: string;
+
+  @Field(() => String, {nullable: true})
+  @Prop({ type: Types.ObjectId, required: true, ref: "Tool" })
+  tool?: string;
+
+  @Field(() => Number)
+  @Prop({ type: Number, required: true })
+  quantity: number;
+}
 
 @ObjectType()
 @Schema()
@@ -21,8 +37,8 @@ export class PurchaseOrderDetail {
   // TAMBAHAN SAJA TIDAK ADA DI COLLECTION
   @Field(() => Material, { nullable: true })
   material: Material;
-  @Field(() => Tool, { nullable: true })
-  tool: Tool;
+  @Field(() => Sku, { nullable: true })
+  sku: Sku;
 
   @Field(() => String)
   @Prop({ type: String, enum: RequestItem_ItemType, required: true })
@@ -32,9 +48,13 @@ export class PurchaseOrderDetail {
   @Prop({ type: Number, required: true })
   quantity: number;
 
-  @Field(() => String)
-  @Prop({ type: String, required: true, enum: RequestStatus })
-  status: String;
+  @Field(() => Number)
+  @Prop({ type: Number, default: 0 })
+  completed_quantity: Number;
+
+  @Field(() => [PurchaseOrderSubDetail])
+  @Prop({ type: [PurchaseOrderSubDetail], default: [] })
+  sub_detail: PurchaseOrderSubDetail[];
 }
 
 @ObjectType()
@@ -67,31 +87,24 @@ export class PurchaseOrder extends Document {
   @Prop({ type: String, required: true, enum: RequestStatus })
   status: String;
 
-  @Field(() => Employee, { nullable: true })
-  @Prop({ type: Types.ObjectId, ref: 'Employee' })
-  handled_by?: string | Employee;
-
-  @Field(() => Date, { nullable: true })
-  @Prop({ type: Date })
-  handled_date?: Date;
-
   @Field(() => [PurchaseOrderDetail])
   @Prop({ type: [PurchaseOrderDetail], required: true })
   purchase_order_detail: PurchaseOrderDetail[];
-
-  @Field(() => [PurchaseTransaction], { nullable: true })
-  @Prop({ type: [Types.ObjectId], ref: 'PurchaseTransaction', default: [] })
-  purhase_transactions?: string[] | PurchaseTransaction[];
 }
 
 export const PurchaseOrderSchema = SchemaFactory.createForClass(PurchaseOrder);
 
 
+// PURCHASE TRANSACTION
 @ObjectType()
 @Schema()
 export class PurchaseTransactionDetail {
   @Field(() => String)
   _id: string;
+
+  @Field(() => PurchaseOrder)
+  @Prop({ type: Types.ObjectId, required: true, ref: 'PurchaseOrder' })
+  purchase_order: string | PurchaseOrder;
 
   @Field(() => String)
   @Prop({ type: Types.ObjectId, required: true })
@@ -101,7 +114,7 @@ export class PurchaseTransactionDetail {
   @Field(() => Material, { nullable: true })
   material: Material;
   @Field(() => Tool, { nullable: true })
-  tool: Tool;
+  sku: Tool;
 
   @Field(() => String)
   @Prop({ type: String, enum: RequestItem_ItemType, required: true })
@@ -131,12 +144,16 @@ export class PurchaseTransaction extends Document {
   @Prop({ type: Types.ObjectId, required: true, ref: 'Employee' })
   purchasing_staff: string | Employee;
 
+  @Field(() => String)
+  @Prop({ type: String, required: true })
+  transaction_number: string;
+
   @Field(() => String, { nullable: true })
   @Prop({ type: String, default: "" })
   description?: string;
 
   @Field(() => Date)
-  @Prop({ type: Date, required: true, default: () => new Date() })
+  @Prop({ type: Date, required: true })
   transaction_date: Date;
 
   @Field(() => Number)
@@ -146,10 +163,6 @@ export class PurchaseTransaction extends Document {
   @Field(() => Supplier)
   @Prop({ type: Types.ObjectId, required: true, ref: 'Supplier' })
   supplier: string | Supplier;
-
-  @Field(() => PurchaseOrder)
-  @Prop({ type: Types.ObjectId, required: true, ref: 'PurchaseOrder' })
-  purchase_order: string | PurchaseOrder;
 
   @Field(() => [PurchaseTransactionDetail])
   @Prop({ type: [PurchaseTransactionDetail], required: true })

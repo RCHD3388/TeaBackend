@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Material, Merk, Sku, UnitMeasure } from '../schema/inventory.schema';
+import { Material, MaterialStatus, Merk, Sku, UnitMeasure } from '../schema/inventory.schema';
 import { CreateMaterialInput, UpdateMaterialInput } from '../types/material.types';
 import { CategoryData, CategoryType } from './../../../feature_module/category/schema/category.schema';
 
@@ -27,9 +27,11 @@ export class MaterialService {
   async findAll(): Promise<Material[]> {
     return this.materialModel.find().populate(["merk", "unit_measure", "minimum_unit_measure", "item_category"]).exec();
   }
-  
-  async findByIds(ids: string[]): Promise<Material[]> {
-    return this.materialModel.find({ id: { $in: ids } }).populate(["merk", "unit_measure", "minimum_unit_measure", "item_category"]).exec();
+
+  async findByIds(ids: string[], active_only: boolean = false): Promise<Material[]> {
+    let filter = {};
+    if (active_only) filter = { status: MaterialStatus.ACTIVE };
+    return this.materialModel.find({ id: { $in: ids } , ...filter}).populate(["merk", "unit_measure", "minimum_unit_measure", "item_category"]).exec();
   }
 
   async findOne(id: string): Promise<Material> {

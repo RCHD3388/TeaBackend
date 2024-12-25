@@ -1,7 +1,7 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import { ClientSession, Connection, Model } from 'mongoose';
-import { Warehouse, WarehouseType } from './schema/warehouse.schema';
+import { Warehouse, WarehouseStatus, WarehouseType } from './schema/warehouse.schema';
 import { Project } from '../project/schema/project.schema';
 import { CreateWarehouseInput, UpdateWarehouseInput } from './types/warehouse.types';
 import { User } from '../user/schema/user.schema';
@@ -24,9 +24,9 @@ export class WarehouseService {
 
   async findAllByProjectLeader(user: User): Promise<Warehouse[]> {
     if(((user.employee as Employee).role as EmployeeRole).name == "mandor"){
-      return await this.warehouseModel.find({project_leader: (user.employee as Employee)._id.toString()}).exec();
+      return await this.warehouseModel.find({project_leader: (user.employee as Employee)._id.toString(), status: WarehouseStatus.ACTIVE}).exec();
     }else{
-      return await this.warehouseModel.find({$or: [{project: null}, {project: { $size: 0 }}]}).exec();
+      return await this.warehouseModel.find({$or: [{project: null}, {project: { $size: 0 }}], status: WarehouseStatus.ACTIVE}).exec();
     }
   }
 

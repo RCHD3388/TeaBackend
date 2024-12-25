@@ -25,6 +25,15 @@ export class WarehouseResolver {
     return this.warehouseService.findAll(user);
   }
 
+  @Query(() => [Warehouse], { name: 'getAllWarehousesByUser' })
+  @UseGuards(RolesGuard)
+  @Roles("owner", "admin", "staff_pembelian", "mandor")
+  async getAllWarehousesByUser(
+    @CurrentUser() user: User,
+  ) {
+    return this.warehouseService.findAllByProjectLeader(user);
+  }
+
   @Query(() => Warehouse, { name: 'getWarehouseById' })
   @UseGuards(RolesGuard)
   @Roles("owner", "admin", "staff_pembelian", "mandor")
