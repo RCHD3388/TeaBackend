@@ -210,7 +210,14 @@ export class ItemTransactionService {
       }
 
       if (material_item.length > 0) {
-        await this.materialTransactionService.transferOutMaterial(String(warehouse), material_item, session)
+        let materialTransactionResult = await this.materialTransactionService.transferOutMaterial(String(warehouse), material_item, session)
+        for (let i = 0; i < materialTransactionResult.length; i++) {
+          const transaction = materialTransactionResult[i];
+          const targetMaterial = targetRequest.request_item_detail.find(item => item.item_type == RequestItem_ItemType.MATERIAL && String(item.item) == transaction.material);
+          if (targetMaterial) {
+            targetMaterial.price = transaction.price;
+          }
+        }
       }
       if (tool_item.length > 0) {
         await this.toolTransactionService.transferOutTool(String(warehouse), tool_item, session)
