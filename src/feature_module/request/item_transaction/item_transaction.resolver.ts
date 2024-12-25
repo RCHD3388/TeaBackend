@@ -7,8 +7,8 @@ import { User } from 'src/feature_module/user/schema/user.schema';
 import { RolesGuard } from 'src/common/guard/roles.guard';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { CurrentUser } from 'src/common/decorators/auth_user.decorator';
-import { CreateRequestItemInput, CustomRequestItem } from '../types/request_item.types';
-import { UpdateRequestStatusInput } from '../types/request.types';
+import { CreateFinishingDetailInput, CreateProcessingDetailInput, CreateRequestItemInput, CustomRequestItem } from '../types/request_item.types';
+import { RequestStatus, UpdateRequestStatusInput } from '../types/request.types';
 
 @Resolver()
 @UseGuards(AppAuthGuard)
@@ -38,7 +38,7 @@ export class ItemTransactionResolver {
   @Roles("owner", "admin", "mandor")
   async findYourApprovalItemTransaction(
     @CurrentUser() user: User
-  ): Promise<CustomRequestItem[]> {
+  ): Promise<RequestItemHeader[]> {
     return await this.itemTransactionService.findYourApproval(user);
   }
 
@@ -52,14 +52,46 @@ export class ItemTransactionResolver {
     return await this.itemTransactionService.createRequestItem(createRequestItemInput, user);
   }
 
-  @Mutation(() => RequestItemHeader, { name: 'updateRequestItem' })
+  @Mutation(() => RequestItemHeader, { name: 'cancelItemRequest' })
   @UseGuards(RolesGuard)
   @Roles("owner", "admin", "mandor")
-  async updateRequestItem(
+  async cancelItemRequest(
     @Args('id') id: string,
-    @Args('updateRequestStatusInput') updateRequestStatusInput: UpdateRequestStatusInput,
     @CurrentUser() user: User
   ): Promise<RequestItemHeader> {
-    return this.itemTransactionService.updateRequestItemStatus(id, updateRequestStatusInput, user);
+    return this.itemTransactionService.cancelItemRequest(id, user);
+  }
+
+  @Mutation(() => RequestItemHeader, { name: 'processingItemRequest' })
+  @UseGuards(RolesGuard)
+  @Roles("owner", "admin", "mandor")
+  async processingItemRequest(
+    @Args('id') id: string,
+    @Args('createProcessingDetailInput') createProcessingDetailInput : CreateProcessingDetailInput,
+    @CurrentUser() user: User
+  ): Promise<RequestItemHeader> {
+    return this.itemTransactionService.processingItemRequest(id, createProcessingDetailInput, user);
+  }
+
+  @Mutation(() => RequestItemHeader, { name: 'updateAvailableStatusItemRequest' })
+  @UseGuards(RolesGuard)
+  @Roles("owner", "admin", "mandor")
+  async updateAvailableStatusItemRequest(
+    @Args('id') id: string,
+    @Args('status') status: RequestStatus.DITOLAK | RequestStatus.DISETUJUI,
+    @CurrentUser() user: User
+  ): Promise<RequestItemHeader> {
+    return this.itemTransactionService.updateAvailableStatusItemRequest(id, status, user);
+  }
+
+  @Mutation(() => RequestItemHeader, { name: 'closingItemRequest' })
+  @UseGuards(RolesGuard)
+  @Roles("owner", "admin", "mandor")
+  async closingItemRequest(
+    @Args('id') id: string,
+    @Args('createFinishingDetailInput') createFinishingDetailInput : CreateFinishingDetailInput,
+    @CurrentUser() user: User
+  ): Promise<RequestItemHeader> {
+    return this.itemTransactionService.closedItemRequest(id, createFinishingDetailInput, user);
   }
 }

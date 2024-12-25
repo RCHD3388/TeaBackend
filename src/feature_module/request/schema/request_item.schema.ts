@@ -26,6 +26,38 @@ export class RequestItemDetail {
 }
 
 @ObjectType()
+@Schema()
+export class FinishingDetail {
+  @Field(() => String, {nullable: true})
+  @Prop({ type: String })
+  sender_name?: string;
+
+  @Field(() => String, {nullable: true})
+  @Prop({ type: String })
+  sender_phone?: string;
+
+  @Field(() => String, {nullable: true})
+  @Prop({ type: String })
+  police_number?: string;
+
+  @Field(() => String, {nullable: true})
+  @Prop({ type: String })
+  vehicle_detail?: string;
+
+  @Field(() => String, {nullable: true})
+  @Prop({ type: String })
+  recipient_name?: string;
+
+  @Field(() => String, {nullable: true})
+  @Prop({ type: String })
+  recipient_phone?: string;
+
+  @Field(() => String, {nullable: true})
+  @Prop({ type: String })
+  recipient_description?: string;
+}
+
+@ObjectType()
 @Schema({ timestamps: true })
 export class RequestItemHeader extends Document {
   @Field(() => String)
@@ -55,25 +87,17 @@ export class RequestItemHeader extends Document {
   @Prop({ type: Date, default: () => new Date() })
   requested_at: Date;
 
-  @Field(() => [Warehouse])
-  @Prop({ type: [Types.ObjectId], required: true, ref: "Warehouse" })
-  requested_to: String[] | Warehouse[];
+  @Field(() => Warehouse)
+  @Prop({ type: Types.ObjectId, required: true, ref: "Warehouse" })
+  requested_to: String | Warehouse;
 
   @Field(() => String)
   @Prop({ type: String, required: true, enum: RequestStatus })
   status: String;
 
-  @Field(() => Date, { nullable: true })
-  @Prop({ type: Date })
-  handled_date?: Date;
-
-  @Field(() => Employee, { nullable: true })
-  @Prop({ type: Types.ObjectId, ref: "Employee" })
-  handled_by?: String | Employee;
-
-  @Field(() => Employee, { nullable: true })
-  @Prop({ type: Types.ObjectId, ref: "Warehouse" })
-  handled_warehouse?: String | Warehouse;
+  @Field(() => FinishingDetail, { nullable: true })
+  @Prop({ type: FinishingDetail, default: null })
+  finishing_detail?: FinishingDetail;
 
   @Field(() => [RequestItemDetail])
   @Prop({ type: [RequestItemDetail], required: true })

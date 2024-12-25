@@ -17,6 +17,7 @@ export enum RequestStatus {
   DISETUJUI = 'disetujui',
   DITOLAK = 'ditolak',
   PROSES = 'proses',
+  PENGIRIMAN = 'pengiriman',
   DIBATALKAN = 'dibatalkan',
   SELESAI = 'selesai',
 }

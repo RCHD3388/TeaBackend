@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import { Connection, Model } from 'mongoose';
-import { CreateRequestItemInput, CustomRequestItem } from '../types/request_item.types';
+import { CreateFinishingDetailInput, CreateProcessingDetailInput, CreateRequestItemDetailInput, CreateRequestItemInput, CustomRequestItem } from '../types/request_item.types';
 import { RequestItemDetail, RequestItemHeader } from '../schema/request_item.schema';
 import { Warehouse } from 'src/feature_module/inventory/schema/warehouse.schema';
 import { RequestItem_ItemType, RequestItemType, RequestStatus, UpdateRequestStatusInput } from '../types/request.types';
@@ -12,6 +12,8 @@ import { request } from 'http';
 import { WarehouseService } from 'src/feature_module/inventory/warehouse.service';
 import { MaterialTransactionService } from 'src/feature_module/inventory/transaction/material_transaction.service';
 import { ToolTransactionService } from 'src/feature_module/inventory/transaction/tool_transaction.service';
+import { MaterialTransaction, ToolTransaction } from 'src/feature_module/inventory/schema/inventory_trans.schema';
+import { Material, Tool } from 'src/feature_module/inventory/schema/inventory.schema';
 
 @Injectable()
 export class ItemTransactionService {
@@ -23,6 +25,31 @@ export class ItemTransactionService {
     private readonly materialTransactionService: MaterialTransactionService,
     private readonly toolTransactionService: ToolTransactionService
   ) { }
+
+  async canFulfillRequest(requestedItems: CreateRequestItemDetailInput[], remainItems: MaterialTransaction[]) {
+    // Buat map untuk mempermudah pencarian remainItems berdasarkan id
+    const remainMap = new Map();
+    remainItems.forEach(item => {
+      remainMap.set((item.material as Material)._id.toString(), item.remain);
+    });
+
+    // Periksa apakah semua requestedItems dapat dipenuhi
+    for (const request of requestedItems) {
+      const remainQuantity = remainMap.get(request.item.toString()) || 0;
+      if (remainQuantity < request.quantity) {
+        return false; // Tidak cukup quantity untuk memenuhi request
+      }
+    }
+    return true; // Semua requestedItems dapat dipenuhi
+  }
+  async canFulfillTools(requestedTools: CreateRequestItemDetailInput[], remainTools: ToolTransaction[]) {
+    let requestedToolIds = requestedTools.map(tool => tool.item);
+    let remainToolIds = remainTools.map(tool => (tool.tool as Tool)._id.toString());
+    // Buat set dari remainTools untuk pencarian lebih cepat
+    const remainSet = new Set(remainToolIds);
+    // Periksa apakah semua requestedTools ada di remainSet
+    return requestedToolIds.every(tool => remainSet.has(String(tool)));
+  }
 
   async findAll(): Promise<RequestItemHeader[]> {
     return await this.requestItemHeaderModel.find().populate(["requested_by", "requested_from", "requested_to", "handled_by"]).exec();
@@ -36,21 +63,15 @@ export class ItemTransactionService {
       .exec();
   }
 
-  async findYourApproval(user: User): Promise<CustomRequestItem[]> {
-    const employeeId = (user.employee as Employee)._id;
-    const employeeRoleName = ((user.employee as Employee).role as EmployeeRole).name;
-
+  async findYourApproval(user: User): Promise<RequestItemHeader[]> {
+    // mendapatkan seluruh warehouse milik project leader atau dari warehouse perusahaan admin tertentu
     let currentUserWarehouse = await this.warehouseService.findAllByProjectLeader(user);
+    // mencari request transaction yang mengandung warehouse milik project leader atau admin (untuk warehouse perusahaan)
     let requestItemHeaders = await this.requestItemHeaderModel.find({ requested_to: { $in: currentUserWarehouse } })
-      .populate(["requested_by", "requested_from", "handled_by"])
+      .populate(["requested_by", "requested_from", "requested_to", "handled_by"])
       .exec();
 
-    return await Promise.all(requestItemHeaders.map(async (requestItemHeader) => {
-      return {
-        request_item_header: requestItemHeader,
-        warehouse: currentUserWarehouse.filter(warehouse => (requestItemHeader.requested_to as String[]).includes(warehouse._id))
-      };
-    }));
+    return requestItemHeaders;
   }
 
   async createRequestItem(createRequestItemInput: CreateRequestItemInput, user: User): Promise<RequestItemHeader> {
@@ -89,6 +110,25 @@ export class ItemTransactionService {
       }
     }
 
+    if (type == RequestItemType.PENGEMBALIAN) {
+      let material_item = await Promise.all(request_item_detail.filter((item: CreateRequestItemDetailInput) => {
+        return item.item_type == RequestItem_ItemType.MATERIAL
+      }))
+      let tool_item = await Promise.all(request_item_detail.filter((item: CreateRequestItemDetailInput) => {
+        return item.item_type == RequestItem_ItemType.TOOL
+      }))
+
+      let remainMaterial = await this.materialTransactionService.getRemainItems(requestedFromWarehouse._id);
+      let remainTool = await this.toolTransactionService.getRemainItems(requestedFromWarehouse._id);
+
+      let canFulfillRequest = await this.canFulfillRequest(material_item, remainMaterial);
+      let canFulfillTools = await this.canFulfillTools(tool_item, remainTool);
+
+      if (!canFulfillRequest || !canFulfillTools) {
+        throw new BadRequestException('Tidak dapat memenuhi request item, pastikan barang dan alat yang diminta tersedia');
+      }
+    }
+
     // create request
     const newRequestItemHeader = new this.requestItemHeaderModel({
       title: createRequestItemInput.title,
@@ -99,144 +139,169 @@ export class ItemTransactionService {
       requested_to,
       requested_at: new Date(),
       status: RequestStatus.MENUNGGU,
+      request_item_detail
     });
 
     return await newRequestItemHeader.save();
   }
 
-  async updateRequestItemStatus(id: string, updateRequestStatusInput: UpdateRequestStatusInput, user: User): Promise<RequestItemHeader> {
-    let { status, handled_warehouse } = updateRequestStatusInput;
-    let targetRequestItemHeader = await this.requestItemHeaderModel.findById(id).populate({
-      path: 'requested_to',
-      populate: {
-        path: 'project',
-        model: 'Project'
-      }
-    }).exec();
-    // check if request item exist
-    if (!targetRequestItemHeader) {
+  async cancelItemRequest(id: string, user: User): Promise<RequestItemHeader> {
+    let targetRequest = await this.requestItemHeaderModel.findById(id).exec();
+    if (!targetRequest) {
+      throw new NotFoundException('Request Item dengan ID ' + id + ' tidak ditemukan');
+    }
+    if (targetRequest.status != RequestStatus.MENUNGGU && targetRequest.status != RequestStatus.DISETUJUI) {
+      throw new BadRequestException('Request Item tersebut sudah diproses atau telah dibatalkan');
+    }
+    if (targetRequest.requested_by.toString() != (user.employee as Employee)._id.toString()) {
+      throw new BadRequestException('Hanya pembuat permintaan yang dapat membatalkan permintaan tersebut');
+    }
+
+    targetRequest.status = RequestStatus.DIBATALKAN;
+    return await targetRequest.save();
+  }
+
+  async processingItemRequest(id: string, createProcessingDetailInput: CreateProcessingDetailInput, user: User,): Promise<RequestItemHeader> {
+    let targetRequest = await this.requestItemHeaderModel.findById(id).populate("requested_to").exec();
+    if (!targetRequest) {
       throw new NotFoundException('Request Item dengan ID ' + id + ' tidak ditemukan');
     }
 
-    // check jika sudah dibatalkan
-    if (targetRequestItemHeader.status == RequestStatus.DIBATALKAN) {
-      throw new BadRequestException('Request Item tersebut sudah dibatalkan');
-    }
-    // check jika sudah diselesaikan
-    if (targetRequestItemHeader.status == RequestStatus.SELESAI) {
-      throw new BadRequestException('Request Item tersebut sudah selesai');
-    }
-    // check request tidak bisa kembali ke menunggu jika sudah ditangani
-    if (targetRequestItemHeader.status != RequestStatus.MENUNGGU && status == RequestStatus.MENUNGGU) {
-      throw new BadRequestException('Request Item tersebut sudah ditangani, dan tidak dapat dikembalikan ke menunggu');
-    }
-    // check jika sudah ditangani dan ingin dibatalkan
-    if (targetRequestItemHeader.status != RequestStatus.MENUNGGU && status == RequestStatus.DIBATALKAN) {
-      throw new BadRequestException('Request Item tersebut sudah ditangani, dan tidak dapat dibatalkan');
-    }
-
-    // CHECK HANDLE REQUEST ITEM
-    if (targetRequestItemHeader.handled_by == null) {
-      // ==> 1. check apakah merupakan hadnle awal
-      const projectLeaders = [];
-      targetRequestItemHeader.requested_to.forEach((warehouse: any) => {
-        if (warehouse && warehouse.project && warehouse.project.project_leader) {
-          projectLeaders.push(warehouse.project.project_leader);
-        }
-      });
-      // check hanya pembuat request yang dapat membatalkan request tersebut
-      if (status == RequestStatus.DIBATALKAN && targetRequestItemHeader.requested_by != (user.employee as Employee)._id) {
-        throw new BadRequestException('Hanya pembuat request yang dapat membatalkan request tersebut');
+    // kalau peminjaman maka dari langsung processing
+    if (targetRequest.type == RequestItemType.PEMINJAMAN) {
+      if (targetRequest.status != RequestStatus.MENUNGGU) {
+        throw new BadRequestException('Request Item tersebut sudah diproses atau telah dibatalkan');
       }
-      // check project leader valid
-      if (status != RequestStatus.DIBATALKAN && !projectLeaders.includes((user.employee as Employee)._id)) {
+      // ketika mandor dan bukan meruakan warehouse miliknya
+      if (((user.employee as Employee).role as EmployeeRole).name == "mandor" && (targetRequest.requested_to as Warehouse).project_leader?.toString() != (user.employee as Employee)._id.toString()) {
         throw new BadRequestException('User tidak diperbolehkan melakukan aksi tersebut');
       }
-
-    } else {
-      // 2. check ketika sudah pernah di handle 
-      if (targetRequestItemHeader.handled_by != (user.employee as Employee)._id) {
-        throw new BadRequestException('User sudah ditangani oleh pegawai lain');
+      // ketika admin atau owner dan warehouse bukan gudang perusahaan
+      if (((user.employee as Employee).role as EmployeeRole).name != "mandor" && (targetRequest.requested_to as Warehouse).project_leader) {
+        throw new BadRequestException('User tidak diperbolehkan melakukan aksi tersebut');
+      }
+    }
+    // kalau pengembalian harus disetujui
+    if (targetRequest.type == RequestItemType.PENGEMBALIAN) {
+      if (targetRequest.status != RequestStatus.DISETUJUI) {
+        throw new BadRequestException('Request Item tersebut belum disetujui atau sedang di proses');
+      }
+      if (targetRequest.requested_by.toString() != (user.employee as Employee)._id.toString()) {
+        throw new BadRequestException('User tidak diperbolehkan melakukan aksi tersebut');
       }
     }
 
+    targetRequest.finishing_detail = {
+      sender_name: createProcessingDetailInput.sender_name,
+      sender_phone: createProcessingDetailInput.sender_phone,
+      police_number: createProcessingDetailInput.police_number || "",
+      vehicle_detail: createProcessingDetailInput.vehicle_detail || "",
+    }
+
+    targetRequest.status = RequestStatus.PENGIRIMAN;
+    return await targetRequest.save();
+  }
+
+  async updateAvailableStatusItemRequest(id: string, status: RequestStatus.DITOLAK | RequestStatus.DISETUJUI, user: User): Promise<RequestItemHeader> {
+    let targetRequest = await this.requestItemHeaderModel.findById(id).populate("requested_to").exec();
+    if (!targetRequest) {
+      throw new NotFoundException('Request Item dengan ID ' + id + ' tidak ditemukan');
+    }
+
+    if (targetRequest.status != RequestStatus.MENUNGGU) {
+      throw new BadRequestException('Request Item tersebut sudah diproses atau telah dibatalkan');
+    }
+
+    if (((user.employee as Employee).role as EmployeeRole).name == "mandor") {
+      // kalau project leader warehouse tujuan bukan user sekarang
+      if ((targetRequest.requested_to as Warehouse).project_leader.toString() != (user.employee as Employee)._id.toString()) {
+        throw new BadRequestException('User tidak diperbolehkan melakukan aksi tersebut');
+      }
+    }
+    if (((user.employee as Employee).role as EmployeeRole).name != "mandor" && (targetRequest.requested_to as Warehouse).project_leader) {
+      throw new BadRequestException('User tidak diperbolehkan melakukan aksi tersebut');
+    }
+
+    targetRequest.status = status;
+    return await targetRequest.save();
+  }
+
+  async closedItemRequest(id: string, createFinishingDetailInput: CreateFinishingDetailInput, user: User) {
+    let targetRequest = await this.requestItemHeaderModel.findById(id).populate("requested_to").exec();
+    if (!targetRequest) {
+      throw new NotFoundException('Request Item dengan ID ' + id + ' tidak ditemukan');
+    }
+
+    if (targetRequest.status != RequestStatus.PENGIRIMAN) {
+      throw new BadRequestException('Request Item tersebut belum dikirim');
+    }
+
+    if (targetRequest.type == RequestItemType.PEMINJAMAN) {
+      if (targetRequest.requested_by.toString() != (user.employee as Employee)._id.toString()) {
+        throw new BadRequestException('Hanya penerima yang dapat menutup atau menyelesaikan permintaan tersebut');
+      }
+    }
+    if (targetRequest.type == RequestItemType.PENGEMBALIAN) {
+      if (((user.employee as Employee).role as EmployeeRole).name == "mandor" && (targetRequest.requested_to as Warehouse).project_leader?.toString() != (user.employee as Employee)._id.toString()) {
+        throw new BadRequestException('Hanya penerima yang dapat menutup atau menyelesaikan permintaan tersebut');
+      }
+      if (((user.employee as Employee).role as EmployeeRole).name != "mandor" && (targetRequest.requested_to as Warehouse).project_leader) {
+        throw new BadRequestException('Hanya penerima yang dapat menutup atau menyelesaikan permintaan tersebut');
+      }
+    }
 
     const session = await this.connection.startSession();
-
     try {
       session.startTransaction();
 
-      // PROSES START
+      let item_detail = targetRequest.request_item_detail;
+      let material_item = await Promise.all(item_detail.filter((item: RequestItemDetail) => {
+        return item.item_type == RequestItem_ItemType.MATERIAL
+      }).map((item: RequestItemDetail) => {
+        return {
+          material: String(item.item),
+          qty: item.quantity,
+        }
+      }))
+      let tool_item = await Promise.all(item_detail.filter((item: RequestItemDetail) => {
+        return item.item_type == RequestItem_ItemType.TOOL
+      }).map((item: RequestItemDetail) => {
+        return String(item.item)
+      }))
 
-      // save request header data
-      if (targetRequestItemHeader.status == RequestStatus.MENUNGGU
-        && status != RequestStatus.DIBATALKAN
-        && status != RequestStatus.MENUNGGU) {
-        targetRequestItemHeader.handled_by = (user.employee as Employee)._id;
-        targetRequestItemHeader.handled_warehouse = handled_warehouse;
+      let warehouse_from = targetRequest.requested_from;
+      let warehouse_to = targetRequest.requested_to;
+
+      if (material_item.length > 0) {
+        await this.materialTransactionService.create({
+          materials: material_item,
+          transaction_category: "TRF",
+          warehouse_from: String(warehouse_from),
+          warehouse_to: String(warehouse_to)
+        }, session)
       }
-      targetRequestItemHeader.status = status;
-      targetRequestItemHeader.handled_date = new Date();
-      await targetRequestItemHeader.save({ session });
-
-      // create transaction
-      if (status == RequestStatus.DISETUJUI) {
-        // check if handled_warehouse not exist
-        if (targetRequestItemHeader.handled_warehouse == null) {
-          throw new BadRequestException('Terjadi kesalahan, silakan coba lagi');
-        }
-        // get data transaction
-        let item_detail = targetRequestItemHeader.request_item_detail;
-        let material_item = await Promise.all(item_detail.filter((item: RequestItemDetail) => {
-                              return item.item_type == RequestItem_ItemType.MATERIAL
-                            }).map((item: RequestItemDetail) => {
-                              return {
-                                material: String(item.item),
-                                qty: item.quantity,
-                              }
-                            }))
-        let tool_item = item_detail.filter((item: RequestItemDetail) => {
-                          return item.item_type == RequestItem_ItemType.TOOL
-                        }).map((item: RequestItemDetail) => {
-                          return String(item.item)
-                        })
-
-        let warehouse_from = targetRequestItemHeader.requested_from;
-        let warehouse_to = targetRequestItemHeader.handled_warehouse;
-        // ketika peminjaman maka akan ditukar
-        if (targetRequestItemHeader.type == RequestItemType.PEMINJAMAN) {
-          warehouse_from = targetRequestItemHeader.handled_warehouse;
-          warehouse_to = targetRequestItemHeader.requested_from;
-        }
-
-        // get transaction data end
-        if (material_item.length > 0) {
-          await this.materialTransactionService.create({
-            materials: material_item,
-            transaction_category: "TRF",
-            warehouse_from: String(warehouse_from),
-            warehouse_to: String(warehouse_to)
-          }, session)
-        }
-        if (tool_item.length > 0) {
-          await this.toolTransactionService.create({
-            tool: tool_item,
-            transaction_category: "TRF",
-            warehouse_from: String(warehouse_from),
-            warehouse_to: String(warehouse_to)
-          }, session)
-        }
+      if (tool_item.length > 0) {
+        await this.toolTransactionService.create({
+          tool: tool_item,
+          transaction_category: "TRF",
+          warehouse_from: String(warehouse_from),
+          warehouse_to: String(warehouse_to)
+        }, session)
       }
 
-      // PROSES END
-      
       await session.commitTransaction();
-      return targetRequestItemHeader
     } catch (error) {
       await session.abortTransaction();
       throw error
     } finally {
       await session.endSession();
     }
+
+    targetRequest.finishing_detail.recipient_name = createFinishingDetailInput.recipient_name;
+    targetRequest.finishing_detail.recipient_phone = createFinishingDetailInput.recipient_phone;
+    targetRequest.finishing_detail.recipient_description = createFinishingDetailInput.recipient_description || "";
+
+    targetRequest.status = RequestStatus.SELESAI;
+    return await targetRequest.save();
   }
 }

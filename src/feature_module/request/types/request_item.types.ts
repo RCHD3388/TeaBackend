@@ -1,6 +1,6 @@
 import { Field, InputType, ObjectType } from "@nestjs/graphql";
-import { IsNotEmpty, IsOptional, IsString, IsNumber, Min, IsEnum, IsArray } from "class-validator";
-import { RequestItemType, RequestStatus } from "./request.types";
+import { IsNotEmpty, IsOptional, IsString, IsNumber, Min, IsEnum, IsArray, isEnum } from "class-validator";
+import { RequestItem_ItemType, RequestItemType, RequestStatus } from "./request.types";
 import { RequestItemHeader } from "../schema/request_item.schema";
 import { Warehouse } from "src/feature_module/inventory/schema/warehouse.schema";
 
@@ -18,8 +18,9 @@ export class CreateRequestItemDetailInput {
   quantity: number;
 
   @Field(() => String)
-  @IsNotEmpty({ message: 'Tipe item tidak boleh kosong' })
+  @IsEnum(RequestItem_ItemType, { message: 'Tipe item harus sesuai' })
   @IsString()
+  @IsNotEmpty({ message: 'Tipe item tidak boleh kosong' })
   item_type: String;
 }
 
@@ -64,5 +65,43 @@ export class CustomRequestItem {
 
   @Field(() => [Warehouse])
   warehouse: Warehouse[]
+}
+
+@InputType()
+export class CreateProcessingDetailInput {
+  @Field(() => String)
+  @IsNotEmpty({ message: 'Nama pengirim tidak boleh kosong' })
+  @IsString()
+  sender_name: string;
+
+  @Field(() => String)
+  @IsNotEmpty({ message: 'Nomer telepon pengirim tidak boleh kosong' })
+  @IsString()
+  sender_phone: string;
+
+  @Field(() => String, {nullable: true})
+  @IsString()
+  police_number?: string;
+
+  @Field(() => String, {nullable: true})
+  @IsString()
+  vehicle_detail?: string;
+}
+
+@InputType()
+export class CreateFinishingDetailInput {
+  @Field(() => String)
+  @IsNotEmpty({ message: 'Nama penerima tidak boleh kosong' })
+  @IsString()
+  recipient_name: string;
+
+  @Field(() => String)
+  @IsNotEmpty({ message: 'Nomer telepon penerima tidak boleh kosong' })
+  @IsString()
+  recipient_phone: string;
+
+  @Field(() => String, {nullable: true})
+  @IsString()
+  recipient_description?: string;
 }
 
