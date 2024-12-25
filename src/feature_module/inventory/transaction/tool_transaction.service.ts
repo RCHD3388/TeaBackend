@@ -88,9 +88,6 @@ export class ToolTransactionService {
         let newTransCode = `${targetTransactionCategory.id}${targetTransactionCategory.counter + 1}`
         let date = new Date();
 
-        // check transaction history
-
-
         // used tools and transfer out from warehouse_from
         if (targetTransactionCategory.id == "USE" || targetTransactionCategory.id == "TRF") {
           const from_latestToolTransaction = await this.toolTransactionModel.find({ tool: tool, warehouse: warehouse_from })
@@ -164,13 +161,13 @@ export class ToolTransactionService {
       let target_warehouse = await this.warehouseModel.findById(warehouse_to).session(session)
       if (!target_warehouse) throw new NotFoundException(`Warehouse tujuan tidak ditemukan`);
 
-      // ADD AND CREATE PROCESS
       for (let curTool of tool) {
-        let newTransCode = `${targetTransactionCategory.id}${targetTransactionCategory.counter + 1}`
-        let date = new Date();
 
         // CREATE NEW TOOL
         let targetTool = await this.toolService.create(curTool, session)
+        // ADD AND CREATE PROCESS
+        let newTransCode = `${targetTransactionCategory.id}${targetTransactionCategory.counter + 1}`
+        let date = new Date();
 
         // CREATE NEW TRANSACTION
         let newInToolTransaction = new this.toolTransactionModel({
@@ -191,6 +188,125 @@ export class ToolTransactionService {
       }
 
       return true
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async transferOutTool(
+    warehouse: String,
+    tool: String[],
+    session: ClientSession
+  ): Promise<ToolTransaction[]> {
+
+    try {
+      // START TRANSACTION
+      // check transaction category exist
+      let targetTransactionCategory = await this.transactionCategoryModel.findOne({ id: "SND" }).session(session);
+      if (!targetTransactionCategory) throw new NotFoundException(`Kategori transaksi tidak ditemukan`);
+
+      // check target warehouse
+      let source_warehouse = await this.warehouseModel.findOne({ _id: warehouse }).session(session)
+      if (!source_warehouse) throw new NotFoundException(`Warehouse sumber tidak ditemukan`);
+
+      // ======================= PROSES START =======================
+      let listOfNewTransaction: ToolTransaction[] = [];
+
+      for (let curTool of tool) {
+        // GENERATE NEW TRANS CODE AND DATE
+        let newTransCode = `${targetTransactionCategory.id}${targetTransactionCategory.counter + 1}`
+        let date = new Date();
+
+        // CHECK TOOL AVAILABILITY
+        let targetTool = await this.toolModel.findById(curTool).session(session)
+        if (!targetTool) throw new NotFoundException(`Alat tidak ditemukan`);
+
+        // used tools and transfer out from warehouse_from
+        const from_latestToolTransaction = await this.toolTransactionModel.find({ tool: tool, warehouse: warehouse })
+          .sort({ date: -1 })
+          .limit(1)
+          .session(session)
+        // CHECK TOOL EXIST
+        if (from_latestToolTransaction.length <= 0 || from_latestToolTransaction[0].in == 0) {
+          throw new BadRequestException(`Tool tidak ada di warehouse sumber`);
+        }
+        let newOutToolTransaction = new this.toolTransactionModel({
+          tool: tool,
+          date,
+          in: 0,
+          out: 1,
+          warehouse: warehouse,
+          transaction_code: newTransCode,
+          transaction_category: targetTransactionCategory._id,
+        })
+        await newOutToolTransaction.save({ session });
+        listOfNewTransaction.push(newOutToolTransaction)
+
+        targetTransactionCategory.counter = targetTransactionCategory.counter + 1;
+        await targetTransactionCategory.save({ session });
+      }
+
+      return listOfNewTransaction
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async transferInTool(
+    warehouse: String,
+    tool: String[],
+    session: ClientSession
+  ): Promise<ToolTransaction[]> {
+
+    try {
+      // START TRANSACTION
+      // check transaction category exist
+      let targetTransactionCategory = await this.transactionCategoryModel.findOne({ id: "REC" }).session(session);
+      if (!targetTransactionCategory) throw new NotFoundException(`Kategori transaksi tidak ditemukan`);
+
+      // check target warehouse
+      let target_warehouse = await this.warehouseModel.findOne({ _id: warehouse }).session(session)
+      if (!target_warehouse) throw new NotFoundException(`Warehouse sumber tidak ditemukan`);
+
+      // ======================= PROSES START =======================
+      let listOfNewTransaction: ToolTransaction[] = [];
+
+      for (let curTool of tool) {
+        // GENERATE NEW TRANS CODE AND DATE
+        let newTransCode = `${targetTransactionCategory.id}${targetTransactionCategory.counter + 1}`
+        let date = new Date();
+
+        // CHECK TOOL AVAILABILITY
+        let targetTool = await this.toolModel.findById(curTool).session(session)
+        if (!targetTool) throw new NotFoundException(`Alat tidak ditemukan`);
+
+        // receive transfer tools to warehouse_to
+        const to_latestToolTransaction = await this.toolTransactionModel.find({ tool: tool, warehouse: warehouse })
+          .sort({ date: -1 })
+          .limit(1)
+          .session(session)
+
+        // CHECK IF ALREADY EXIST
+        if (to_latestToolTransaction.length > 0 && to_latestToolTransaction[0].in == 1) throw new BadRequestException(`Tool sudah ada di warehouse tujuan`);
+        let newInToolTransaction = new this.toolTransactionModel({
+          tool: tool,
+          date,
+          in: 1,
+          out: 0,
+          warehouse: warehouse,
+          transaction_code: newTransCode,
+          transaction_category: targetTransactionCategory._id,
+        })
+
+        await newInToolTransaction.save({ session });
+        listOfNewTransaction.push(newInToolTransaction)
+
+        // udpate transaction counter
+        targetTransactionCategory.counter = targetTransactionCategory.counter + 1;
+        await targetTransactionCategory.save({ session });
+      }
+
+      return listOfNewTransaction
     } catch (error) {
       throw error;
     }

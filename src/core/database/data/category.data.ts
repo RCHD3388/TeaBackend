@@ -11,4 +11,6 @@ export const transactionCategoryData: Partial<TransactionCategory>[] = [
   { id: "TRF", description: "Hasil transfer antar warehouse atau gudang proyek" },
   { id: "ADD", description: "Penambahan langsung ke warehouse atau gudang" },
   { id: "USE", description: "Penggunaan langsung dari warehouse atau gudang" },
+  { id: "SND", description: "Dalam proses pengiriman warehouse atau gudang" },
+  { id: "REC", description: "Penerimaan hasil kiriman warehouse atau gudang" },
 ]

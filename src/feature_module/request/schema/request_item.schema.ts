@@ -19,6 +19,10 @@ export class RequestItemDetail {
   @Field(() => Number)
   @Prop({ type: Number, required: true })
   quantity: number;
+
+  @Field(() => Number, {nullable: true})
+  @Prop({ type: Number, default: 0 })
+  price?: number;
   
   @Field(() => String)
   @Prop({ type: String, required: true, enum: RequestItem_ItemType })

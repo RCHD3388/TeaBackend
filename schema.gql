@@ -243,10 +243,21 @@ type RequestItemDetail {
   _id: String!
   item: MaterialOrTool!
   quantity: Float!
+  price: Float
   item_type: String!
 }
 
 union MaterialOrTool = Material | Tool
+
+type FinishingDetail {
+  sender_name: String
+  sender_phone: String
+  police_number: String
+  vehicle_detail: String
+  recipient_name: String
+  recipient_phone: String
+  recipient_description: String
+}
 
 type RequestItemHeader {
   _id: String!
@@ -256,11 +267,9 @@ type RequestItemHeader {
   requested_from: Warehouse!
   requested_by: Employee!
   requested_at: DateTime!
-  requested_to: [Warehouse!]!
+  requested_to: Warehouse!
   status: String!
-  handled_date: DateTime
-  handled_by: Employee
-  handled_warehouse: Employee
+  finishing_detail: FinishingDetail
   request_item_detail: [RequestItemDetail!]!
 }
 
@@ -357,7 +366,10 @@ type Mutation {
   createRequestClosing(createRequestClosingInput: CreateRequestClosingInput!): RequestProjectClosing!
   updateRequestClosing(id: String!, updateRequestStatusInput: UpdateRequestStatusInput!): RequestProjectClosing!
   createRequestItemTransaction(createRequestItemInput: CreateRequestItemInput!): RequestItemHeader!
-  updateRequestItem(id: String!, updateRequestStatusInput: UpdateRequestStatusInput!): RequestItemHeader!
+  cancelItemRequest(id: String!): RequestItemHeader!
+  processingItemRequest(id: String!, createProcessingDetailInput: CreateProcessingDetailInput!): RequestItemHeader!
+  updateAvailableStatusItemRequest(id: String!, status: String!): RequestItemHeader!
+  closingItemRequest(id: String!, createFinishingDetailInput: CreateFinishingDetailInput!): RequestItemHeader!
 }
 
 input LoginInput {
@@ -606,4 +618,17 @@ input CreateRequestItemDetailInput {
   item: String!
   quantity: Float!
   item_type: String!
+}
+
+input CreateProcessingDetailInput {
+  sender_name: String!
+  sender_phone: String!
+  police_number: String
+  vehicle_detail: String
+}
+
+input CreateFinishingDetailInput {
+  recipient_name: String!
+  recipient_phone: String!
+  recipient_description: String
 }

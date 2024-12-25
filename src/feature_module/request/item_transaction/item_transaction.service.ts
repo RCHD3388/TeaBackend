@@ -99,14 +99,8 @@ export class ItemTransactionService {
     // check jika PEMINJAMAN maka WAREHOUSE TUJUAN HARUS merupakan project mandor
     // check jika PENGEMBALIAN maka WAREHOUSE ASAL HARUS merupakan project mandor
     if (((user.employee as Employee).role as EmployeeRole).name == "mandor") {
-      if (type == RequestItemType.PEMINJAMAN) {
-        if ((requestedToWarehouse.project as Project).project_leader.toString() != (user.employee as Employee)._id.toString()) {
-          throw new BadRequestException('User tidak diperbolehkan melakukan aksi tersebut');
-        }
-      } else if (type == RequestItemType.PENGEMBALIAN) {
-        if ((requestedFromWarehouse.project as Project).project_leader.toString() != (user.employee as Employee)._id.toString()) {
-          throw new BadRequestException('User tidak diperbolehkan melakukan aksi tersebut');
-        }
+      if ((requestedFromWarehouse.project as Project).project_leader.toString() != (user.employee as Employee)._id.toString()) {
+        throw new BadRequestException('User tidak diperbolehkan melakukan aksi tersebut');
       }
     }
 
@@ -191,15 +185,55 @@ export class ItemTransactionService {
       }
     }
 
-    targetRequest.finishing_detail = {
-      sender_name: createProcessingDetailInput.sender_name,
-      sender_phone: createProcessingDetailInput.sender_phone,
-      police_number: createProcessingDetailInput.police_number || "",
-      vehicle_detail: createProcessingDetailInput.vehicle_detail || "",
-    }
+    const session = await this.connection.startSession();
+    try {
+      session.startTransaction();
 
-    targetRequest.status = RequestStatus.PENGIRIMAN;
-    return await targetRequest.save();
+      let item_detail = targetRequest.request_item_detail;
+      let material_item = await Promise.all(item_detail.filter((item: RequestItemDetail) => {
+        return item.item_type == RequestItem_ItemType.MATERIAL
+      }).map((item: RequestItemDetail) => {
+        return {
+          material: String(item.item),
+          qty: item.quantity
+        }
+      }))
+      let tool_item = await Promise.all(item_detail.filter((item: RequestItemDetail) => {
+        return item.item_type == RequestItem_ItemType.TOOL
+      }).map((item: RequestItemDetail) => {
+        return String(item.item)
+      }))
+
+      let warehouse = targetRequest.requested_from;
+      if (targetRequest.type == RequestItemType.PENGEMBALIAN) {
+        warehouse = (targetRequest.requested_to as Warehouse)._id || targetRequest.requested_to;
+      }
+
+      if (material_item.length > 0) {
+        await this.materialTransactionService.transferOutMaterial(String(warehouse), material_item, session)
+      }
+      if (tool_item.length > 0) {
+        await this.toolTransactionService.transferOutTool(String(warehouse), tool_item, session)
+      }
+
+      targetRequest.finishing_detail = {
+        sender_name: createProcessingDetailInput.sender_name,
+        sender_phone: createProcessingDetailInput.sender_phone,
+        police_number: createProcessingDetailInput.police_number || "",
+        vehicle_detail: createProcessingDetailInput.vehicle_detail || "",
+      }
+
+      targetRequest.status = RequestStatus.PENGIRIMAN;
+      await targetRequest.save();
+      await session.commitTransaction();
+
+      return targetRequest
+    } catch (error) {
+      await session.abortTransaction();
+      throw error
+    } finally {
+      await session.endSession();
+    }
   }
 
   async updateAvailableStatusItemRequest(id: string, status: RequestStatus.DITOLAK | RequestStatus.DISETUJUI, user: User): Promise<RequestItemHeader> {
@@ -261,6 +295,7 @@ export class ItemTransactionService {
         return {
           material: String(item.item),
           qty: item.quantity,
+          price: item.price
         }
       }))
       let tool_item = await Promise.all(item_detail.filter((item: RequestItemDetail) => {
@@ -269,27 +304,27 @@ export class ItemTransactionService {
         return String(item.item)
       }))
 
-      let warehouse_from = targetRequest.requested_from;
-      let warehouse_to = targetRequest.requested_to;
+      let warehouse = targetRequest.requested_from;
+      if (targetRequest.type == RequestItemType.PENGEMBALIAN) {
+        warehouse = (targetRequest.requested_to as Warehouse)._id || targetRequest.requested_to;
+      }
 
       if (material_item.length > 0) {
-        await this.materialTransactionService.create({
-          materials: material_item,
-          transaction_category: "TRF",
-          warehouse_from: String(warehouse_from),
-          warehouse_to: String(warehouse_to)
-        }, session)
+        await this.materialTransactionService.transferInMaterial(String(warehouse), material_item, session)
       }
       if (tool_item.length > 0) {
-        await this.toolTransactionService.create({
-          tool: tool_item,
-          transaction_category: "TRF",
-          warehouse_from: String(warehouse_from),
-          warehouse_to: String(warehouse_to)
-        }, session)
+        await this.toolTransactionService.transferInTool(String(warehouse), tool_item, session)
       }
 
+      targetRequest.finishing_detail.recipient_name = createFinishingDetailInput.recipient_name;
+      targetRequest.finishing_detail.recipient_phone = createFinishingDetailInput.recipient_phone;
+      targetRequest.finishing_detail.recipient_description = createFinishingDetailInput.recipient_description || "";
+
+      targetRequest.status = RequestStatus.SELESAI;
+      await targetRequest.save({ session });
+
       await session.commitTransaction();
+      return targetRequest
     } catch (error) {
       await session.abortTransaction();
       throw error
@@ -297,11 +332,6 @@ export class ItemTransactionService {
       await session.endSession();
     }
 
-    targetRequest.finishing_detail.recipient_name = createFinishingDetailInput.recipient_name;
-    targetRequest.finishing_detail.recipient_phone = createFinishingDetailInput.recipient_phone;
-    targetRequest.finishing_detail.recipient_description = createFinishingDetailInput.recipient_description || "";
 
-    targetRequest.status = RequestStatus.SELESAI;
-    return await targetRequest.save();
   }
 }
