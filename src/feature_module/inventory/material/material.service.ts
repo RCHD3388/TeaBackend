@@ -27,6 +27,10 @@ export class MaterialService {
   async findAll(): Promise<Material[]> {
     return this.materialModel.find().populate(["merk", "unit_measure", "minimum_unit_measure", "item_category"]).exec();
   }
+  
+  async findByIds(ids: string[]): Promise<Material[]> {
+    return this.materialModel.find({ id: { $in: ids } }).populate(["merk", "unit_measure", "minimum_unit_measure", "item_category"]).exec();
+  }
 
   async findOne(id: string): Promise<Material> {
     let material = await this.materialModel.findById(id).populate(["merk", "unit_measure", "minimum_unit_measure", "item_category"]).exec();

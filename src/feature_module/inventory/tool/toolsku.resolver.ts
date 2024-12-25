@@ -59,4 +59,26 @@ export class ToolSkuResolver {
   ): Promise<Tool> {
     return this.toolService.update(id, updateToolInput);
   }
+
+  
+  @Query(() => [Tool], { name: 'getAllTools' })
+  @UseGuards(RolesGuard)
+  @Roles("owner", "admin", "staff_pembelian", "mandor")
+  async getAllTools(@Args('sku', { nullable: true, type: () => String }) sku?: string): Promise<Tool[]> {
+    return this.toolService.findAll(sku);
+  }
+
+  @Query(() => Tool, { name: 'getToolById' })
+  @UseGuards(RolesGuard)
+  @Roles("owner", "admin", "staff_pembelian", "mandor")
+  async getToolById(@Args('id') id: string): Promise<Tool> {
+    return this.toolService.findOne(id);
+  }
+  
+  @Query(() => [Tool], { name: 'getToolsByIds' })
+  @UseGuards(RolesGuard)
+  @Roles("owner", "admin", "staff_pembelian", "mandor")
+  async getToolsByIds(@Args('ids', { type: () => [String] }) ids: string[]): Promise<Tool[]> {
+    return this.toolService.findByIds(ids);
+  }
 }

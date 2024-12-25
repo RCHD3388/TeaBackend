@@ -4,7 +4,7 @@ import { Types, Document } from "mongoose";
 import { Material, Tool } from "../../inventory/schema/inventory.schema";
 import { Warehouse } from "../../inventory/schema/warehouse.schema";
 import { Employee } from "../../person/schema/employee.schema";
-import { MaterialOrTool, RequestItem_ItemType, RequestItemType, RequestStatus } from "../types/request.types";
+import { RequestItem_ItemType, RequestItemType, RequestStatus } from "../types/request.types";
 
 @ObjectType()
 @Schema()
@@ -12,9 +12,9 @@ export class RequestItemDetail {
   @Field(() => String)
   _id: string;
 
-  @Field(() => MaterialOrTool)
-  @Prop({ type: Types.ObjectId, required: true, refPath: "item_type" })
-  item: Material | Tool | String;
+  @Field(() => String)
+  @Prop({ type: Types.ObjectId, required: true })
+  item: String;
 
   @Field(() => Number)
   @Prop({ type: Number, required: true })

@@ -242,13 +242,11 @@ type Supplier {
 
 type RequestItemDetail {
   _id: String!
-  item: MaterialOrTool!
+  item: String!
   quantity: Float!
   price: Float
   item_type: String!
 }
-
-union MaterialOrTool = Material | Tool
 
 type FinishingDetail {
   sender_name: String
@@ -296,9 +294,13 @@ type Query {
   getAllMerks: [Merk!]!
   getMerkById(id: String!): Merk!
   getAllMaterials: [Material!]!
+  getAllMaterialByIds(ids: [String!]!): Material!
   getMaterialById(id: String!): Material!
   getAllSkus: [Sku!]!
   getSkuById(id: String!): Sku!
+  getAllTools(sku: String): [Tool!]!
+  getToolById(id: String!): Tool!
+  getToolsByIds(ids: [String!]!): [Tool!]!
   getWarehouseMaterials(warehouse_id: String!): [MaterialTransaction!]!
   getWarehouseTools(warehouse_id: String!): [ToolTransaction!]!
   getCategories(categoryFilter: CategoryFilter): [CategoryData!]!

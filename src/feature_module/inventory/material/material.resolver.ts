@@ -21,6 +21,13 @@ export class MaterialResolver {
     return this.materialService.findAll();
   }
 
+  @Query(() => Material, { name: 'getAllMaterialByIds' })
+  @UseGuards(RolesGuard)
+  @Roles("owner", "admin", "staff_pembelian")
+  async getAllMaterialByIds(@Args('ids', { type: () => [String] }) ids: string[]): Promise<Material[]> {
+    return this.materialService.findByIds(ids);
+  }
+
   @Query(() => Material, { name: 'getMaterialById' })
   @UseGuards(RolesGuard)
   @Roles("owner", "admin", "staff_pembelian")

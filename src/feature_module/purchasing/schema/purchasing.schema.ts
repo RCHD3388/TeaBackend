@@ -5,7 +5,8 @@ import { CategoryData } from "../../category/schema/category.schema";
 import { Warehouse } from "../../inventory/schema/warehouse.schema";
 import { Employee } from "../../person/schema/employee.schema";
 import { Supplier } from "../../person/schema/supplier.schema";
-import { MaterialOrTool, RequestItem_ItemType, RequestStatus } from "../../request/types/request.types";
+import { RequestItem_ItemType, RequestStatus } from "../../request/types/request.types";
+import { Material, Tool } from "src/feature_module/inventory/schema/inventory.schema";
 
 @ObjectType()
 @Schema()
@@ -13,9 +14,15 @@ export class PurchaseOrderDetail {
   @Field(() => String)
   _id: string;
 
-  @Field(() => MaterialOrTool)
-  @Prop({ type: Types.ObjectId, required: true, refPath: 'item_type' })
+  @Field(() => String)
+  @Prop({ type: Types.ObjectId, required: true })
   item: string;
+
+  // TAMBAHAN SAJA TIDAK ADA DI COLLECTION
+  @Field(() => Material, { nullable: true })
+  material: Material;
+  @Field(() => Tool, { nullable: true })
+  tool: Tool;
 
   @Field(() => String)
   @Prop({ type: String, enum: RequestItem_ItemType, required: true })
@@ -86,9 +93,15 @@ export class PurchaseTransactionDetail {
   @Field(() => String)
   _id: string;
 
-  @Field(() => MaterialOrTool)
-  @Prop({ type: Types.ObjectId, required: true, refPath: 'item_type' })
+  @Field(() => String)
+  @Prop({ type: Types.ObjectId, required: true })
   item: string;
+
+  // TAMBAHAN SAJA GA ADA DI COLLECTION
+  @Field(() => Material, { nullable: true })
+  material: Material;
+  @Field(() => Tool, { nullable: true })
+  tool: Tool;
 
   @Field(() => String)
   @Prop({ type: String, enum: RequestItem_ItemType, required: true })
