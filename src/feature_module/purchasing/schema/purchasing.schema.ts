@@ -1,6 +1,6 @@
 import { Field, ObjectType } from "@nestjs/graphql";
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { Types } from "mongoose";
+import { Types, Document } from "mongoose";
 import { CategoryData } from "../../category/schema/category.schema";
 import { Warehouse } from "../../inventory/schema/warehouse.schema";
 import { Employee } from "../../person/schema/employee.schema";
@@ -14,6 +14,10 @@ export class PurchaseOrderSubDetail {
   @Field(() => String)
   @Prop({ type: Types.ObjectId, required: true, ref: "PurchaseTransaction" })
   purchase_transaction: string;
+
+  @Field(() => String)
+  @Prop({ type: Types.ObjectId, required: true })
+  purchase_transaction_detail: string;
 
   @Field(() => String, {nullable: true})
   @Prop({ type: Types.ObjectId, required: true, ref: "Tool" })
@@ -100,7 +104,7 @@ export const PurchaseOrderSchema = SchemaFactory.createForClass(PurchaseOrder);
 @Schema()
 export class PurchaseTransactionDetail {
   @Field(() => String)
-  _id: string;
+  _id?: string;
 
   @Field(() => PurchaseOrder)
   @Prop({ type: Types.ObjectId, required: true, ref: 'PurchaseOrder' })
@@ -112,9 +116,9 @@ export class PurchaseTransactionDetail {
 
   // TAMBAHAN SAJA GA ADA DI COLLECTION
   @Field(() => Material, { nullable: true })
-  material: Material;
+  material?: Material;
   @Field(() => Tool, { nullable: true })
-  sku: Tool;
+  sku?: Tool;
 
   @Field(() => String)
   @Prop({ type: String, enum: RequestItem_ItemType, required: true })

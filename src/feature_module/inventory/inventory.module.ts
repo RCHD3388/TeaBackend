@@ -41,6 +41,8 @@ import { ToolService } from "./tool/tool.service";
     ToolSkuResolver, ToolSkuService, ToolService,
     TransactionResolver, MaterialTransactionService, ToolTransactionService
   ],
-  exports: [WarehouseService, MaterialTransactionService, ToolTransactionService]
+  exports: [WarehouseService, MaterialTransactionService, ToolTransactionService,
+    MaterialService, ToolService, ToolSkuService
+  ]
 })
 export class InventoryModule {}

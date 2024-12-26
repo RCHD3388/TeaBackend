@@ -78,6 +78,7 @@ export class CreatePurchaseTransactionDetailInput {
   @Field(() => Number)
   @IsNotEmpty({ message: 'Harga tidak boleh kosong' })
   @IsNumber()
+  @Min(0, { message: 'Harga tidak boleh kurang dari 0' })
   price: number;
 }
 
@@ -106,5 +107,33 @@ export class CreateRequestPurchaseTransactionInput {
   @Field(() => [CreatePODetailInput])
   @IsArray()
   @IsNotEmpty({ message: 'Detail item tidak boleh kosong' })
-  purchase_order_detail: CreatePurchaseTransactionDetailInput[];
+  purchase_transaction_detail: CreatePurchaseTransactionDetailInput[];
 }
+
+
+@InputType()
+export class UpdateRequestPurchaseTransactionInput {
+  @Field(() => String, {nullable: true})
+  @IsOptional()
+  @IsString()
+  description? : string
+
+  @Field(() => String, {nullable: true})
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty({ message: 'Nomer transaksi tidak boleh kosong' })
+  transaction_number?: String
+
+  @Field(() => Date, {nullable: true})
+  @IsDate()
+  @IsOptional()
+  @IsNotEmpty({ message: 'Tanggal transaksi tidak boleh kosong' })
+  transaction_date?: Date
+
+  @Field(() => String, {nullable: true})
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty({ message: 'Supplier tidak boleh kosong' })
+  supplier?: String
+}
+

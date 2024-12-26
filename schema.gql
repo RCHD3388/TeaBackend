@@ -272,6 +272,47 @@ type RequestItemHeader {
   request_item_detail: [RequestItemDetail!]!
 }
 
+type PurchaseOrderSubDetail {
+  purchase_transaction: String!
+  purchase_transaction_detail: String!
+  tool: String
+  quantity: Float!
+}
+
+type PurchaseOrderDetail {
+  _id: String!
+  item: String!
+  material: Material
+  sku: Sku
+  item_type: String!
+  quantity: Float!
+  completed_quantity: Float!
+  sub_detail: [PurchaseOrderSubDetail!]!
+}
+
+type PurchaseOrder {
+  _id: String!
+  title: String!
+  description: String
+  requested_from: Warehouse!
+  requested_by: Employee!
+  date: DateTime!
+  status: String!
+  purchase_order_detail: [PurchaseOrderDetail!]!
+}
+
+type PurchaseTransactionDetail {
+  _id: String!
+  purchase_order: PurchaseOrder!
+  item: String!
+  material: Material
+  sku: Tool
+  item_type: String!
+  quantity: Float!
+  price: Float!
+  subtotal: Float!
+}
+
 type Query {
   getHello: String!
   getAllUsers: [User!]!
@@ -288,6 +329,7 @@ type Query {
   getAllSuppliers: [Supplier!]!
   getSupplierById(id: String!): Supplier!
   getAllWarehouses: [Warehouse!]!
+  getAllWarehousesByUser: [Warehouse!]!
   getWarehouseById(id: String!): Warehouse!
   getAllUnitMeasures: [UnitMeasure!]!
   getUnitMeasureById(id: String!): UnitMeasure!

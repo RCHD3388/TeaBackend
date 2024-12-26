@@ -40,6 +40,10 @@ export class ToolService {
     return tool;
   }
 
+  async findByIds(ids: string[]): Promise<Tool[]> {
+    return this.toolModel.find({ _id: { $in: ids } }).populate(["sku", "status"]).exec();
+  }
+
   async create(createToolInput: CreateToolInput, session: ClientSession): Promise<string> {
     const { sku, status } = createToolInput;
 
