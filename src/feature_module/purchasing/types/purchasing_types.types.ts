@@ -137,3 +137,16 @@ export class UpdateRequestPurchaseTransactionInput {
   supplier?: String
 }
 
+@InputType()
+export class ReceiveItemInput {
+  @Field(() => String)
+  @IsString()
+  @IsNotEmpty({ message: 'Nomer transaksi tidak boleh kosong' })
+  item_transaction : string
+
+  @Field(() => String)
+  @IsString()
+  @IsNotEmpty({ message: 'Nomer detail transaksi tidak boleh kosong' })
+  item_transaction_detail : string
+}
+

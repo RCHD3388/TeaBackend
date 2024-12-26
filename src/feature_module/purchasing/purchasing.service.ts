@@ -1,8 +1,8 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { InjectConnection, InjectModel } from '@nestjs/mongoose';
+import { Connection, Model } from 'mongoose';
 import { PurchaseOrder, PurchaseTransaction } from './schema/purchasing.schema';
-import { CreateRequestPOInput } from './types/purchasing_types.types';
+import { CreateRequestPOInput, ReceiveItemInput } from './types/purchasing_types.types';
 import { User } from '../user/schema/user.schema';
 import { WarehouseService } from '../inventory/warehouse.service';
 import { RequestItem_ItemType, RequestStatus } from '../request/types/request.types';
@@ -10,15 +10,20 @@ import { MaterialService } from '../inventory/material/material.service';
 import { ToolService } from '../inventory/tool/tool.service';
 import { ToolSkuService } from '../inventory/tool/toolsku.service';
 import { Employee, EmployeeRole } from '../person/schema/employee.schema';
+import { MaterialTransactionService } from '../inventory/transaction/material_transaction.service';
+import { ToolTransactionService } from '../inventory/transaction/tool_transaction.service';
 
 @Injectable()
 export class PurchasingService {
   constructor(
+    @InjectConnection() private readonly connection: Connection,
     @InjectModel(PurchaseOrder.name) private readonly purchaseOrderModel: Model<PurchaseOrder>,
     @InjectModel(PurchaseTransaction.name) private readonly purchaseTransactionModel: Model<PurchaseTransaction>,
     private readonly warehouseService: WarehouseService,
     private readonly materialService: MaterialService,
-    private readonly toolskuService: ToolSkuService
+    private readonly toolskuService: ToolSkuService,
+    private readonly materialTransactionService: MaterialTransactionService,
+    private readonly toolTransactionService: ToolTransactionService,
   ) { }
 
   // admin owner 
@@ -33,7 +38,7 @@ export class PurchasingService {
   }
 
   // admin owner mandor
-  async getPurchaseOrderById(id: string, user): Promise<PurchaseOrder> {
+  async getPurchaseOrderById(id: string, user: User): Promise<PurchaseOrder> {
     let po = await this.purchaseOrderModel.findById(id).populate(["requested_from", "requested_by"]).exec();
     if (!po) throw new NotFoundException('PO tidak ditemukan');
 
@@ -45,21 +50,50 @@ export class PurchasingService {
 
     // populate manualy material and tool
     let formatedPODetail = await Promise.all(po.purchase_order_detail.map(async (detail) => {
-      let item = null;
+      let material = null;
       let sku = null;
       if (detail.item_type == RequestItem_ItemType.MATERIAL) {
-        item = await this.materialService.findOne(detail.item.toString())
+        material = await this.materialService.findOne(detail.item.toString())
       }
       if (detail.item_type == RequestItem_ItemType.TOOL) {
         sku = await this.toolskuService.findOne(detail.item.toString())
       }
-      return {...detail, item, sku}
+      return {...detail, material, sku}
     }))
 
     // format new purchase order with detail item material or tool
     po.purchase_order_detail = formatedPODetail;
 
     return po;
+  }
+
+  async getRelatedPTfromPT(id: string, user: User): Promise<PurchaseTransaction[]> {
+    let po = await this.getPurchaseOrderById(id, user);
+
+    if(po.status == RequestStatus.SELESAI) {
+      return []
+    }
+
+    // item ids yang masih dibutuhkan
+    const PO_details = po.purchase_order_detail.filter(detail => detail.quantity > detail.completed_quantity);
+    const itemIds = PO_details.map(detail => detail.item.toString());
+    
+    let relatedPT = await this.purchaseTransactionModel.find({
+      "purchase_transaction_detail": {
+        $elemMatch: {
+          "item": { $in: itemIds },
+          "purchase_order": id
+        }
+      }
+    }).exec();
+
+    const formatedPT = await Promise.all(relatedPT.map(async (pt) => {
+      const filteredDetail = pt.purchase_transaction_detail.filter(detail => itemIds.includes(detail.item.toString()));
+      pt.purchase_transaction_detail = filteredDetail;
+      return pt
+    }))
+
+    return formatedPT;
   }
 
   // admin owner mandor
@@ -121,5 +155,90 @@ export class PurchasingService {
     }
     po.status = status;
     return await po.save();
+  }
+
+  // admin owner mandor
+  async handleReceivedPODetail(id: string, receiveItemInput: ReceiveItemInput, user: User): Promise<PurchaseOrder> {
+    let { item_transaction, item_transaction_detail } = receiveItemInput;
+    
+    // check po exist & handled by request_by user
+    let po = await this.purchaseOrderModel.findOne({ _id: id, status: RequestStatus.DISETUJUI }).exec();
+    if (!po) throw new NotFoundException('PO yang disetujui tidak ditemukan');
+    if(po.requested_by != (user.employee as Employee)._id.toString()) {
+      throw new BadRequestException('Hanya pembuat PO yang dapat konfirmasi penerimaan barang');
+    }
+
+    // check transaction exist & detail exist
+    let targetTransaction = await this.purchaseTransactionModel.findOne({
+      _id: item_transaction,
+      "purchase_transaction_detail": {
+        $elemMatch: {
+          _id: item_transaction_detail,
+          purchase_order: id
+        }
+      }
+    }).exec();
+    if (!targetTransaction) {
+      throw new NotFoundException('Transaksi untuk order pembelian tersebut tidak ditemukan');
+    }
+
+    // get RELATED TRANS_DETAIL & PO_DETAIL
+    let targetTransactionDetail = targetTransaction.purchase_transaction_detail.find(detail => detail._id.toString() == item_transaction_detail);
+
+    let edittedPODetailIndex = po.purchase_order_detail.findIndex(detail => detail.item == targetTransactionDetail.item);
+    let targetPurchaseOrderDetail = po.purchase_order_detail[edittedPODetailIndex];
+
+    const session = await this.connection.startSession();
+
+    try {
+      session.startTransaction();
+
+      let remainNeeded = targetPurchaseOrderDetail.quantity - targetPurchaseOrderDetail.completed_quantity;
+      if(remainNeeded < targetTransactionDetail.quantity) {
+        throw new BadRequestException('Jumlah barang yang diterima tidak boleh melebihi jumlah yang dibutuhkan')
+      }
+
+      // MATERIAL ITEM
+      if(targetTransactionDetail.item_type == RequestItem_ItemType.MATERIAL) {
+        await this.materialTransactionService.create({
+          materials: [{
+            material: targetTransactionDetail.item,
+            qty: targetTransactionDetail.quantity,
+            price: targetTransactionDetail.price
+          }],
+          warehouse_to: String(po.requested_from),
+          transaction_category: "PUR"
+        }, session);
+      // TOOL ITEM
+      }else if(targetTransactionDetail.item_type == RequestItem_ItemType.TOOL) {
+        await this.toolTransactionService.create({
+          tool: [targetTransactionDetail.item],
+          warehouse_to: String(po.requested_from),
+          transaction_category: "PUR"
+        }, session)
+      }
+
+      po.purchase_order_detail[edittedPODetailIndex].completed_quantity += targetTransactionDetail.quantity;
+      po.purchase_order_detail[edittedPODetailIndex].sub_detail.push({
+        purchase_transaction : targetTransaction._id.toString(),
+        purchase_transaction_detail : targetTransactionDetail._id.toString(),
+        quantity: targetTransactionDetail.quantity
+      })
+
+      let allCompleted = po.purchase_order_detail.every(detail => detail.quantity == detail.completed_quantity);
+      if(allCompleted) {
+        po.status = RequestStatus.SELESAI;
+      }
+
+      po.save({session})
+
+      await session.commitTransaction();
+      return po;
+    } catch (error) {
+      await session.abortTransaction();
+      throw error
+    } finally {
+      await session.endSession();
+    }
   }
 }

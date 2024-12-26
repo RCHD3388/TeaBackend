@@ -54,7 +54,7 @@ export class PurchaseOrderDetail {
 
   @Field(() => Number)
   @Prop({ type: Number, default: 0 })
-  completed_quantity: Number;
+  completed_quantity: number;
 
   @Field(() => [PurchaseOrderSubDetail])
   @Prop({ type: [PurchaseOrderSubDetail], default: [] })
