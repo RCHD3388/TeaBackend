@@ -57,9 +57,9 @@ export class PurchasingService {
     }))
 
     // format new purchase order with detail item material or tool
-    let formattedPO: PurchaseOrder = {...po, purchase_order_detail: formatedPODetail};
+    po.purchase_order_detail = formatedPODetail;
 
-    return formattedPO;
+    return po;
   }
 
   // admin owner mandor
