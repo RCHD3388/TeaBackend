@@ -31,6 +31,13 @@ export class ToolSkuResolver {
     return this.toolskuService.findOne(id);
   }
 
+  @Query(() => [Sku], { name: 'getAllSkusByIds' })
+  @UseGuards(RolesGuard)
+  @Roles("owner", "admin", "staff_pembelian", "mandor")
+  async getAllSkusByIds(@Args('ids', { type: () => [String] }) ids: string[]): Promise<Sku[]> {
+    return this.toolskuService.findByIds(ids);
+  }
+
   @Mutation(() => Sku)
   @UseGuards(RolesGuard)
   @Roles("owner", "admin", "staff_pembelian")
@@ -77,7 +84,7 @@ export class ToolSkuResolver {
   
   @Query(() => [Tool], { name: 'getToolsByIds' })
   @UseGuards(RolesGuard)
-  @Roles("owner", "admin", "staff_pembelian")
+  @Roles("owner", "admin", "staff_pembelian", "mandor")
   async getToolsByIds(@Args('ids', { type: () => [String] }) ids: string[]): Promise<Tool[]> {
     return this.toolService.findByIds(ids);
   }

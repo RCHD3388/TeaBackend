@@ -104,7 +104,7 @@ export class CreateRequestPurchaseTransactionInput {
   @IsNotEmpty({ message: 'Supplier tidak boleh kosong' })
   supplier: String
 
-  @Field(() => [CreatePODetailInput])
+  @Field(() => [CreatePurchaseTransactionDetailInput])
   @IsArray()
   @IsNotEmpty({ message: 'Detail item tidak boleh kosong' })
   purchase_transaction_detail: CreatePurchaseTransactionDetailInput[];
@@ -150,3 +150,9 @@ export class ReceiveItemInput {
   item_transaction_detail : string
 }
 
+@InputType()
+export class CreateNewPurchaseTransactionDetailInput {
+  @Field(() => CreatePurchaseTransactionDetailInput)
+  @IsNotEmpty({ message: 'Detail item tidak boleh kosong' })
+  input: CreatePurchaseTransactionDetailInput;
+}

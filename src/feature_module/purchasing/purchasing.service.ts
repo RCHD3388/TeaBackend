@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import { Connection, Model } from 'mongoose';
-import { PurchaseOrder, PurchaseTransaction } from './schema/purchasing.schema';
+import { PurchaseOrder, PurchaseOrderDetail, PurchaseTransaction } from './schema/purchasing.schema';
 import { CreateRequestPOInput, ReceiveItemInput } from './types/purchasing_types.types';
 import { User } from '../user/schema/user.schema';
 import { WarehouseService } from '../inventory/warehouse.service';
@@ -49,28 +49,11 @@ export class PurchasingService {
       throw new BadRequestException('Anda tidak dapat mengakses Purchase Order ini');
     }
 
-    // populate manualy material and tool
-    let formatedPODetail = await Promise.all(po.purchase_order_detail.map(async (detail) => {
-      let material = null;
-      let sku = null;
-      if (detail.item_type == RequestItem_ItemType.MATERIAL) {
-        material = await this.materialService.findOne(detail.item.toString())
-      }
-      if (detail.item_type == RequestItem_ItemType.TOOL) {
-        sku = await this.toolskuService.findOne(detail.item.toString())
-      }
-      return {...detail, material, sku}
-    }))
-
-    // format new purchase order with detail item material or tool
-    po.purchase_order_detail = formatedPODetail;
-
     return po;
   }
 
   async getRelatedPTfromPO(id: string, user: User): Promise<PurchaseTransaction[]> {
     let po = await this.getPurchaseOrderById(id, user);
-
     if(po.status == RequestStatus.SELESAI) {
       return []
     }
@@ -89,19 +72,17 @@ export class PurchasingService {
     }).exec();
 
     const formatedPT = await Promise.all(relatedPT.map(async (pt) => {
-      let filteredDetail = pt.purchase_transaction_detail.filter(detail => itemIds.includes(detail.item.toString()));
-      // populate manualy material and tool
-      filteredDetail = await Promise.all(filteredDetail.map(async (detail) => {
-        let material = null;
-        let tool = null;
-        if (detail.item_type == RequestItem_ItemType.MATERIAL) {
-          material = await this.materialService.findOne(detail.item.toString())
-        }
-        if (detail.item_type == RequestItem_ItemType.TOOL) {
-          tool = await this.toolService.findOne(detail.item.toString())
-        }
-        return {...detail, material, tool}
-      }))
+      let filteredDetail = pt.purchase_transaction_detail.filter(detail => 
+        // check items include dan purchase order benar
+        itemIds.includes(detail.item.toString()) && detail.purchase_order == id &&
+        // check POdetail tidak memiliki sub detail yang mengarah ke transaksi tersebut
+        !po.purchase_order_detail.some(
+          (pod) => pod.sub_detail.some(
+            (sbd) => sbd.purchase_transaction == pt._id.toString() && sbd.purchase_transaction_detail == detail._id.toString()
+          )
+        )
+      );
+
       pt.purchase_transaction_detail = filteredDetail;
       return pt
     }))
@@ -148,7 +129,7 @@ export class PurchasingService {
       title: createPurchaseOrderInput.title,
       description: createPurchaseOrderInput.description || "",
       requested_from: requested_from,
-      requested_by: user._id.toString(),
+      requested_by: (user.employee as Employee)._id.toString(),
       date: new Date(),
       status: userRole == "mandor" ? RequestStatus.MENUNGGU : RequestStatus.DISETUJUI,
       purchase_order_detail: purchase_order_detail
@@ -163,7 +144,7 @@ export class PurchasingService {
     let po = await this.purchaseOrderModel.findOne({ _id: id, status: RequestStatus.MENUNGGU }).exec();
     if (!po) throw new NotFoundException('PO yang sedang menunggu persetujuan tidak ditemukan');
 
-    if (status != RequestStatus.MENUNGGU && status != RequestStatus.DISETUJUI) {
+    if (status != RequestStatus.DITOLAK && status != RequestStatus.DISETUJUI) {
       throw new BadRequestException('PO hanya boleh disetejui atau ditolak');
     }
     po.status = status;
@@ -199,7 +180,16 @@ export class PurchasingService {
     let targetTransactionDetail = targetTransaction.purchase_transaction_detail.find(detail => detail._id.toString() == item_transaction_detail);
 
     let edittedPODetailIndex = po.purchase_order_detail.findIndex(detail => detail.item == targetTransactionDetail.item);
+    if(edittedPODetailIndex == -1) {
+      throw new BadRequestException('PO Detail tidak ditemukan');
+    }
     let targetPurchaseOrderDetail = po.purchase_order_detail[edittedPODetailIndex];
+    if(targetPurchaseOrderDetail.sub_detail.some(sbd => 
+      sbd.purchase_transaction == targetTransaction._id.toString() &&
+      sbd.purchase_transaction_detail == targetTransactionDetail._id.toString()
+    )) {
+      throw new BadRequestException('Transaksi ini sudah diterima sebelumnya');
+    }
 
     const session = await this.connection.startSession();
 
@@ -215,7 +205,7 @@ export class PurchasingService {
       if(targetTransactionDetail.item_type == RequestItem_ItemType.MATERIAL) {
         await this.materialTransactionService.create({
           materials: [{
-            material: targetTransactionDetail.item,
+            material: targetTransactionDetail.original_item,
             qty: targetTransactionDetail.quantity,
             price: targetTransactionDetail.price
           }],
@@ -225,7 +215,7 @@ export class PurchasingService {
       // TOOL ITEM
       }else if(targetTransactionDetail.item_type == RequestItem_ItemType.TOOL) {
         await this.toolTransactionService.create({
-          tool: [targetTransactionDetail.item],
+          tool: [targetTransactionDetail.original_item],
           warehouse_to: String(po.requested_from),
           transaction_category: "PUR"
         }, session)
@@ -243,7 +233,7 @@ export class PurchasingService {
         po.status = RequestStatus.SELESAI;
       }
 
-      po.save({session})
+      await po.save({session})
 
       await session.commitTransaction();
       return po;

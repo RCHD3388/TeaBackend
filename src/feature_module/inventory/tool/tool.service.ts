@@ -76,4 +76,11 @@ export class ToolService {
 
     return await this.toolModel.findByIdAndUpdate(id, updateToolInput);
   }
+
+  
+  async remove(id: string): Promise<Tool> {
+    let tool = await this.toolModel.findByIdAndDelete(id).exec();
+    if (!tool) throw new NotFoundException('Tool tidak ditemukan');
+    return tool;
+  }
 }

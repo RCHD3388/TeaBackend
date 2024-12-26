@@ -30,7 +30,7 @@ export class PurchasingResolver {
   async getPurchaseOrderByUser(@CurrentUser() user: User): Promise<PurchaseOrder[]> {
     return this.purchasingService.getPurchaseOrderByUser(user);
   }
-  
+
   @Query(() => PurchaseOrder)
   @UseGuards(RolesGuard)
   @Roles('admin', 'owner', 'mandor', "staff_pembelian")
@@ -40,17 +40,17 @@ export class PurchasingResolver {
   ): Promise<PurchaseOrder> {
     return this.purchasingService.getPurchaseOrderById(id, user);
   }
-  
-  @Query(() => [PurchaseTransaction])
+
+  @Query(() => [PurchaseTransaction], { name: 'getRelatedPTfromPO' })
   @UseGuards(RolesGuard)
-  @Roles('admin', 'owner', 'mandor')
+  @Roles("owner", "admin", "mandor")
   async getRelatedPTfromPO(
     @Args('id') id: string,
     @CurrentUser() user: User
   ): Promise<PurchaseTransaction[]> {
     return this.purchasingService.getRelatedPTfromPO(id, user);
   }
-  
+
   @Mutation(() => PurchaseOrder)
   @UseGuards(RolesGuard)
   @Roles('admin', 'owner', 'mandor')
@@ -60,7 +60,7 @@ export class PurchasingResolver {
   ): Promise<PurchaseOrder> {
     return this.purchasingService.createPurchaseOrder(createPurchaseOrderInput, user);
   }
-  
+
   @Mutation(() => PurchaseOrder)
   @UseGuards(RolesGuard)
   @Roles('admin', 'owner')
@@ -70,7 +70,7 @@ export class PurchasingResolver {
   ): Promise<PurchaseOrder> {
     return this.purchasingService.handleWaitingPO(id, status);
   }
-  
+
   @Mutation(() => PurchaseOrder)
   @UseGuards(RolesGuard)
   @Roles('admin', 'owner', 'mandor')

@@ -275,15 +275,12 @@ type RequestItemHeader {
 type PurchaseOrderSubDetail {
   purchase_transaction: String!
   purchase_transaction_detail: String!
-  tool: String
   quantity: Float!
 }
 
 type PurchaseOrderDetail {
   _id: String!
   item: String!
-  material: Material
-  sku: Sku
   item_type: String!
   quantity: Float!
   completed_quantity: Float!
@@ -305,12 +302,22 @@ type PurchaseTransactionDetail {
   _id: String!
   purchase_order: PurchaseOrder!
   item: String!
-  material: Material
-  sku: Tool
+  original_item: String!
   item_type: String!
   quantity: Float!
   price: Float!
   subtotal: Float!
+}
+
+type PurchaseTransaction {
+  _id: String!
+  purchasing_staff: Employee!
+  transaction_number: String!
+  description: String
+  transaction_date: DateTime!
+  total: Float!
+  supplier: Supplier!
+  purchase_transaction_detail: [PurchaseTransactionDetail!]!
 }
 
 type Query {
@@ -336,10 +343,11 @@ type Query {
   getAllMerks: [Merk!]!
   getMerkById(id: String!): Merk!
   getAllMaterials: [Material!]!
-  getAllMaterialByIds(ids: [String!]!): Material!
+  getAllMaterialByIds(ids: [String!]!): [Material!]!
   getMaterialById(id: String!): Material!
   getAllSkus: [Sku!]!
   getSkuById(id: String!): Sku!
+  getAllSkusByIds(ids: [String!]!): [Sku!]!
   getAllTools(sku: String): [Tool!]!
   getToolById(id: String!): Tool!
   getToolsByIds(ids: [String!]!): [Tool!]!
@@ -351,6 +359,13 @@ type Query {
   findAllRequestItemTransaction: [RequestItemHeader!]!
   findYourRequestItemTransaction: [RequestItemHeader!]!
   findYourApprovalItemTransaction: [RequestItemHeader!]!
+  getAllPurchaseOrders: [PurchaseOrder!]!
+  getPurchaseOrderByUser: [PurchaseOrder!]!
+  getPurchaseOrderByID(id: String!): PurchaseOrder!
+  getRelatedPTfromPO(id: String!): [PurchaseTransaction!]!
+  getAllPurchaseTransactions: [PurchaseTransaction!]!
+  getPurchaseTransactionByUser: [PurchaseTransaction!]!
+  getPurchaseTransactionById(id: String!): PurchaseTransaction!
 }
 
 input EmployeeFilter {
@@ -411,6 +426,13 @@ type Mutation {
   processingItemRequest(id: String!, createProcessingDetailInput: CreateProcessingDetailInput!): RequestItemHeader!
   updateAvailableStatusItemRequest(id: String!, status: String!): RequestItemHeader!
   closingItemRequest(id: String!, createFinishingDetailInput: CreateFinishingDetailInput!): RequestItemHeader!
+  createPurchaseOrder(createPurchaseOrderInput: CreateRequestPOInput!): PurchaseOrder!
+  handleWaitingPO(id: String!, status: String!): PurchaseOrder!
+  handleReceivedPODetail(id: String!, receiveItemInput: ReceiveItemInput!): PurchaseOrder!
+  createPurchaseTransaction(createPurchaseTransactionInput: CreateRequestPurchaseTransactionInput!): PurchaseTransaction!
+  updatePurchaseTransaction(id: String!, updatePurchaseTransactionInput: UpdateRequestPurchaseTransactionInput!): PurchaseTransaction!
+  removePurchaseTransactionDetail(id: String!, id_detail: String!): PurchaseTransaction!
+  addNewDetailPT(id: String!, createPurchaseTransactionDetailInput: CreateNewPurchaseTransactionDetailInput!): PurchaseTransaction!
 }
 
 input LoginInput {
@@ -682,4 +704,50 @@ input CreateFinishingDetailInput {
   recipient_name: String!
   recipient_phone: String!
   recipient_description: String
+}
+
+input CreateRequestPOInput {
+  title: String!
+  description: String
+  requested_from: String!
+  purchase_order_detail: [CreatePODetailInput!]!
+}
+
+input CreatePODetailInput {
+  item: String!
+  quantity: Float!
+  item_type: String!
+}
+
+input ReceiveItemInput {
+  item_transaction: String!
+  item_transaction_detail: String!
+}
+
+input CreateRequestPurchaseTransactionInput {
+  description: String
+  transaction_number: String!
+  transaction_date: DateTime!
+  supplier: String!
+  purchase_transaction_detail: [CreatePurchaseTransactionDetailInput!]!
+}
+
+input CreatePurchaseTransactionDetailInput {
+  purchase_order: String!
+  item: String!
+  quantity: Float!
+  item_type: String!
+  tool: CreateToolInput
+  price: Float!
+}
+
+input UpdateRequestPurchaseTransactionInput {
+  description: String
+  transaction_number: String
+  transaction_date: DateTime
+  supplier: String
+}
+
+input CreateNewPurchaseTransactionDetailInput {
+  input: CreatePurchaseTransactionDetailInput!
 }

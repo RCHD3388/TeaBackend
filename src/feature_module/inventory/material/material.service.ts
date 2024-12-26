@@ -31,7 +31,7 @@ export class MaterialService {
   async findByIds(ids: string[], active_only: boolean = false): Promise<Material[]> {
     let filter = {};
     if (active_only) filter = { status: MaterialStatus.ACTIVE };
-    return this.materialModel.find({ id: { $in: ids } , ...filter}).populate(["merk", "unit_measure", "minimum_unit_measure", "item_category"]).exec();
+    return this.materialModel.find({ _id: { $in: ids } , ...filter}).populate(["merk", "unit_measure", "minimum_unit_measure", "item_category"]).exec();
   }
 
   async findOne(id: string): Promise<Material> {

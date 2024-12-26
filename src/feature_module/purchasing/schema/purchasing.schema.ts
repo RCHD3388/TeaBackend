@@ -19,9 +19,9 @@ export class PurchaseOrderSubDetail {
   @Prop({ type: Types.ObjectId, required: true })
   purchase_transaction_detail: string;
 
-  @Field(() => String, {nullable: true})
-  @Prop({ type: Types.ObjectId, required: true, ref: "Tool" })
-  tool?: string;
+  // @Field(() => String, {nullable: true})
+  // @Prop({ type: Types.ObjectId, required: true, ref: "Tool" })
+  // tool?: string;
 
   @Field(() => Number)
   @Prop({ type: Number, required: true })
@@ -37,12 +37,6 @@ export class PurchaseOrderDetail {
   @Field(() => String)
   @Prop({ type: Types.ObjectId, required: true })
   item: string;
-
-  // TAMBAHAN SAJA TIDAK ADA DI COLLECTION
-  @Field(() => Material, { nullable: true })
-  material: Material;
-  @Field(() => Sku, { nullable: true })
-  sku: Sku;
 
   @Field(() => String)
   @Prop({ type: String, enum: RequestItem_ItemType, required: true })
@@ -114,11 +108,9 @@ export class PurchaseTransactionDetail {
   @Prop({ type: Types.ObjectId, required: true })
   item: string;
 
-  // TAMBAHAN SAJA GA ADA DI COLLECTION
-  @Field(() => Material, { nullable: true })
-  material?: Material;
-  @Field(() => Tool, { nullable: true })
-  tool?: Tool;
+  @Field(() => String)
+  @Prop({ type: Types.ObjectId, required: true })
+  original_item: string;
 
   @Field(() => String)
   @Prop({ type: String, enum: RequestItem_ItemType, required: true })

@@ -8,7 +8,8 @@ import { PurchaseTransaction } from './schema/purchasing.schema';
 import { RolesGuard } from 'src/common/guard/roles.guard';
 import { CurrentUser } from 'src/common/decorators/auth_user.decorator';
 import { User } from '../user/schema/user.schema';
-import { CreatePurchaseTransactionDetailInput, CreateRequestPurchaseTransactionInput, UpdateRequestPurchaseTransactionInput } from './types/purchasing_types.types';
+import { CreateNewPurchaseTransactionDetailInput, CreatePurchaseTransactionDetailInput, CreateRequestPurchaseTransactionInput, UpdateRequestPurchaseTransactionInput } from './types/purchasing_types.types';
+import { CreateToolInput } from '../inventory/types/tool.types';
 
 @Resolver()
 @UseGuards(AppAuthGuard)
@@ -81,11 +82,12 @@ export class PurchasingTransactionResolver {
   @Mutation(() => PurchaseTransaction)
   @UseGuards(RolesGuard)
   @Roles('admin', 'owner', 'staff_pembelian')
-  async addNewDetail(
+  async addNewDetailPT(
     @Args('id') id: string,
-    @Args('createPurchaseTransactionDetailInput') createPurchaseTransactionDetailInput: CreatePurchaseTransactionDetailInput,
+    @Args('createPurchaseTransactionDetailInput') createPurchaseTransactionDetailInput: CreateNewPurchaseTransactionDetailInput,
     @CurrentUser() user: User
   ): Promise<PurchaseTransaction> {
-    return this.purchasingTransactionService.addNewDetail(id, createPurchaseTransactionDetailInput, user);
+    console.log(createPurchaseTransactionDetailInput)
+    return this.purchasingTransactionService.addNewDetailPT(id, createPurchaseTransactionDetailInput, user);
   }
 }
