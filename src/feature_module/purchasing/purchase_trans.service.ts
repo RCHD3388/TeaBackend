@@ -14,7 +14,7 @@ import { SupplierService } from '../person/supplier.service';
 import { SupplierStatus } from '../person/schema/supplier.schema';
 
 @Injectable()
-export class PurchasingService {
+export class PurchasingTransactionService {
   constructor(
     @InjectConnection() private readonly connection: Connection,
     @InjectModel(PurchaseOrder.name) private readonly purchaseOrderModel: Model<PurchaseOrder>,
@@ -26,6 +26,44 @@ export class PurchasingService {
     private readonly supplierService: SupplierService
   ) { }
 
+
+  // admin owner
+  async getAllPurchaseTransactions(): Promise<PurchaseTransaction[]> {
+    return this.purchaseTransactionModel.find().populate("purchasing_staff", "supplier").exec();
+  }
+
+  // admin owner staffpembelian
+  async getPurchaseTransactionByPurchasingStaff(user: User): Promise<PurchaseTransaction[]> {
+    return this.purchaseTransactionModel.find({ purchasing_staff: (user.employee as Employee)._id.toString() })
+      .populate("purchasing_staff", "supplier").exec();
+  }
+
+  // admin owner mandor staffpembelian
+  async getPurchaseTransactionById(id: string, user: User): Promise<PurchaseTransaction> {
+    let pt = await this.purchaseTransactionModel.findById(id).populate("purchasing_staff", "supplier").exec();
+    if (!pt) throw new NotFoundException('Purchase transaction tidak ditemukan');
+
+    // jika role adalah staff_pembelian maka purchasing staff harus user
+    if (((user.employee as Employee).role as EmployeeRole).name == "staff_pembelian" &&
+      pt.purchasing_staff.toString() !== (user.employee as Employee)._id.toString()) {
+      throw new BadRequestException('Anda tidak dapat mengakses Purchase Transaction ini');
+    }
+
+    let formatedPTDetail = await Promise.all(pt.purchase_transaction_detail.map(async (detail) => {
+      let material = null;
+      let tool = null;
+      if (detail.item_type == RequestItem_ItemType.MATERIAL) {
+        material = await this.materialService.findOne(detail.item.toString())
+      }
+      if (detail.item_type == RequestItem_ItemType.TOOL) {
+        tool = await this.toolService.findOne(detail.item.toString())
+      }
+      return { ...detail, material, tool }
+    }))
+    pt.purchase_transaction_detail = formatedPTDetail
+
+    return pt;
+  }
 
   // admin owner staff pembelian
   async createPurchaseTransaction(createPurchaseTransactionInput: CreateRequestPurchaseTransactionInput, user: User): Promise<PurchaseTransaction> {

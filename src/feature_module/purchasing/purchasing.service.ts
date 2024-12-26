@@ -22,6 +22,7 @@ export class PurchasingService {
     private readonly warehouseService: WarehouseService,
     private readonly materialService: MaterialService,
     private readonly toolskuService: ToolSkuService,
+    private readonly toolService: ToolService,
     private readonly materialTransactionService: MaterialTransactionService,
     private readonly toolTransactionService: ToolTransactionService,
   ) { }
@@ -67,7 +68,7 @@ export class PurchasingService {
     return po;
   }
 
-  async getRelatedPTfromPT(id: string, user: User): Promise<PurchaseTransaction[]> {
+  async getRelatedPTfromPO(id: string, user: User): Promise<PurchaseTransaction[]> {
     let po = await this.getPurchaseOrderById(id, user);
 
     if(po.status == RequestStatus.SELESAI) {
@@ -88,7 +89,19 @@ export class PurchasingService {
     }).exec();
 
     const formatedPT = await Promise.all(relatedPT.map(async (pt) => {
-      const filteredDetail = pt.purchase_transaction_detail.filter(detail => itemIds.includes(detail.item.toString()));
+      let filteredDetail = pt.purchase_transaction_detail.filter(detail => itemIds.includes(detail.item.toString()));
+      // populate manualy material and tool
+      filteredDetail = await Promise.all(filteredDetail.map(async (detail) => {
+        let material = null;
+        let tool = null;
+        if (detail.item_type == RequestItem_ItemType.MATERIAL) {
+          material = await this.materialService.findOne(detail.item.toString())
+        }
+        if (detail.item_type == RequestItem_ItemType.TOOL) {
+          tool = await this.toolService.findOne(detail.item.toString())
+        }
+        return {...detail, material, tool}
+      }))
       pt.purchase_transaction_detail = filteredDetail;
       return pt
     }))

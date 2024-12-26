@@ -118,7 +118,7 @@ export class PurchaseTransactionDetail {
   @Field(() => Material, { nullable: true })
   material?: Material;
   @Field(() => Tool, { nullable: true })
-  sku?: Tool;
+  tool?: Tool;
 
   @Field(() => String)
   @Prop({ type: String, enum: RequestItem_ItemType, required: true })
