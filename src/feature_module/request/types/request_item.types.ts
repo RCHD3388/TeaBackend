@@ -3,6 +3,7 @@ import { IsNotEmpty, IsOptional, IsString, IsNumber, Min, IsEnum, IsArray, isEnu
 import { RequestItem_ItemType, RequestItemType, RequestStatus } from "./request.types";
 import { RequestItemHeader } from "../schema/request_item.schema";
 import { Warehouse } from "src/feature_module/inventory/schema/warehouse.schema";
+import { Tool } from "src/feature_module/inventory/schema/inventory.schema";
 
 @InputType()
 export class CreateRequestItemDetailInput {
@@ -68,6 +69,19 @@ export class CustomRequestItem {
 }
 
 @InputType()
+export class ProcessingToolDetailInput {
+  @Field(() => String)
+  @IsString()
+  @IsNotEmpty({ message: 'Sku dari barang yang akan di proses perlu diisi' })
+  sku: String;
+
+  @Field(() => [String])
+  @IsArray()
+  @IsNotEmpty({ message: 'Tool yang ingin diberikan harus diisi' })
+  tool: String[];
+}
+
+@InputType()
 export class CreateProcessingDetailInput {
   @Field(() => String)
   @IsNotEmpty({ message: 'Nama pengirim tidak boleh kosong' })
@@ -86,6 +100,11 @@ export class CreateProcessingDetailInput {
   @Field(() => String, {nullable: true})
   @IsString()
   vehicle_detail?: string;
+
+  @Field(() => [ProcessingToolDetailInput], {nullable: true})
+  @IsArray()
+  @IsNotEmpty({ message: 'Detail item tidak boleh kosong' })
+  processing_tool_detail?: ProcessingToolDetailInput[];
 }
 
 @InputType()

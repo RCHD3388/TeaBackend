@@ -12,9 +12,15 @@ export class RequestItemDetail {
   @Field(() => String)
   _id: string;
 
+  // akan simpen sku sama material
   @Field(() => String)
   @Prop({ type: Types.ObjectId, required: true })
   item: String;
+
+  // akan simpen beberapa detail dari tool yang akan dipnidahkan (kalau misalnya merupakan tool)
+  @Field(() => [Tool], {nullable: true})
+  @Prop({ type: [Types.ObjectId], default: [], ref: "Tool" })
+  tool?: String[];
 
   @Field(() => Number)
   @Prop({ type: Number, required: true })

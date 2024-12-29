@@ -243,6 +243,7 @@ type Supplier {
 type RequestItemDetail {
   _id: String!
   item: String!
+  tool: [Tool!]
   quantity: Float!
   price: Float
   item_type: String!
@@ -698,6 +699,12 @@ input CreateProcessingDetailInput {
   sender_phone: String!
   police_number: String
   vehicle_detail: String
+  processing_tool_detail: [ProcessingToolDetailInput!]
+}
+
+input ProcessingToolDetailInput {
+  sku: String!
+  tool: [String!]!
 }
 
 input CreateFinishingDetailInput {
