@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import { Connection, Model } from 'mongoose';
-import { CreateFinishingDetailInput, CreateProcessingDetailInput, CreateRequestItemDetailInput, CreateRequestItemInput, CustomRequestItem } from '../types/request_item.types';
+import { CreateFinishingDetailInput, CreateProcessingDetailInput, CreateRequestItemDetailInput, CreateRequestItemInput, CustomRequestItem, ProcessingToolDetailInput } from '../types/request_item.types';
 import { RequestItemDetail, RequestItemHeader } from '../schema/request_item.schema';
 import { Warehouse } from 'src/feature_module/inventory/schema/warehouse.schema';
 import { RequestItem_ItemType, RequestItemType, RequestStatus, UpdateRequestStatusInput } from '../types/request.types';
@@ -114,7 +114,8 @@ export class ItemTransactionService {
     return true
   }
 
-  async checkValidToolForProcessing(requestedSku, targetOutTools): Promise<boolean> {
+  // TERBARU UNTUK CHECK PROCESSING SESUAI SKU
+  async checkValidToolForProcessing(requestedSku: String[], targetOutTools: ProcessingToolDetailInput[]): Promise<boolean> {
     
     return true;
   }
@@ -258,8 +259,8 @@ export class ItemTransactionService {
         }
       }
       if (toolsku_item.length > 0) {
-        if(await this.checkValidToolForProcessing(toolsku_item, createProcessingDetailInput.processing_tool_detail)){
-          
+        if(!(await this.checkValidToolForProcessing(toolsku_item, createProcessingDetailInput.processing_tool_detail))){
+          throw new BadRequestException('Jumlah Tool dari sku yang diminta harus terpenuhi semua, pastikan jumlah tool yang diberikan sesuai dengan permintaan') 
         }
         await this.toolTransactionService.transferOutTool(String(warehouse), toolsku_item, session)
       }
