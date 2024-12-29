@@ -87,7 +87,6 @@ export class TransactionResolver {
     } finally {
       await session.endSession();
     }
-
   }
 
   @Query(() => [ToolTransaction], { name: 'getWarehouseTools' })

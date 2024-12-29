@@ -49,7 +49,6 @@ export class UpdateWarehouseInput {
   @Field(() => String, {nullable: true})
   @IsOptional()
   @IsString()
-  @IsNotEmpty({ message: 'Description is required.' })
   description?: string;
 
   @Field(() => String, {nullable: true})

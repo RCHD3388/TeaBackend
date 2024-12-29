@@ -115,7 +115,7 @@ export const MaterialSchema = SchemaFactory.createForClass(Material);
 @ObjectType()
 @Schema()
 export class Tool extends Document {
-  @Field(() => ID) // Menyertakan _id dalam GraphQL response
+  @Field(() => String) // Menyertakan _id dalam GraphQL response
   _id: string;
 
   @Field(() => String)

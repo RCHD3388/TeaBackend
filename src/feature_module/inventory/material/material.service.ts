@@ -4,6 +4,7 @@ import { Model } from 'mongoose';
 import { Material, MaterialStatus, Merk, Sku, UnitMeasure } from '../schema/inventory.schema';
 import { CreateMaterialInput, UpdateMaterialInput } from '../types/material.types';
 import { CategoryData, CategoryType } from './../../../feature_module/category/schema/category.schema';
+import { FilterInput } from 'src/feature_module/types/global_input_types.types';
 
 @Injectable()
 export class MaterialService {
@@ -24,8 +25,12 @@ export class MaterialService {
     return newId;
   }
 
-  async findAll(): Promise<Material[]> {
-    return this.materialModel.find().populate(["merk", "unit_measure", "minimum_unit_measure", "item_category"]).exec();
+  async findAll(filterInput: FilterInput): Promise<Material[]> {
+    let filter = {}
+    if(filterInput?.status){
+      filter = { status: MaterialStatus.ACTIVE };
+    }
+    return this.materialModel.find(filter).populate(["merk", "unit_measure", "minimum_unit_measure", "item_category"]).exec();
   }
 
   async findByIds(ids: string[], active_only: boolean = false): Promise<Material[]> {

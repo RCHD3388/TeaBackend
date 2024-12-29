@@ -36,7 +36,7 @@ export class ToolTransactionService {
     ]).session(session || null).exec();
 
     const populatedData = await this.toolTransactionModel.populate(remainsData, {
-      path: 'tool', // Populate material
+      path: 'tool', // Populate tool
       populate: [
         {
           path: 'sku', model: 'Sku',
@@ -48,7 +48,6 @@ export class ToolTransactionService {
         { path: 'status', model: 'CategoryData' }
       ]
     });
-
     return populatedData
   }
   async create(

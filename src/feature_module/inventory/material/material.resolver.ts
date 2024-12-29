@@ -6,6 +6,8 @@ import { Material } from './../schema/inventory.schema';
 import { RolesGuard } from './../../../common/guard/roles.guard';
 import { Roles } from './../../../common/decorators/roles.decorator';
 import { CreateMaterialInput, UpdateMaterialInput } from '../types/material.types';
+import { filter } from 'rxjs';
+import { FilterInput } from 'src/feature_module/types/global_input_types.types';
 
 @Resolver()
 @UseGuards(AppAuthGuard)
@@ -17,8 +19,10 @@ export class MaterialResolver {
   @Query(() => [Material], { name: 'getAllMaterials' })
   @UseGuards(RolesGuard)
   @Roles("owner", "admin", "staff_pembelian", "mandor")
-  async getAllMaterials() {
-    return this.materialService.findAll();
+  async getAllMaterials(
+    @Args('filterInput', {nullable: true}) filterInput?: FilterInput
+  ) {
+    return this.materialService.findAll(filterInput);
   }
 
   @Query(() => [Material], { name: 'getAllMaterialByIds' })

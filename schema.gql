@@ -60,7 +60,7 @@ type Material {
 }
 
 type Tool {
-  _id: ID!
+  _id: String!
   id: String!
   description: String
   warranty_number: String
@@ -343,7 +343,7 @@ type Query {
   getUnitMeasureById(id: String!): UnitMeasure!
   getAllMerks: [Merk!]!
   getMerkById(id: String!): Merk!
-  getAllMaterials: [Material!]!
+  getAllMaterials(filterInput: FilterInput): [Material!]!
   getAllMaterialByIds(ids: [String!]!): [Material!]!
   getMaterialById(id: String!): Material!
   getAllSkus: [Sku!]!
@@ -371,6 +371,11 @@ type Query {
 
 input EmployeeFilter {
   filter: [String!]
+  status: Boolean
+}
+
+input FilterInput {
+  name: String
   status: Boolean
 }
 
