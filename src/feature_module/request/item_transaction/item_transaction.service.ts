@@ -115,8 +115,33 @@ export class ItemTransactionService {
   }
 
   // TERBARU UNTUK CHECK PROCESSING SESUAI SKU
-  async checkValidToolForProcessing(requestedSku: String[], targetOutTools: ProcessingToolDetailInput[]): Promise<boolean> {
-    
+  async checkValidToolForProcessing(requestedSku: { item: String, qty: number }[], targetOutTools: ProcessingToolDetailInput[]): Promise<boolean> {
+    // 1. Buat map untuk menampung total stok berdasarkan sku
+    const remainMap: Map<string, number> = new Map();
+
+    // 2. Hitung total quantity yang dimiliki per SKU dari TARGET OUT
+    for (const outTool of targetOutTools) {
+      let currentToolSku = String(outTool.sku);
+      const currentQty = remainMap.get(currentToolSku) ?? 0;
+      remainMap.set(currentToolSku, currentQty + 1);
+    }
+
+    // 3. Cek apakah tiap request (sku + quantity) dapat dipenuhi oleh remainMap
+    // 3.1 cek apakah panjang remainMap sama dengan panjang requestedSku
+    if (remainMap.size !== requestedSku.length) {
+      return false;
+    }
+
+    for (const requested of requestedSku) {
+      const availableQty = remainMap.get(String(requested.item)) ?? 0;
+      if (availableQty == requested.qty) {
+        // jika stok tidak cukup untuk memenuhi salah satu item, return false
+        return false;
+      }
+    }
+
+    // 4. Jika semua permintaan dapat terpenuhi, return true
+    return true;
     return true;
   }
 
@@ -239,7 +264,10 @@ export class ItemTransactionService {
       let toolsku_item = await Promise.all(item_detail.filter((item: RequestItemDetail) => {
         return item.item_type == RequestItem_ItemType.TOOL
       }).map((item: RequestItemDetail) => {
-        return String(item.item)
+        return {
+          item: String(item.item),
+          qty: item.quantity
+        }
       }))
 
       // warehouse out = ASAL (jika pengembalian), dan TUJUAN (jika kita pinjam)
@@ -259,10 +287,20 @@ export class ItemTransactionService {
         }
       }
       if (toolsku_item.length > 0) {
-        if(!(await this.checkValidToolForProcessing(toolsku_item, createProcessingDetailInput.processing_tool_detail))){
-          throw new BadRequestException('Jumlah Tool dari sku yang diminta harus terpenuhi semua, pastikan jumlah tool yang diberikan sesuai dengan permintaan') 
+        if (!(await this.checkValidToolForProcessing(toolsku_item, createProcessingDetailInput.processing_tool_detail))) {
+          throw new BadRequestException('Jumlah Tool dari sku yang diminta harus terpenuhi semua, pastikan jumlah tool yang diberikan sesuai dengan permintaan')
         }
-        await this.toolTransactionService.transferOutTool(String(warehouse), toolsku_item, session)
+        // melakukan flatten array menggabungkan semua tool yang akan di keluarkan dari warehouse menjadi sebuah array
+        const targetOutTool: String[] = [];
+        createProcessingDetailInput.processing_tool_detail.forEach((det) => {
+          // currentArray adalah array tool
+          targetOutTool.push(...det.tool);
+        });
+
+        // melakukan transaksi keluar dari warehouse
+        await this.toolTransactionService.transferOutTool(String(warehouse), targetOutTool, session)
+
+        // memberikan informasi pada database mengenai barang yang dikeluarkan
       }
 
       targetRequest.finishing_detail = {
