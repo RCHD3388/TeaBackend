@@ -48,7 +48,7 @@ export class ToolSkuService {
   }
 
   async update(id: string, updateSkuInput: UpdateSkuInput): Promise<Sku> {
-    const { name, description, merk, item_category } = updateSkuInput;
+    const { name, description, merk, item_category, status } = updateSkuInput;
 
     let targetSku = await this.skuModel.findById(id).exec();
 
@@ -68,6 +68,7 @@ export class ToolSkuService {
     targetSku.description = description ? description : targetSku.description;
     targetSku.merk = merk ? merk : targetSku.merk;
     targetSku.item_category = item_category ? item_category : targetSku.item_category;  
+    targetSku.status = status ? status : targetSku.status;
 
     return targetSku.save();
   }

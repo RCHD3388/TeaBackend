@@ -47,8 +47,8 @@ export class ToolService {
   async create(createToolInput: CreateToolInput, session: ClientSession): Promise<string> {
     const { sku, status } = createToolInput;
 
-    const targetSku = await this.skuModel.findById(sku).exec();
-    if (!targetSku) throw new NotFoundException(`Sku tidak ditemukan`);
+    const targetSku = await this.skuModel.findOne({_id: sku, status: MaterialStatus.ACTIVE}).exec();
+    if (!targetSku) throw new NotFoundException(`Sku aktif tidak ditemukan`);
 
     let targetStatus = await this.categoryDataModel.findOne({_id: status, type: CategoryType.TOOL_STATUS}).exec();
     if (!targetStatus) throw new NotFoundException(`Status tidak ditemukan`);
