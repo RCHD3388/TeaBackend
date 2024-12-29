@@ -3,7 +3,7 @@ import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import { Connection, Model } from 'mongoose';
 import { CreateFinishingDetailInput, CreateProcessingDetailInput, CreateRequestItemDetailInput, CreateRequestItemInput, CustomRequestItem, ProcessingToolDetailInput } from '../types/request_item.types';
 import { RequestItemDetail, RequestItemHeader } from '../schema/request_item.schema';
-import { Warehouse } from 'src/feature_module/inventory/schema/warehouse.schema';
+import { Warehouse, WarehouseStatus } from 'src/feature_module/inventory/schema/warehouse.schema';
 import { RequestItem_ItemType, RequestItemType, RequestStatus, UpdateRequestStatusInput } from '../types/request.types';
 import { User } from 'src/feature_module/user/schema/user.schema';
 import { Employee, EmployeeRole } from 'src/feature_module/person/schema/employee.schema';
@@ -46,6 +46,17 @@ export class ItemTransactionService {
   async canFulfillTools(requestedTools: CreateRequestItemDetailInput[], remainTools: ToolTransaction[]) {
     // 1. Buat map untuk menampung total stok berdasarkan sku
     const remainMap: Map<string, number> = new Map();
+
+    // Buat set untuk mendeteksi duplikasi dalam requestedTools
+    const requestedSkuSet: Set<string> = new Set();
+    for (const requested of requestedTools) {
+      const sku = String(requested.item);
+      if (requestedSkuSet.has(sku)) {
+        // Jika ditemukan duplikasi, return false
+        return false;
+      }
+      requestedSkuSet.add(sku);
+    }
 
     // 2. Hitung total quantity yang dimiliki per SKU
     for (const toolTrans of remainTools) {
@@ -165,7 +176,11 @@ export class ItemTransactionService {
     if (!requestedFromWarehouse) {
       throw new NotFoundException('Requested from warehouse not found');
     }
-    const requestedToWarehouse = await this.warehouseModel.findById(requested_to).populate('project').exec();
+    const requestedToWarehouse = await this.warehouseModel.findOne({
+      _id: requested_to, 
+      status: WarehouseStatus.ACTIVE
+    }).populate('project').exec();
+    
     if (!requestedToWarehouse) {
       throw new NotFoundException('Requested to warehouse not found');
     }
@@ -182,7 +197,7 @@ export class ItemTransactionService {
       // check AVAILABILITY
       let condition = await this.checkAvailabilityItem(checked_request_item_detail, requestedFromWarehouse);
       if (!condition) {
-        throw new BadRequestException('Warehouse tujuan tidak memiliki barang yang cukup mencukupi');
+        throw new BadRequestException('Gagal, pastikan warehouse memiliki barang mencukupi dan tidak ada data sku yang terduplikasi');
       }
     }
 
@@ -301,6 +316,15 @@ export class ItemTransactionService {
         await this.toolTransactionService.transferOutTool(String(warehouse), targetOutTool, session)
 
         // memberikan informasi pada database mengenai barang yang dikeluarkan
+        createProcessingDetailInput.processing_tool_detail.forEach((det) => {
+          const targetDetailIndex = targetRequest.request_item_detail.findIndex(item =>
+            item.item_type == RequestItem_ItemType.TOOL &&
+            String(item.item) == det.sku
+          );
+          if (targetDetailIndex == -1) throw new BadRequestException("Terjadi kesalahan proses transaksi perpindahan barang")
+          targetRequest.request_item_detail[targetDetailIndex].tool = det.tool
+        });
+        await targetRequest.save({ session });
       }
 
       targetRequest.finishing_detail = {
