@@ -346,7 +346,7 @@ type Query {
   getAllMaterials(filterInput: FilterInput): [Material!]!
   getAllMaterialByIds(ids: [String!]!): [Material!]!
   getMaterialById(id: String!): Material!
-  getAllSkus: [Sku!]!
+  getAllSkus(filter: FilterInput): [Sku!]!
   getSkuById(id: String!): Sku!
   getAllSkusByIds(ids: [String!]!): [Sku!]!
   getAllTools(sku: String): [Tool!]!

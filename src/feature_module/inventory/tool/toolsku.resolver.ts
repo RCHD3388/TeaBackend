@@ -8,6 +8,7 @@ import { ToolSkuService } from './toolsku.service';
 import { CreateSkuInput, UpdateSkuInput } from '../types/inventory_category.types';
 import { ToolService } from './tool.service';
 import { UpdateToolInput } from '../types/tool.types';
+import { FilterInput } from 'src/feature_module/types/global_input_types.types';
 
 @Resolver()
 @UseGuards(AppAuthGuard)
@@ -20,8 +21,10 @@ export class ToolSkuResolver {
   @Query(() => [Sku], { name: 'getAllSkus' })
   @UseGuards(RolesGuard)
   @Roles("owner", "admin", "staff_pembelian")
-  async getAllSkus() {
-    return this.toolskuService.findAll();
+  async getAllSkus(
+    @Args('filter', { nullable: true }) filter?: FilterInput
+  ) {
+    return this.toolskuService.findAll(filter);
   }
 
   @Query(() => Sku, { name: 'getSkuById' })

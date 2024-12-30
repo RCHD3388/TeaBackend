@@ -5,6 +5,7 @@ import { Material, MaterialStatus, Merk, Sku, UnitMeasure } from '../schema/inve
 import { CreateMaterialInput, UpdateMaterialInput } from '../types/material.types';
 import { CreateSkuInput, UpdateSkuInput } from '../types/inventory_category.types';
 import { CategoryData, CategoryType } from 'src/feature_module/category/schema/category.schema';
+import { FilterInput } from 'src/feature_module/types/global_input_types.types';
 
 @Injectable()
 export class ToolSkuService {
@@ -14,8 +15,12 @@ export class ToolSkuService {
     @InjectModel(CategoryData.name) private categoryDataModel: Model<CategoryData>,
   ) { }
 
-  async findAll(): Promise<Sku[]> {
-    return this.skuModel.find().populate(['merk', 'item_category']).exec();
+  async findAll(filterInput: FilterInput): Promise<Sku[]> {
+    let filter = {}
+    if(filterInput?.status){
+      filter = { status: MaterialStatus.ACTIVE };
+    }
+    return this.skuModel.find(filter).populate(['merk', 'item_category']).exec();
   }
 
   async findOne(id: string): Promise<Sku> {
