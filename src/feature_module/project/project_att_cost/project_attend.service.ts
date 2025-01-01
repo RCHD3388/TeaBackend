@@ -162,7 +162,7 @@ export class ProjectAttendService {
   }
 
   async findAll(project_id: string, user: User): Promise<AttendanceModule[]> {
-    let targetProject = await this.projectModel.findById(project_id).select(["attendance"]).populate({
+    let targetProject = await this.projectModel.findById(project_id).select(["project_leader", "attendance"]).populate({
       path: "attendance",
       populate: {
         path: 'attendance.attendance_detail.employee',
@@ -173,7 +173,7 @@ export class ProjectAttendService {
 
     // check if user is project leader of the project
     if (((user.employee as Employee).role as EmployeeRole).name == "mandor"
-      && (targetProject.project_leader as Employee)._id.toString() != (user.employee as Employee)._id.toString()
+      && targetProject.project_leader.toString() != (user.employee as Employee)._id.toString()
     ) {
       throw new ForbiddenException('User tidak diperbolehkan melakukan aksi tersebut')
     }
@@ -187,7 +187,7 @@ export class ProjectAttendService {
 
     // check if user is project leader of the project
     if (((user.employee as Employee).role as EmployeeRole).name == "mandor"
-      && (targetProject.project_leader as Employee)._id.toString() != (user.employee as Employee)._id.toString()
+      && targetProject.project_leader.toString() != (user.employee as Employee)._id.toString()
     ) {
       throw new ForbiddenException('User tidak diperbolehkan melakukan aksi tersebut')
     }
