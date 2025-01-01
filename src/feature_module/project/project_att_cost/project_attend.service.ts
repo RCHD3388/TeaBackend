@@ -30,19 +30,23 @@ export class ProjectAttendService {
 
     // check valid start date
     const existingModules: AttendanceModule[] = targetProject.attendance as AttendanceModule[];
-    if (existingModules.some((attendance) => attendance.end_date > start_date)) {
-      throw new BadRequestException('Tanggal mulai tidak valid');
+    if (existingModules.some((attendance) => {return attendance.start_date <= start_date && start_date <= attendance.end_date})) {
+      throw new BadRequestException('Tanggal mulai tidak valid, bertabrakan dengan module lain');
     }
 
     const existingWorker: String[] = targetProject.worker as String[];
     let actual_start_date = new Date(start_date.getTime());
     let end_date = new Date(start_date.getTime() + 6 * 24 * 60 * 60 * 1000);
+    if (existingModules.some((attendance) => {return attendance.start_date <= end_date && end_date <= attendance.end_date})) {
+      throw new BadRequestException('Tanggal mulai tidak valid, bertabrakan dengan module lain');
+    }
 
     let attendances: Attendance[] = [];
-    let currentLoopDate = start_date;
 
-    while (currentLoopDate <= end_date) {
+    for (let i = 0; i < 7; i++) {
       // create attendance detail
+      let currentDate = new Date(start_date.getTime());
+      currentDate.setDate(currentDate.getDate() + i);
       let attendance_details: AttendanceDetail[] = [];
       for (let i = 0; i < existingWorker.length; i++) {
         attendance_details.push({
@@ -53,11 +57,9 @@ export class ProjectAttendService {
       }
       // add attendance
       attendances.push({
-        date: currentLoopDate,
+        date: currentDate,
         attendance_detail: attendance_details
       })
-
-      currentLoopDate.setDate(currentLoopDate.getDate() + 1);
     }
 
     const attendanceModule = new this.attendanceModuleModel({
@@ -93,16 +95,16 @@ export class ProjectAttendService {
 
 
   async updateModule(project_id: string, module_id: string, updateInput: UpdateAttendanceModuleInput, user: User): Promise<AttendanceModule> {
-    let { description, attendance } = updateInput;
+    let { description, attendance, start_date } = updateInput;
 
-    let targetProject = await this.projectModel.findById(project_id).exec();
+    let targetProject = await this.projectModel.findById(project_id).populate(["attendance"]).exec();
     if (!targetProject) throw new NotFoundException('Project tidak ditemukan');
 
     if (((user.employee as Employee).role as EmployeeRole).name == "mandor" && targetProject.project_leader.toString() != (user.employee as Employee)._id.toString()) {
       throw new ForbiddenException('User tidak diperbolehkan melakukan aksi tersebut');
     }
 
-    if (targetProject.attendance.findIndex((att: any) => att.toString() == module_id) == -1) {
+    if (targetProject.attendance.findIndex((att: any) => (att as AttendanceModule)._id.toString() == module_id) == -1) {
       throw new BadRequestException('Module absensi tidak ditemukan');
     }
 
@@ -129,6 +131,30 @@ export class ProjectAttendService {
       }
     }
 
+    // START DATE CHANGE
+    if (start_date) {
+      const existingModules: AttendanceModule[] = targetProject.attendance as AttendanceModule[];
+      if (existingModules.some((attendance) => {
+        return attendance._id.toString() != module_id && attendance.start_date <= start_date && start_date <= attendance.end_date})) {
+        throw new BadRequestException('Tanggal mulai tidak valid, bertabrakan dengan modul lain');
+      }
+
+      let end_date = new Date(start_date.getTime() + 6 * 24 * 60 * 60 * 1000);
+      if (existingModules.some((attendance) => {
+        return attendance._id.toString() != module_id && attendance.start_date <= end_date && end_date <= attendance.end_date})) {
+        throw new BadRequestException('Tanggal mulai tidak valid, bertabrakan dengan module lain');
+      }
+
+      newAttendance.sort((a, b) => a.date.getTime() - b.date.getTime());
+      for (let i = 0; i < newAttendance.length; i++) {
+        let currentDate = new Date(start_date.getTime());
+        currentDate.setDate(currentDate.getDate() + i);
+        newAttendance[i].date = currentDate;
+      }
+      attendanceModule.start_date = start_date;
+      attendanceModule.end_date = end_date;
+    }
+
     attendanceModule.attendance = newAttendance;
     attendanceModule.save();
 
@@ -140,7 +166,7 @@ export class ProjectAttendService {
       path: "attendance",
       populate: {
         path: 'attendance.attendance_detail.employee',
-        model: 'Employee'
+        model: 'Employee',
       }
     }).exec();
     if (!targetProject) throw new NotFoundException('Project tidak ditemukan');
@@ -152,7 +178,7 @@ export class ProjectAttendService {
       throw new ForbiddenException('User tidak diperbolehkan melakukan aksi tersebut')
     }
 
-    return targetProject.attendance as AttendanceModule[];
+    return targetProject.attendance.sort((a, b) => b.start_date.getTime() - a.start_date.getTime()) as AttendanceModule[];
   }
 
   async findOne(project_id: string, module_id: string, user: User): Promise<AttendanceModule> {
@@ -195,7 +221,7 @@ export class ProjectAttendService {
     let targetModule = existingModules.find((module) => module._id.toString() == module_id);
     if (!targetModule) throw new BadRequestException('Module absensi tidak ditemukan');
 
-    if (targetModule.submit_status = true) throw new BadRequestException('Module absensi telah disubmit, tidak dapat dihapus');
+    if (targetModule.submit_status == true) throw new BadRequestException('Module absensi telah disubmit, tidak dapat dihapus');
 
     return await this.attendanceModuleModel.findByIdAndDelete(module_id).exec();
   }
@@ -207,7 +233,7 @@ export class ProjectAttendService {
     // find existing modules
     let existingModules = await this.attendanceModuleModel.find({ _id: { $in: targetProject.attendance }, submit_status: false }).session(session);
 
-    existingModules = await Promise.all(existingModules.map(async(module) => {
+    existingModules = await Promise.all(existingModules.map(async (module) => {
       // edit all attendance
       module.attendance = await Promise.all(module.attendance.map((attendance) => {
         // batch add attendance detail
@@ -239,9 +265,9 @@ export class ProjectAttendService {
     // find existing modules
     let existingModules = await this.attendanceModuleModel.find({ _id: { $in: targetProject.attendance }, submit_status: false }).session(session);
 
-    existingModules = await Promise.all(existingModules.map(async(module) => {
+    existingModules = await Promise.all(existingModules.map(async (module) => {
       // edit all attendance
-      module.attendance =  module.attendance.map((attendance) => {
+      module.attendance = module.attendance.map((attendance) => {
         // remove employee from all attendance detail
         attendance.attendance_detail = attendance.attendance_detail.filter(
           (detail) => {

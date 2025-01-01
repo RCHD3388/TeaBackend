@@ -497,6 +497,7 @@ input CreateAttendanceModuleInput {
 input UpdateAttendanceModuleInput {
   description: String
   attendance: [UpdateAttendanceInput!]!
+  start_date: DateTime!
 }
 
 input UpdateAttendanceInput {

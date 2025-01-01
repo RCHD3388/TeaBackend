@@ -48,6 +48,12 @@ export class UpdateAttendanceModuleInput {
   @ValidateNested({ each: true })
   @Type(() => UpdateAttendanceInput)
   attendance: UpdateAttendanceInput[];
+
+  @Field(() => Date)
+  @IsDate()
+  @IsOptional()
+  @IsNotEmpty({ message: 'Tanggal tidak boleh kosong' })
+  start_date: Date;
 }
 
 @InputType()
