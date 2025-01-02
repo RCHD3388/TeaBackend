@@ -251,6 +251,22 @@ export class ProjectService {
       request_project_closing: request_project_closing
     }
 
+    let worker_ids = targetProject.worker;
+    let target_employee = await this.employeeModel.find({ _id: { $in: worker_ids } }).session(session).exec();
+
+    // SELESAIKAN PEGAWAI YANG SEDANG BEKERJA PADA PROJECT TERSEBUT.
+    for (let i = 0; i < target_employee.length; i++) {
+      let current_employee = target_employee[i];
+      const projectHistoryIndex = current_employee.project_history.findIndex((history: any) => history.project.toString() === project_id && !history.left_at);
+      if (projectHistoryIndex != -1) {
+        current_employee.project_history[projectHistoryIndex].left_at = new Date();
+        current_employee.project_history[projectHistoryIndex].description = "Project sudah selesai, telah melakukan penutupan project";
+        current_employee.save({ session });
+      } else {
+        throw new BadRequestException(`Terjadi kesalahan data pegawai pada project tersebut.`);
+      }
+    } 
+
     targetProject.finished_at = new Date();
     let targetWarehouse = await this.warehouseModel.findOne({ project: targetProject._id }).session(session).exec();
     targetWarehouse.status = WarehouseStatus.INACTIVE

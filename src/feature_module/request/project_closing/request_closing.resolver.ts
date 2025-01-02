@@ -34,7 +34,7 @@ export class RequestClosingResolver {
     @CurrentUser() user: User,
     @Args('projectId', { nullable: true }) projectId?: string
   ): Promise<RequestProjectClosing[]> {
-    return this.requestClosingService.findAll(user);
+    return this.requestClosingService.findAll(user, projectId);
   }
 
   @Mutation(() => RequestProjectClosing, { name: 'updateRequestClosing' })

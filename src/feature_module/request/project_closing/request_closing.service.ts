@@ -18,13 +18,17 @@ export class RequestClosingService {
     private readonly projectService: ProjectService
   ) { }
 
-  async findAll(user: User): Promise<RequestProjectClosing[]> {
+  async findAll(user: User, projectId?: string): Promise<RequestProjectClosing[]> {
     let currentEmployee = user.employee as Employee;
     let role = (currentEmployee.role as EmployeeRole).name;
 
     let filter = {}
     if(role == "mandor"){
       filter = {requested_by: (user.employee as Employee)._id.toString()}
+    }
+
+    if(projectId){
+      filter = {...filter, requested_from: projectId}
     }
 
     let targetRequestClosing = await this.requestClosingModel.find(filter).populate(["requested_by", "requested_from", "handled_by"]).exec()
