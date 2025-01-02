@@ -26,7 +26,14 @@ export class EmployeeService {
   }
 
   async findEmployeeById(id: string): Promise<Employee> {
-    const employee = await this.employeeModel.findById(id).exec();
+    const employee = await this.employeeModel.findById(id).populate({
+      path: 'project_history', // Nama field yang akan dipopulasi
+      populate: {
+        path: 'project', // Field dalam project_history yang akan dipopulasi
+        model: 'Project', // Nama model yang terkait dengan field ini
+      },
+    })
+      .exec();
     if (!employee) {
       throw new NotFoundException(`Employee with ID ${id} not found`);
     }
@@ -46,7 +53,7 @@ export class EmployeeService {
       employee_filter = { ...employee_filter, ...custom_filter }
     }
     let salaryFilter = {}
-    if(withSalary == false) {
+    if (withSalary == false) {
       salaryFilter = { salary: 0 }
     }
 

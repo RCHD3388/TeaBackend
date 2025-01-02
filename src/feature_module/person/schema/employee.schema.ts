@@ -13,7 +13,7 @@ export enum EmployeeStatus {
 @ObjectType()
 @Schema()
 export class EmployeeProjectHistory {
-  @Field(() => String || Project)
+  @Field(() => Project || String)
   @Prop({ type: Types.ObjectId, ref: 'Project', required: true })
   project: String | Project
 

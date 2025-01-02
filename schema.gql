@@ -184,7 +184,7 @@ type Project {
 }
 
 type EmployeeProjectHistory {
-  project: String!
+  project: Project!
   join_at: DateTime!
   left_at: DateTime
   description: String!
