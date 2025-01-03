@@ -7,7 +7,7 @@ import { User } from 'src/feature_module/user/schema/user.schema';
 import { RolesGuard } from 'src/common/guard/roles.guard';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { CurrentUser } from 'src/common/decorators/auth_user.decorator';
-import { CreateFinishingDetailInput, CreateProcessingDetailInput, CreateRequestItemInput, CustomRequestItem } from '../types/request_item.types';
+import { CreateFinishingDetailInput, CreateProcessingDetailInput, CreateRequestItemInput, CustomOneRequestItem } from '../types/request_item.types';
 import { RequestStatus, UpdateRequestStatusInput } from '../types/request.types';
 
 @Resolver()
@@ -22,6 +22,17 @@ export class ItemTransactionResolver {
   @Roles("owner", "admin",)
   async findAllRequestItemTransaction(): Promise<RequestItemHeader[]> {
     return await this.itemTransactionService.findAll();
+  }
+
+  
+  @Query(() => CustomOneRequestItem)
+  @UseGuards(RolesGuard)
+  @Roles("owner", "admin", "mandor")
+  async findOneRequestItemTransaction(
+    @Args('id') id: string,
+    @CurrentUser() user: User
+  ): Promise<CustomOneRequestItem> {
+    return await this.itemTransactionService.findOneById(id, user);
   }
 
   @Query(() => [RequestItemHeader])

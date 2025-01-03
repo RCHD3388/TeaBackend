@@ -275,6 +275,12 @@ type RequestItemHeader {
   request_item_detail: [RequestItemDetail!]!
 }
 
+type CustomOneRequestItem {
+  request_item_header: RequestItemHeader!
+  materials: [Material!]!
+  skus: [Sku!]!
+}
+
 type PurchaseOrderSubDetail {
   purchase_transaction: String!
   purchase_transaction_detail: String!
@@ -361,6 +367,7 @@ type Query {
   findAllRequestCosts: [RequestCost!]!
   findAllRequestClosing(projectId: String): [RequestProjectClosing!]!
   findAllRequestItemTransaction: [RequestItemHeader!]!
+  findOneRequestItemTransaction(id: String!): CustomOneRequestItem!
   findYourRequestItemTransaction: [RequestItemHeader!]!
   findYourApprovalItemTransaction: [RequestItemHeader!]!
   getAllPurchaseOrders: [PurchaseOrder!]!

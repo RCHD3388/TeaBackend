@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import { Connection, Model } from 'mongoose';
-import { CreateFinishingDetailInput, CreateProcessingDetailInput, CreateRequestItemDetailInput, CreateRequestItemInput, CustomRequestItem, ProcessingToolDetailInput } from '../types/request_item.types';
+import { CreateFinishingDetailInput, CreateProcessingDetailInput, CreateRequestItemDetailInput, CreateRequestItemInput, CustomOneRequestItem, CustomRequestItem, ProcessingToolDetailInput } from '../types/request_item.types';
 import { RequestItemDetail, RequestItemHeader } from '../schema/request_item.schema';
 import { Warehouse, WarehouseStatus } from 'src/feature_module/inventory/schema/warehouse.schema';
 import { RequestItem_ItemType, RequestItemType, RequestStatus, UpdateRequestStatusInput } from '../types/request.types';
@@ -14,6 +14,9 @@ import { MaterialTransactionService } from 'src/feature_module/inventory/transac
 import { ToolTransactionService } from 'src/feature_module/inventory/transaction/tool_transaction.service';
 import { MaterialTransaction, ToolTransaction } from 'src/feature_module/inventory/schema/inventory_trans.schema';
 import { Material, Sku, Tool } from 'src/feature_module/inventory/schema/inventory.schema';
+import { MaterialService } from 'src/feature_module/inventory/material/material.service';
+import { ToolService } from 'src/feature_module/inventory/tool/tool.service';
+import { ToolSkuService } from 'src/feature_module/inventory/tool/toolsku.service';
 
 @Injectable()
 export class ItemTransactionService {
@@ -22,6 +25,8 @@ export class ItemTransactionService {
     @InjectModel(RequestItemHeader.name) private readonly requestItemHeaderModel: Model<RequestItemHeader>,
     @InjectModel(Warehouse.name) private readonly warehouseModel: Model<Warehouse>,
     private readonly warehouseService: WarehouseService,
+    private readonly materialService : MaterialService,
+    private readonly toolSkuService : ToolSkuService,
     private readonly materialTransactionService: MaterialTransactionService,
     private readonly toolTransactionService: ToolTransactionService
   ) { }
@@ -105,6 +110,48 @@ export class ItemTransactionService {
     return requestItemHeaders;
   }
   // DONE
+  async findOneById(id: string, user: User): Promise<CustomOneRequestItem> {
+    let targetRequest: RequestItemHeader = await this.requestItemHeaderModel.findById(id)
+      .populate(["requested_by", "requested_from", "requested_to"])
+      .exec();
+    if (((user.employee as Employee).role as EmployeeRole).name == "mandor") {
+      let currentUserWarehouse = await this.warehouseService.findAllByProjectLeader(user);
+      let user_warehouse = await Promise.all(currentUserWarehouse.map((warehouse) => {
+        return warehouse._id.toString()
+      }))
+      
+      // check user adalah penerima atau pembuat request
+      if (!user_warehouse.includes(targetRequest.requested_to.toString())
+        && (targetRequest.requested_by as Employee)._id.toString() != (user.employee as Employee)._id.toString()) {
+        throw new BadRequestException('User tidak diperbolehkan melakukan aksi tersebut');
+      }
+    }
+
+    // get material data
+    let material_ids = targetRequest.request_item_detail.filter((item: RequestItemDetail) => {
+      return item.item_type == RequestItem_ItemType.MATERIAL
+    }).map((item: RequestItemDetail) => {
+      return item.item.toString()
+    })
+
+    let materials = await this.materialService.findByIds(material_ids);
+
+    let sku_ids = targetRequest.request_item_detail.filter((item: RequestItemDetail) => {
+      return item.item_type == RequestItem_ItemType.TOOL
+    }).map((item: RequestItemDetail) => {
+      return item.item.toString()
+    })
+
+    let skus = await this.toolSkuService.findByIds(sku_ids);
+
+    let returnvalue: CustomOneRequestItem = {
+      request_item_header: targetRequest,
+      materials: materials,
+      skus: skus
+    }
+    return returnvalue
+  }
+  // DONE
   async checkAvailabilityItem(checked_request_item_detail, requestedFromWarehouse) {
     let material_item = await Promise.all(checked_request_item_detail.filter((item: CreateRequestItemDetailInput) => {
       return item.item_type == RequestItem_ItemType.MATERIAL
@@ -177,10 +224,10 @@ export class ItemTransactionService {
       throw new NotFoundException('Requested from warehouse not found');
     }
     const requestedToWarehouse = await this.warehouseModel.findOne({
-      _id: requested_to, 
+      _id: requested_to,
       status: WarehouseStatus.ACTIVE
     }).populate('project').exec();
-    
+
     if (!requestedToWarehouse) {
       throw new NotFoundException('Requested to warehouse not found');
     }

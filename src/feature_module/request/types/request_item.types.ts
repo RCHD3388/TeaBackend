@@ -3,7 +3,7 @@ import { IsNotEmpty, IsOptional, IsString, IsNumber, Min, IsEnum, IsArray, isEnu
 import { RequestItem_ItemType, RequestItemType, RequestStatus } from "./request.types";
 import { RequestItemHeader } from "../schema/request_item.schema";
 import { Warehouse } from "src/feature_module/inventory/schema/warehouse.schema";
-import { Tool } from "src/feature_module/inventory/schema/inventory.schema";
+import { Material, Sku, Tool } from "src/feature_module/inventory/schema/inventory.schema";
 
 @InputType()
 export class CreateRequestItemDetailInput {
@@ -123,5 +123,17 @@ export class CreateFinishingDetailInput {
   @IsOptional()
   @IsString()
   recipient_description?: string;
+}
+
+@ObjectType()
+export class CustomOneRequestItem {
+  @Field(() => RequestItemHeader)
+  request_item_header: RequestItemHeader;
+
+  @Field(() => [Material])
+  materials: Material[];
+
+  @Field(() => [Sku])
+  skus: Sku[];
 }
 

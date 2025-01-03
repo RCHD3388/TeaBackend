@@ -1,7 +1,7 @@
 import { Field, ObjectType } from "@nestjs/graphql";
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Types, Document } from "mongoose";
-import { Material, Tool } from "../../inventory/schema/inventory.schema";
+import { Material, Sku, Tool } from "../../inventory/schema/inventory.schema";
 import { Warehouse } from "../../inventory/schema/warehouse.schema";
 import { Employee } from "../../person/schema/employee.schema";
 import { RequestItem_ItemType, RequestItemType, RequestStatus } from "../types/request.types";

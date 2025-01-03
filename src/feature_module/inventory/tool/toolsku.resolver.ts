@@ -20,7 +20,7 @@ export class ToolSkuResolver {
 
   @Query(() => [Sku], { name: 'getAllSkus' })
   @UseGuards(RolesGuard)
-  @Roles("owner", "admin", "staff_pembelian")
+  @Roles("owner", "admin", "staff_pembelian", "mandor")
   async getAllSkus(
     @Args('filter', { nullable: true }) filter?: FilterInput
   ) {
