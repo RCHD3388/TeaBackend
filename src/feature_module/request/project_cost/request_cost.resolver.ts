@@ -8,6 +8,7 @@ import { RequestCost } from '../schema/request_cost.schema';
 import { CreateRequestCostInput, UpdateRequestCostStatusInput } from '../types/request_cost.types';
 import { CurrentUser } from 'src/common/decorators/auth_user.decorator';
 import { User } from 'src/feature_module/user/schema/user.schema';
+import { UpdateRequestInput } from '../types/request.types';
 
 @Resolver()
 @UseGuards(AppAuthGuard)
@@ -25,6 +26,17 @@ export class RequestCostResolver {
   ): Promise<RequestCost> {
     return this.requestCostService.createRequestCost(createRequestCostInput, user);
   }
+
+  @Query(() => RequestCost, { name: 'findOneRequestCost' })
+  @UseGuards(RolesGuard)
+  @Roles("owner", "admin", "mandor")
+  async findOneRequestCost(
+    @Args('id') id: string,
+    @CurrentUser() user: User
+  ): Promise<RequestCost> {
+    return this.requestCostService.findOne(id, user);
+  }
+
 
   @Query(() => [RequestCost], { name: 'findAllRequestCosts' })
   @UseGuards(RolesGuard)
@@ -46,4 +58,15 @@ export class RequestCostResolver {
     return this.requestCostService.updateStatus(id, updateRequestCostStatusInput, user);
   }
 
+  
+  @Mutation(() => RequestCost, { name: 'updateRequestCostDetail' })
+  @UseGuards(RolesGuard)
+  @Roles("owner", "admin", "mandor")
+  async updateRequestCostDetail(
+    @Args('id') id: string,
+    @Args('updateRequestInput') updateRequestInput: UpdateRequestInput,
+    @CurrentUser() user: User
+  ): Promise<RequestCost> {
+    return this.requestCostService.update(id, updateRequestInput, user);
+  }
 }

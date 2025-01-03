@@ -27,7 +27,7 @@ export class AuthService {
     let name = (user.employee as Employee).person.name
 
     return {
-      _id: user._id,
+      _id: (user.employee as Employee)._id,
       username: user.username,
       role: role,
       access_token: access_token,

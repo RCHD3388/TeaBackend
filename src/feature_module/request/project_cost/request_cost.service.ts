@@ -6,7 +6,7 @@ import { CreateRequestCostInput, UpdateRequestCostStatusInput } from '../types/r
 import { User } from 'src/feature_module/user/schema/user.schema';
 import { CategoryData, CategoryType } from 'src/feature_module/category/schema/category.schema';
 import { Project } from 'src/feature_module/project/schema/project.schema';
-import { RequestStatus } from '../types/request.types';
+import { RequestStatus, UpdateRequestInput } from '../types/request.types';
 import { Employee, EmployeeRole, EmployeeRoleSchema } from 'src/feature_module/person/schema/employee.schema';
 import { ProjectCostService } from 'src/feature_module/project/project_att_cost/project_cost.service';
 
@@ -25,14 +25,36 @@ export class RequestCostService {
     let role = (currentEmployee.role as EmployeeRole).name;
 
     let filter = {}
-    if(role == "mandor"){
-      filter = {requested_by: (user.employee as Employee)._id.toString()}
+    if (role == "mandor") {
+      filter = { requested_by: (user.employee as Employee)._id.toString() }
     }
 
-    let targetRequestCosts = await this.requestCostModel.find(filter).populate(["requested_by", "requested_from", "handled_by", "project_cost_category"]).exec()
+    let targetRequestCosts = await this.requestCostModel.find(filter)
+    .populate(["requested_by", "requested_from", "handled_by", "project_cost_category"])
+    .sort({ createdAt: -1 }) 
+    .exec()
 
     return targetRequestCosts;
   }
+
+async findOne(id: string, user: User): Promise<RequestCost> {
+  const currentEmployeeId = (user.employee as Employee)._id.toString();
+
+  if (((user.employee as Employee).role as EmployeeRole).name == "mandor") {
+    return await this.requestCostModel.findOne({ _id: id, requested_by: currentEmployeeId }).populate(["requested_by", "requested_from", "handled_by", "project_cost_category"]).exec();
+  }
+
+  const targetRequestCost = await this.requestCostModel.findOne({
+    _id: id,
+  }).populate(["requested_by", "requested_from", "handled_by", "project_cost_category"]).exec();
+
+  if (!targetRequestCost) {
+    throw new NotFoundException('Request Cost tidak ditemukan atau bukan milik user yang sedang login');
+  }
+
+  return targetRequestCost;
+}
+
 
   async createRequestCost(createRequestCostInput: CreateRequestCostInput, user: User): Promise<RequestCost> {
     let { project_cost_category, requested_from } = createRequestCostInput;
@@ -115,5 +137,23 @@ export class RequestCostService {
     } finally {
       await session.endSession();
     }
+  }
+
+  async update(id: string, updateRequestInput: UpdateRequestInput, user: User): Promise<RequestCost> {
+    let targetRequestCost = await this.requestCostModel.findOne({ _id: id, requested_by: (user.employee as Employee)._id }).exec();
+    // check if request cost exist
+    if (!targetRequestCost) {
+      throw new NotFoundException('Request Cost dengan ID ' + id + ' tidak ditemukan');
+    }
+
+    if (targetRequestCost.status == RequestStatus.MENUNGGU) {
+      targetRequestCost.title = updateRequestInput.title ? updateRequestInput.title : targetRequestCost.title;
+      targetRequestCost.description = updateRequestInput.description ? updateRequestInput.description : targetRequestCost.description;
+      targetRequestCost.price = updateRequestInput.price ? updateRequestInput.price : targetRequestCost.price;
+    }else{
+      throw new BadRequestException('Request Cost tersebut sudah ditangani');
+    }
+
+    return await targetRequestCost.save();
   }
 }

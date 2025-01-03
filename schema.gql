@@ -87,6 +87,8 @@ type RequestCost {
   price: Float!
   handled_date: DateTime
   handled_by: Employee
+  createdAt: DateTime
+  updatedAt: DateTime
 }
 
 type Warehouse {
@@ -355,6 +357,7 @@ type Query {
   getWarehouseMaterials(warehouse_id: String!): [MaterialTransaction!]!
   getWarehouseTools(warehouse_id: String!): [ToolTransaction!]!
   getCategories(categoryFilter: CategoryFilter): [CategoryData!]!
+  findOneRequestCost(id: String!): RequestCost!
   findAllRequestCosts: [RequestCost!]!
   findAllRequestClosing(projectId: String): [RequestProjectClosing!]!
   findAllRequestItemTransaction: [RequestItemHeader!]!
@@ -425,6 +428,7 @@ type Mutation {
   deleteCategory(id: String!): CategoryData!
   createRequestCost(createRequestCostInput: CreateRequestCostInput!): RequestCost!
   updateRequestCost(id: String!, updateRequestCostStatusInput: UpdateRequestCostStatusInput!): RequestCost!
+  updateRequestCostDetail(id: String!, updateRequestInput: UpdateRequestInput!): RequestCost!
   createRequestClosing(createRequestClosingInput: CreateRequestClosingInput!): RequestProjectClosing!
   updateRequestClosing(id: String!, updateRequestStatusInput: UpdateRequestStatusInput!): RequestProjectClosing!
   createRequestItemTransaction(createRequestItemInput: CreateRequestItemInput!): RequestItemHeader!
@@ -672,6 +676,12 @@ input CreateRequestCostInput {
 
 input UpdateRequestCostStatusInput {
   status: String!
+}
+
+input UpdateRequestInput {
+  title: String
+  description: String
+  price: Float
 }
 
 input CreateRequestClosingInput {

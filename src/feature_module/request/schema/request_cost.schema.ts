@@ -51,6 +51,11 @@ export class RequestCost extends Document {
   @Field(() => Employee, { nullable: true })
   @Prop({ type: Types.ObjectId, ref: "Employee" })
   handled_by?: String | Employee;
+
+  @Field(() => Date, { nullable: true })
+  createdAt?: Date;
+  @Field(() => Date, { nullable: true })
+  updatedAt?: Date;
 }
 
 export const RequestCostSchema = SchemaFactory.createForClass(RequestCost);

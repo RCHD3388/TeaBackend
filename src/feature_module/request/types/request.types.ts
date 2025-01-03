@@ -1,5 +1,5 @@
 import { createUnionType, Field, InputType } from "@nestjs/graphql";
-import { IsEnum, IsNotEmpty, IsOptional, IsString } from "class-validator";
+import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, Min } from "class-validator";
 import { Material, Tool } from "../../inventory/schema/inventory.schema";
 
 export enum RequestItemType {
@@ -51,4 +51,25 @@ export class UpdateRequestStatusInput {
   @IsNotEmpty({ message: 'handled warehouse tidak boleh kosong' })
   @IsString()
   handled_warehouse?: String;
+}
+
+@InputType()
+export class UpdateRequestInput {
+  @Field(() => String, {nullable: true})
+  @IsOptional()
+  @IsNotEmpty({ message: 'Title tidak boleh kosong' })
+  @IsString()
+  title?: string;
+
+  @Field(() => String, { nullable: true })
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @Field(() => Number, {nullable: true})
+  @IsNotEmpty({ message: 'Price tidak boleh kosong' })
+  @IsOptional()
+  @IsNumber()
+  @Min(0, { message: 'Price tidak boleh kurang dari 0' })
+  price: number;
 }
