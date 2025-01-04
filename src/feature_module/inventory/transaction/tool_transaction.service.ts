@@ -227,9 +227,14 @@ export class ToolTransactionService {
           .limit(1)
           .session(session)
 
+        console.log(curTool)
+        console.log(source_warehouse._id)
+        console.log(from_latestToolTransaction.length)
+        console.log(from_latestToolTransaction[0])
+
         // CHECK TOOL EXIST
         if (from_latestToolTransaction.length <= 0 || from_latestToolTransaction[0].in == 0) {
-          throw new BadRequestException(`Tool tidak ada di warehouse sumber`);
+          throw new BadRequestException(`Tool asdasd tidak ada di warehouse sumber`);
         }
         let newOutToolTransaction = new this.toolTransactionModel({
           tool: curTool,
@@ -271,7 +276,7 @@ export class ToolTransactionService {
 
       // ======================= PROSES START =======================
       let listOfNewTransaction: ToolTransaction[] = [];
-
+      console.log(tool)
       for (let curTool of tool) {
         // GENERATE NEW TRANS CODE AND DATE
         let newTransCode = `${targetTransactionCategory.id}${targetTransactionCategory.counter + 1}`

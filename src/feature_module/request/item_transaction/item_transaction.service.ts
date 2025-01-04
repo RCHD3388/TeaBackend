@@ -17,6 +17,7 @@ import { Material, Sku, Tool } from 'src/feature_module/inventory/schema/invento
 import { MaterialService } from 'src/feature_module/inventory/material/material.service';
 import { ToolService } from 'src/feature_module/inventory/tool/tool.service';
 import { ToolSkuService } from 'src/feature_module/inventory/tool/toolsku.service';
+import { populate } from 'dotenv';
 
 @Injectable()
 export class ItemTransactionService {
@@ -25,8 +26,8 @@ export class ItemTransactionService {
     @InjectModel(RequestItemHeader.name) private readonly requestItemHeaderModel: Model<RequestItemHeader>,
     @InjectModel(Warehouse.name) private readonly warehouseModel: Model<Warehouse>,
     private readonly warehouseService: WarehouseService,
-    private readonly materialService : MaterialService,
-    private readonly toolSkuService : ToolSkuService,
+    private readonly materialService: MaterialService,
+    private readonly toolSkuService: ToolSkuService,
     private readonly materialTransactionService: MaterialTransactionService,
     private readonly toolTransactionService: ToolTransactionService
   ) { }
@@ -101,7 +102,6 @@ export class ItemTransactionService {
     let target_warehouse = await Promise.all(currentUserWarehouse.map((warehouse) => {
       return warehouse._id.toString()
     }))
-    console.log(target_warehouse)
     // mencari request transaction yang mengandung warehouse milik project leader atau admin (untuk warehouse perusahaan)
     let requestItemHeaders = await this.requestItemHeaderModel.find({ requested_to: { $in: target_warehouse } })
       .populate(["requested_by", "requested_from", "requested_to"])
@@ -112,14 +112,20 @@ export class ItemTransactionService {
   // DONE
   async findOneById(id: string, user: User): Promise<CustomOneRequestItem> {
     let targetRequest: RequestItemHeader = await this.requestItemHeaderModel.findById(id)
-      .populate(["requested_by", "requested_from", "requested_to"])
+      .populate([
+        "requested_by", "requested_from", "requested_to",
+        {
+          path: 'request_item_detail',
+          populate: { path: 'tool', model: 'Tool', populate: { path: 'sku', model: 'Sku' } }
+        }
+      ])
       .exec();
     if (((user.employee as Employee).role as EmployeeRole).name == "mandor") {
       let currentUserWarehouse = await this.warehouseService.findAllByProjectLeader(user);
       let user_warehouse = await Promise.all(currentUserWarehouse.map((warehouse) => {
         return warehouse._id.toString()
       }))
-      
+
       // check user adalah penerima atau pembuat request
       if (!user_warehouse.includes(targetRequest.requested_to.toString())
         && (targetRequest.requested_by as Employee)._id.toString() != (user.employee as Employee)._id.toString()) {
@@ -180,8 +186,7 @@ export class ItemTransactionService {
     // 2. Hitung total quantity yang dimiliki per SKU dari TARGET OUT
     for (const outTool of targetOutTools) {
       let currentToolSku = String(outTool.sku);
-      const currentQty = remainMap.get(currentToolSku) ?? 0;
-      remainMap.set(currentToolSku, currentQty + 1);
+      remainMap.set(currentToolSku, outTool.tool.length);
     }
 
     // 3. Cek apakah tiap request (sku + quantity) dapat dipenuhi oleh remainMap
@@ -192,14 +197,13 @@ export class ItemTransactionService {
 
     for (const requested of requestedSku) {
       const availableQty = remainMap.get(String(requested.item)) ?? 0;
-      if (availableQty == requested.qty) {
+      if (availableQty != requested.qty) {
         // jika stok tidak cukup untuk memenuhi salah satu item, return false
         return false;
       }
     }
 
     // 4. Jika semua permintaan dapat terpenuhi, return true
-    return true;
     return true;
   }
 
@@ -350,15 +354,15 @@ export class ItemTransactionService {
       }
       if (toolsku_item.length > 0) {
         if (!(await this.checkValidToolForProcessing(toolsku_item, createProcessingDetailInput.processing_tool_detail))) {
-          throw new BadRequestException('Jumlah Tool dari sku yang diminta harus terpenuhi semua, pastikan jumlah tool yang diberikan sesuai dengan permintaan')
+          throw new BadRequestException('Pastikan jumlah tool yang diberikan sesuai dengan permintaan')
         }
+
         // melakukan flatten array menggabungkan semua tool yang akan di keluarkan dari warehouse menjadi sebuah array
         const targetOutTool: String[] = [];
         createProcessingDetailInput.processing_tool_detail.forEach((det) => {
           // currentArray adalah array tool
           targetOutTool.push(...det.tool);
         });
-
         // melakukan transaksi keluar dari warehouse
         await this.toolTransactionService.transferOutTool(String(warehouse), targetOutTool, session)
 
@@ -456,11 +460,13 @@ export class ItemTransactionService {
           price: item.price
         }
       }))
-      let tool_item = await Promise.all(item_detail.filter((item: RequestItemDetail) => {
-        return item.item_type == RequestItem_ItemType.TOOL
-      }).map((item: RequestItemDetail) => {
-        return String(item.item)
-      }))
+      let tool_item = []
+      item_detail.forEach((item: RequestItemDetail) => {
+        if (item.item_type == RequestItem_ItemType.TOOL) {
+          tool_item.push(...item.tool)
+        }
+      })
+
 
       let warehouse = targetRequest.requested_from;
       if (targetRequest.type == RequestItemType.PENGEMBALIAN) {
