@@ -37,6 +37,16 @@ export class RequestClosingResolver {
     return this.requestClosingService.findAll(user, projectId);
   }
 
+  @Query(() => RequestProjectClosing, { name: 'findOneRequestClosing' })
+  @UseGuards(RolesGuard)
+  @Roles("owner", "admin", "mandor")
+  async findOneRequestClosing(
+    @CurrentUser() user: User,
+    @Args('id') id?: string
+  ): Promise<RequestProjectClosing> {
+    return this.requestClosingService.findOne(id, user);
+  }
+
   @Mutation(() => RequestProjectClosing, { name: 'updateRequestClosing' })
   @UseGuards(RolesGuard)
   @Roles("owner", "admin", "mandor")

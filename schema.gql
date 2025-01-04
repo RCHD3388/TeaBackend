@@ -305,6 +305,8 @@ type PurchaseOrder {
   date: DateTime!
   status: String!
   purchase_order_detail: [PurchaseOrderDetail!]!
+  createdAt: DateTime
+  updatedAt: DateTime
 }
 
 type PurchaseTransactionDetail {
@@ -327,6 +329,12 @@ type PurchaseTransaction {
   total: Float!
   supplier: Supplier!
   purchase_transaction_detail: [PurchaseTransactionDetail!]!
+}
+
+type CustomOneRequestPO {
+  purchase_order: PurchaseOrder!
+  materials: [Material!]!
+  skus: [Sku!]!
 }
 
 type Query {
@@ -366,13 +374,14 @@ type Query {
   findOneRequestCost(id: String!): RequestCost!
   findAllRequestCosts: [RequestCost!]!
   findAllRequestClosing(projectId: String): [RequestProjectClosing!]!
+  findOneRequestClosing(id: String!): RequestProjectClosing!
   findAllRequestItemTransaction: [RequestItemHeader!]!
   findOneRequestItemTransaction(id: String!): CustomOneRequestItem!
   findYourRequestItemTransaction: [RequestItemHeader!]!
   findYourApprovalItemTransaction: [RequestItemHeader!]!
-  getAllPurchaseOrders: [PurchaseOrder!]!
+  getAllPurchaseOrders(filter: FilterInput): [PurchaseOrder!]!
   getPurchaseOrderByUser: [PurchaseOrder!]!
-  getPurchaseOrderByID(id: String!): PurchaseOrder!
+  getPurchaseOrderByID(id: String!): CustomOneRequestPO!
   getRelatedPTfromPO(id: String!): [PurchaseTransaction!]!
   getAllPurchaseTransactions: [PurchaseTransaction!]!
   getPurchaseTransactionByUser: [PurchaseTransaction!]!
@@ -445,6 +454,7 @@ type Mutation {
   closingItemRequest(id: String!, createFinishingDetailInput: CreateFinishingDetailInput!): RequestItemHeader!
   createPurchaseOrder(createPurchaseOrderInput: CreateRequestPOInput!): PurchaseOrder!
   handleWaitingPO(id: String!, status: String!): PurchaseOrder!
+  cancelPurchaseOrder(id: String!): PurchaseOrder!
   handleReceivedPODetail(id: String!, receiveItemInput: ReceiveItemInput!): PurchaseOrder!
   createPurchaseTransaction(createPurchaseTransactionInput: CreateRequestPurchaseTransactionInput!): PurchaseTransaction!
   updatePurchaseTransaction(id: String!, updatePurchaseTransactionInput: UpdateRequestPurchaseTransactionInput!): PurchaseTransaction!
@@ -699,7 +709,6 @@ input CreateRequestClosingInput {
 
 input UpdateRequestStatusInput {
   status: String!
-  handled_warehouse: String!
 }
 
 input CreateRequestItemInput {

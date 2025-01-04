@@ -1,7 +1,9 @@
-import { Field, InputType } from "@nestjs/graphql";
+import { Field, InputType, ObjectType } from "@nestjs/graphql";
 import { IsArray, IsDate, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, Min, ValidateNested } from "class-validator";
 import { CreateToolInput } from "src/feature_module/inventory/types/tool.types";
 import { RequestItem_ItemType } from "src/feature_module/request/types/request.types";
+import { PurchaseOrder } from "../schema/purchasing.schema";
+import { Material, Sku } from "src/feature_module/inventory/schema/inventory.schema";
 
 @InputType()
 export class CreatePODetailInput {
@@ -155,4 +157,16 @@ export class CreateNewPurchaseTransactionDetailInput {
   @Field(() => CreatePurchaseTransactionDetailInput)
   @IsNotEmpty({ message: 'Detail item tidak boleh kosong' })
   input: CreatePurchaseTransactionDetailInput;
+}
+
+@ObjectType()
+export class CustomOneRequestPO {
+  @Field(() => PurchaseOrder)
+  purchase_order: PurchaseOrder;
+
+  @Field(() => [Material])
+  materials: Material[];
+
+  @Field(() => [Sku])
+  skus: Sku[];
 }

@@ -45,12 +45,6 @@ export class UpdateRequestStatusInput {
   @IsEnum(RequestStatus, { message: 'Status harus sesuai' })
   @IsString()
   status: String;
-
-  @Field(() => String)
-  @IsOptional()
-  @IsNotEmpty({ message: 'handled warehouse tidak boleh kosong' })
-  @IsString()
-  handled_warehouse?: String;
 }
 
 @InputType()

@@ -29,13 +29,18 @@ export class PurchasingTransactionService {
 
   // admin owner
   async getAllPurchaseTransactions(): Promise<PurchaseTransaction[]> {
-    return this.purchaseTransactionModel.find().populate("purchasing_staff", "supplier").exec();
+    let targetPurchasing = await this.purchaseTransactionModel.find()
+      .populate(["purchasing_staff", "supplier"])
+      .sort({ transaction_date: -1 })
+      .exec();
+    return targetPurchasing
   }
 
   // admin owner staffpembelian
   async getPurchaseTransactionByPurchasingStaff(user: User): Promise<PurchaseTransaction[]> {
-    return this.purchaseTransactionModel.find({ purchasing_staff: (user.employee as Employee)._id.toString() })
-      .populate("purchasing_staff", "supplier").exec();
+    return await this.purchaseTransactionModel.find({ purchasing_staff: (user.employee as Employee)._id.toString() })
+      .populate(["purchasing_staff", "supplier"])
+      .sort({ transaction_date: -1 }).exec();
   }
 
   // admin owner mandor staffpembelian
@@ -78,10 +83,10 @@ export class PurchasingTransactionService {
     // check in db
     let materials = await this.materialService.findByIds(materialIds, true);
     let toolskus = await this.toolskuService.findByIds(toolskuIds, true);
-    
+
     materialIds = [...new Set(materialIds)];
     toolskuIds = [...new Set(toolskuIds)];
-    
+
     if (materials.length != materialIds.length) {
       throw new NotFoundException('Terdapat material yang belum terdaftar tidak ditemukan')
     }
@@ -214,7 +219,7 @@ export class PurchasingTransactionService {
       throw new BadRequestException('Purchase order tidak dapat dihapus karena sudah diterima pada gudang tujuan');
     }
 
-    if(target.purchase_transaction_detail[index].item_type == RequestItem_ItemType.TOOL){
+    if (target.purchase_transaction_detail[index].item_type == RequestItem_ItemType.TOOL) {
       await this.toolService.remove(target.purchase_transaction_detail[index].original_item.toString())
     }
 
@@ -244,7 +249,7 @@ export class PurchasingTransactionService {
     if (po == null) {
       throw new NotFoundException('Purchase order yang dituju tidak ditemukan atau tidak meminta item yang sama, dan juga pastikan PO sudah disetujui');
     }
-    if(item_type == RequestItem_ItemType.TOOL && !tool){
+    if (item_type == RequestItem_ItemType.TOOL && !tool) {
       throw new NotFoundException('Perlu memberikan informasi peralatan untuk setiap sku');
     }
 

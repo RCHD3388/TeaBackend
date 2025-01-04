@@ -22,7 +22,7 @@ export class PurchasingTransactionResolver {
   @UseGuards(RolesGuard)
   @Roles('admin', 'owner')
   async getAllPurchaseTransactions(): Promise<PurchaseTransaction[]> {
-    return this.purchasingTransactionService.getAllPurchaseTransactions();
+    return await this.purchasingTransactionService.getAllPurchaseTransactions();
   }
 
   @Query(() => [PurchaseTransaction])

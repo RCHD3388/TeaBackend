@@ -93,6 +93,7 @@ export class ItemTransactionService {
 
     return await this.requestItemHeaderModel.find({ requested_by: employeeId })
       .populate(["requested_by", "requested_from", "requested_to"])
+      .sort({ requested_at: -1 })
       .exec();
   }
   // DONE
@@ -105,6 +106,7 @@ export class ItemTransactionService {
     // mencari request transaction yang mengandung warehouse milik project leader atau admin (untuk warehouse perusahaan)
     let requestItemHeaders = await this.requestItemHeaderModel.find({ requested_to: { $in: target_warehouse } })
       .populate(["requested_by", "requested_from", "requested_to"])
+      .sort({ requested_at: -1 })
       .exec();
 
     return requestItemHeaders;

@@ -23,15 +23,28 @@ export class RequestClosingService {
     let role = (currentEmployee.role as EmployeeRole).name;
 
     let filter = {}
-    if(role == "mandor"){
-      filter = {requested_by: (user.employee as Employee)._id.toString()}
-    }
-
-    if(projectId){
-      filter = {...filter, requested_from: projectId}
+    if (projectId) {
+      if (role == "mandor") {
+        let targetProject = await this.projectModel.findOne({ _id: projectId, project_leader: (user.employee as Employee)._id }).exec();
+        if (!targetProject) throw new BadRequestException('Anda tidak dapat mengakses proyek ini');
+      }
+      filter = { ...filter, requested_from: projectId }
     }
 
     let targetRequestClosing = await this.requestClosingModel.find(filter).populate(["requested_by", "requested_from", "handled_by"]).exec()
+    return targetRequestClosing;
+  }
+
+  async findOne(id: string, user: User): Promise<RequestProjectClosing> {
+    let currentEmployee = user.employee as Employee;
+    let role = (currentEmployee.role as EmployeeRole).name;
+
+    let filter: any = { _id: id }
+    if (role == "mandor") {
+      filter = { ...filter, requested_by: (user.employee as Employee)._id.toString() }
+    }
+
+    let targetRequestClosing = await this.requestClosingModel.findOne(filter).populate(["requested_by", "requested_from", "handled_by"]).exec()
     return targetRequestClosing;
   }
 
@@ -79,7 +92,7 @@ export class RequestClosingService {
     }
 
     if (targetRequestClosing.status != RequestStatus.MENUNGGU) {
-      throw new BadRequestException('Request Closing tersebut sudah ditangani');
+      throw new BadRequestException('Request Closing tersebut sudah ditangani atau telah dibatalkan');
     }
 
     if (((user.employee as Employee).role as EmployeeRole).name == "mandor") {

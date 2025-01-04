@@ -88,6 +88,11 @@ export class PurchaseOrder extends Document {
   @Field(() => [PurchaseOrderDetail])
   @Prop({ type: [PurchaseOrderDetail], required: true })
   purchase_order_detail: PurchaseOrderDetail[];
+
+  @Field(() => Date, { nullable: true })
+  createdAt?: Date;
+  @Field(() => Date, { nullable: true })
+  updatedAt?: Date;
 }
 
 export const PurchaseOrderSchema = SchemaFactory.createForClass(PurchaseOrder);
