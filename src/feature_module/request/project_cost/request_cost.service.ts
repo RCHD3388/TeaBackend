@@ -26,34 +26,34 @@ export class RequestCostService {
 
     let filter = {}
     if (role == "mandor") {
-      filter = { requested_by: (user.employee as Employee)._id.toString() }
+      filter = { requested_by: (user.employee as Employee)._id }
     }
 
     let targetRequestCosts = await this.requestCostModel.find(filter)
-    .populate(["requested_by", "requested_from", "handled_by", "project_cost_category"])
-    .sort({ createdAt: -1 }) 
-    .exec()
+      .populate(["requested_by", "requested_from", "handled_by", "project_cost_category"])
+      .sort({ createdAt: -1 })
+      .exec()
 
     return targetRequestCosts;
   }
 
-async findOne(id: string, user: User): Promise<RequestCost> {
-  const currentEmployeeId = (user.employee as Employee)._id.toString();
+  async findOne(id: string, user: User): Promise<RequestCost> {
+    const currentEmployeeId = (user.employee as Employee)._id;
 
-  if (((user.employee as Employee).role as EmployeeRole).name == "mandor") {
-    return await this.requestCostModel.findOne({ _id: id, requested_by: currentEmployeeId }).populate(["requested_by", "requested_from", "handled_by", "project_cost_category"]).exec();
+    if (((user.employee as Employee).role as EmployeeRole).name == "mandor") {
+      return await this.requestCostModel.findOne({ _id: id, requested_by: currentEmployeeId }).populate(["requested_by", "requested_from", "handled_by", "project_cost_category"]).exec();
+    }
+
+    const targetRequestCost = await this.requestCostModel.findOne({
+      _id: id,
+    }).populate(["requested_by", "requested_from", "handled_by", "project_cost_category"]).exec();
+
+    if (!targetRequestCost) {
+      throw new NotFoundException('Request Cost tidak ditemukan atau bukan milik user yang sedang login');
+    }
+
+    return targetRequestCost;
   }
-
-  const targetRequestCost = await this.requestCostModel.findOne({
-    _id: id,
-  }).populate(["requested_by", "requested_from", "handled_by", "project_cost_category"]).exec();
-
-  if (!targetRequestCost) {
-    throw new NotFoundException('Request Cost tidak ditemukan atau bukan milik user yang sedang login');
-  }
-
-  return targetRequestCost;
-}
 
 
   async createRequestCost(createRequestCostInput: CreateRequestCostInput, user: User): Promise<RequestCost> {
@@ -152,7 +152,7 @@ async findOne(id: string, user: User): Promise<RequestCost> {
       targetRequestCost.title = updateRequestInput.title ? updateRequestInput.title : targetRequestCost.title;
       targetRequestCost.description = updateRequestInput.description ? updateRequestInput.description : targetRequestCost.description;
       targetRequestCost.price = updateRequestInput.price ? updateRequestInput.price : targetRequestCost.price;
-    }else{
+    } else {
       throw new BadRequestException('Request Cost tersebut sudah ditangani');
     }
 
