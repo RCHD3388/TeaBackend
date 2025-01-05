@@ -12,7 +12,7 @@ import { CreateProjectCostLogInput } from "../types/project_sub.types";
 @Injectable()
 export class ProjectCostService {
   constructor(
-    @InjectModel(ProjectCostLog.name) private requestCostModel: Model<ProjectCostLog>,
+    @InjectModel(ProjectCostLog.name) private projectCostModel: Model<ProjectCostLog>,
     @InjectModel(Project.name) private projectModel: Model<Project>,
   ) { }
 
@@ -27,11 +27,11 @@ export class ProjectCostService {
       throw new ForbiddenException('User tidak diperbolehkan melakukan aksi tersebut')
     }
 
-    return this.requestCostModel.find({project: projectId}).populate(["category", "created_by"]).exec();
+    return this.projectCostModel.find({project: projectId}).populate(["category", "created_by"]).exec();
   }
 
-  async createRequestCost(createProjectCostLogInput: CreateProjectCostLogInput, session: ClientSession): Promise<ProjectCostLog> {
-    let newdata = new this.requestCostModel(createProjectCostLogInput);
+  async createCostLog(createProjectCostLogInput: CreateProjectCostLogInput, session: ClientSession): Promise<ProjectCostLog> {
+    let newdata = new this.projectCostModel(createProjectCostLogInput);
 
     return newdata.save({ session });
   }

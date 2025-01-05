@@ -175,9 +175,9 @@ export class ProjectCostLog extends Document {
   @Prop({ type: Number, required: true })
   price: Number;
 
-  @Field(() => CategoryData)
-  @Prop({ type: Types.ObjectId, required: true, ref: "CategoryData" })
-  category: String | CategoryData;
+  @Field(() => String)
+  @Prop({ type: String, required: true })
+  category: String ;
 
   @Field(() => Employee)
   @Prop({ type: Types.ObjectId, required: true, ref: "Employee" })

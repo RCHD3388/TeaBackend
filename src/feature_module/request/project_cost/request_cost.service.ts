@@ -106,6 +106,8 @@ async findOne(id: string, user: User): Promise<RequestCost> {
       }
     }
 
+    let categoryName = await this.categoryDataModel.findById(targetRequestCost.project_cost_category).exec();
+
     const session = await this.connection.startSession();
 
     try {
@@ -115,14 +117,14 @@ async findOne(id: string, user: User): Promise<RequestCost> {
         targetRequestCost.handled_by = (user.employee as Employee)._id;
         targetRequestCost.handled_date = new Date();
 
-        await this.projectCostService.createRequestCost({
+        await this.projectCostService.createCostLog({
           title: targetRequestCost.title,
           description: targetRequestCost.description,
           date: targetRequestCost.handled_date,
           price: targetRequestCost.price,
           created_by: String(targetRequestCost.handled_by),
           project: String(targetRequestCost.requested_from),
-          category: String(targetRequestCost.project_cost_category),
+          category: categoryName.name,
           request_cost: targetRequestCost._id
         }, session)
       }

@@ -3,7 +3,7 @@ import { InjectConnection, InjectModel } from "@nestjs/mongoose";
 import { User } from "../user/schema/user.schema";
 import { Employee, EmployeeRole } from "../person/schema/employee.schema";
 import { ClientSession, Connection, Model, ObjectId, Types } from "mongoose";
-import { Project } from "./schema/project.schema";
+import { Project, ProjectCostLog } from "./schema/project.schema";
 import { CreateProjectInput, UpdateProjectInput } from "./types/project.types";
 import { CategoryData, CategoryType, TransactionCategory } from "../category/schema/category.schema";
 import { WarehouseService } from "../inventory/warehouse.service";
@@ -22,6 +22,7 @@ export class ProjectService {
     @InjectModel(CategoryData.name) private categoryDataModel: Model<CategoryData>,
     @InjectModel(Project.name) private projectModel: Model<Project>,
     @InjectModel(Warehouse.name) private warehouseModel: Model<Warehouse>,
+    @InjectModel(ProjectCostLog.name) private projectCostModel: Model<ProjectCostLog>,
     private readonly warehouseService: WarehouseService,
     private readonly materialTransactionService: MaterialTransactionService,
     private readonly toolTransactionService: ToolTransactionService
@@ -88,15 +89,15 @@ export class ProjectService {
               model: "RequestProjectClosing",
             },
             {
-              path: "material_used", 
+              path: "material_used",
               model: "MaterialTransaction",
               populate: {
                 path: "material",
                 model: "Material",
                 populate: [
-                  {path: "merk", model: "Merk"},
-                  {path: "unit_measure", model: "UnitMeasure"},
-                  {path: "minimum_unit_measure", model: "UnitMeasure"},
+                  { path: "merk", model: "Merk" },
+                  { path: "unit_measure", model: "UnitMeasure" },
+                  { path: "minimum_unit_measure", model: "UnitMeasure" },
                 ]
               }
             }
@@ -104,7 +105,7 @@ export class ProjectService {
         }
       ]
     ).exec();
-    
+
     if (!project) {
       throw new NotFoundException(`Project with ID ${id} not found for this user`);
     }
@@ -332,7 +333,7 @@ export class ProjectService {
       if (updateProjectClosingInput.note) targetProject.project_closing.note = updateProjectClosingInput.note;
 
       // UPDATE ITEMS INVENTORY
-      if (updateProjectClosingInput.material_left) {
+      if (updateProjectClosingInput.material_left && targetProject.project_closing.material_used.length == 0) {
         if (!updateProjectClosingInput.warehouse_to) {
           throw new BadRequestException("Warehouse tujuan harus diisi, untuk pengembalian barang")
         } else {
@@ -366,6 +367,19 @@ export class ProjectService {
           }, session)
 
           targetProject.project_closing.material_used = remainMaterials.map((materialtrf) => materialtrf._id.toString());
+
+          // ADD TO PROJECT COST LOG
+          let newProjectCostLog = new this.projectCostModel({
+            title: "Penyelesaian Project",
+            description: "Total material yang digunakan oleh proyek",
+            date: new Date(),
+            price: remainMaterials.reduce((total, trfm) => total + (trfm.price * trfm.remain), 0),
+            category: "Penggunaan Material",
+            created_by: (user.employee as Employee)._id.toString(),
+            project: targetProject._id
+          });
+          newProjectCostLog.save({ session });
+
 
           await this.toolTransactionService.create({
             tool: tool_remain_formatted,
