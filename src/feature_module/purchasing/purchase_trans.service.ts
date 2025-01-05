@@ -38,9 +38,12 @@ export class PurchasingTransactionService {
 
   // admin owner staffpembelian
   async getPurchaseTransactionByPurchasingStaff(user: User): Promise<PurchaseTransaction[]> {
-    return await this.purchaseTransactionModel.find({ purchasing_staff: (user.employee as Employee)._id.toString() })
+    
+    let data = await this.purchaseTransactionModel.find({ purchasing_staff: (user.employee as Employee)._id.toString() })
       .populate(["purchasing_staff", "supplier"])
       .sort({ transaction_date: -1 }).exec();
+      
+    return data
   }
 
   // admin owner mandor staffpembelian
@@ -59,12 +62,17 @@ export class PurchasingTransactionService {
 
   // admin owner staff pembelian
   async createPurchaseTransaction(createPurchaseTransactionInput: CreateRequestPurchaseTransactionInput, user: User): Promise<PurchaseTransaction> {
-    let { supplier, purchase_transaction_detail } = createPurchaseTransactionInput;
+    let { transaction_number, supplier, purchase_transaction_detail } = createPurchaseTransactionInput;
 
     // check supplier valid ditemukan dan status active
     let supplierValid = await this.supplierService.findSupplierById(supplier.toString());
     if (supplierValid == null || supplierValid.status != SupplierStatus.ACTIVE) {
       throw new BadRequestException('Supplier aktif tidak ditemukan');
+    }
+
+    let checkTNumber = await this.purchaseTransactionModel.findOne({transaction_number}).exec();
+    if (checkTNumber) {
+      throw new BadRequestException('Nomor transaksi sudah ada');
     }
 
     // PADA MASING MASING DETAIL
@@ -117,7 +125,7 @@ export class PurchasingTransactionService {
       });
 
       if (po == null) {
-        throw new NotFoundException('Purchase order yang dituju tidak ditemukan atau tidak meminta item yang sama, dan juga pastikan PO sudah disetujui');
+        throw new BadRequestException('Purchase order yang dituju tidak ditemukan atau tidak meminta item yang sama, dan juga pastikan PO sudah disetujui');
       }
     }
 

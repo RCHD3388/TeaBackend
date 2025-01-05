@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import { Connection, Model } from 'mongoose';
 import { PurchaseOrder, PurchaseOrderDetail, PurchaseTransaction } from './schema/purchasing.schema';
-import { CreateRequestPOInput, CustomOneRequestPO, ReceiveItemInput } from './types/purchasing_types.types';
+import { CreateRequestPOInput, CustomOneRequestPO, CustomOneRequestPT, ReceiveItemInput } from './types/purchasing_types.types';
 import { User } from '../user/schema/user.schema';
 import { WarehouseService } from '../inventory/warehouse.service';
 import { RequestItem_ItemType, RequestStatus } from '../request/types/request.types';
@@ -84,10 +84,10 @@ export class PurchasingService {
     return custom_data;
   }
 
-  async getRelatedPTfromPO(id: string, user: User): Promise<PurchaseTransaction[]> {
+  async getRelatedPTfromPO(id: string, user: User): Promise<CustomOneRequestPT> {
     let po = (await this.getPurchaseOrderById(id, user)).purchase_order;
     if (po.status == RequestStatus.SELESAI) {
-      return []
+      return {purchase_transaction: [], materials: [], tools: []};
     }
 
     // item ids yang masih dibutuhkan
@@ -103,6 +103,10 @@ export class PurchasingService {
       }
     }).exec();
 
+    let materialsIds = []
+    let skusIds = []
+    let toolIds = []
+
     const formatedPT = await Promise.all(relatedPT.map(async (pt) => {
       let filteredDetail = pt.purchase_transaction_detail.filter(detail =>
         // check items include dan purchase order benar
@@ -116,10 +120,25 @@ export class PurchasingService {
       );
 
       pt.purchase_transaction_detail = filteredDetail;
+      materialsIds.push(...filteredDetail
+        .filter(detail => detail.item_type == RequestItem_ItemType.MATERIAL)
+        .map(detail => detail.item.toString())
+      );
+
+      filteredDetail
+        .filter(detail => detail.item_type == RequestItem_ItemType.TOOL)
+        .forEach(detail => {
+          toolIds.push(detail.original_item.toString())
+          skusIds.push(detail.item.toString())
+        })
       return pt
     }))
 
-    return formatedPT;
+    return {
+      purchase_transaction: formatedPT,
+      materials: await this.materialService.findByIds(materialsIds),
+      tools: await this.toolService.findByIds(toolIds)
+    };
   }
 
   // admin owner mandor

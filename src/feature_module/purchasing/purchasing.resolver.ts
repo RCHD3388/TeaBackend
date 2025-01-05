@@ -7,7 +7,7 @@ import { RolesGuard } from 'src/common/guard/roles.guard';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { User } from '../user/schema/user.schema';
 import { CurrentUser } from 'src/common/decorators/auth_user.decorator';
-import { CreateRequestPOInput, CustomOneRequestPO, ReceiveItemInput } from './types/purchasing_types.types';
+import { CreateRequestPOInput, CustomOneRequestPO, CustomOneRequestPT, ReceiveItemInput } from './types/purchasing_types.types';
 import { RequestStatus } from '../request/types/request.types';
 import { FilterInput } from '../types/global_input_types.types';
 
@@ -44,13 +44,13 @@ export class PurchasingResolver {
     return this.purchasingService.getPurchaseOrderById(id, user);
   }
 
-  @Query(() => [PurchaseTransaction], { name: 'getRelatedPTfromPO' })
+  @Query(() => CustomOneRequestPT, { name: 'getRelatedPTfromPO' })
   @UseGuards(RolesGuard)
   @Roles("owner", "admin", "mandor")
   async getRelatedPTfromPO(
     @Args('id') id: string,
     @CurrentUser() user: User
-  ): Promise<PurchaseTransaction[]> {
+  ): Promise<CustomOneRequestPT> {
     return this.purchasingService.getRelatedPTfromPO(id, user);
   }
 

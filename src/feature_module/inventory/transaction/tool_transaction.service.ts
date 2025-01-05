@@ -69,7 +69,7 @@ export class ToolTransactionService {
       let source_warehouse = await this.warehouseModel.findOne({ _id: warehouse_from }).session(session)
 
       if (targetTransactionCategory.id == "PUR" || targetTransactionCategory.id == "TRF" || targetTransactionCategory.id == "ADD") {
-        if (!target_warehouse) throw new NotFoundException(`Warehouse tujuan tidak ditemukan`);
+        if (!target_warehouse) throw new NotFoundException(`Warehouse tujuan aktif tidak ditemukan`);
       }
       if (targetTransactionCategory.id == "USE" || targetTransactionCategory.id == "TRF") {
         if (!source_warehouse) throw new NotFoundException(`Warehouse sumber tidak ditemukan`);
@@ -158,8 +158,8 @@ export class ToolTransactionService {
       if (!targetTransactionCategory) throw new NotFoundException(`Kategori transaksi tidak ditemukan`);
 
       // check target warehouse
-      let target_warehouse = await this.warehouseModel.findById(warehouse_to).session(session)
-      if (!target_warehouse) throw new NotFoundException(`Warehouse tujuan tidak ditemukan`);
+      let target_warehouse = await this.warehouseModel.findById(warehouse_to, { status: WarehouseStatus.ACTIVE }).session(session)
+      if (!target_warehouse) throw new NotFoundException(`Warehouse tujuan aktif tidak ditemukan`);
 
       for (let curTool of tool) {
 

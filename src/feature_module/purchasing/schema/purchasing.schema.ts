@@ -146,7 +146,7 @@ export class PurchaseTransaction extends Document {
   purchasing_staff: string | Employee;
 
   @Field(() => String)
-  @Prop({ type: String, required: true })
+  @Prop({ type: String, required: true, unique: true })
   transaction_number: string;
 
   @Field(() => String, { nullable: true })

@@ -2,8 +2,8 @@ import { Field, InputType, ObjectType } from "@nestjs/graphql";
 import { IsArray, IsDate, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, Min, ValidateNested } from "class-validator";
 import { CreateToolInput } from "src/feature_module/inventory/types/tool.types";
 import { RequestItem_ItemType } from "src/feature_module/request/types/request.types";
-import { PurchaseOrder } from "../schema/purchasing.schema";
-import { Material, Sku } from "src/feature_module/inventory/schema/inventory.schema";
+import { PurchaseOrder, PurchaseTransaction } from "../schema/purchasing.schema";
+import { Material, Sku, Tool } from "src/feature_module/inventory/schema/inventory.schema";
 
 @InputType()
 export class CreatePODetailInput {
@@ -169,4 +169,16 @@ export class CustomOneRequestPO {
 
   @Field(() => [Sku])
   skus: Sku[];
+}
+
+@ObjectType()
+export class CustomOneRequestPT {
+  @Field(() => [PurchaseTransaction])
+  purchase_transaction: PurchaseTransaction[];
+
+  @Field(() => [Material])
+  materials: Material[];
+
+  @Field(() => [Tool])
+  tools: Tool[];
 }

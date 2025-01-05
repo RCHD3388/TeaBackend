@@ -87,7 +87,6 @@ export class PurchasingTransactionResolver {
     @Args('createPurchaseTransactionDetailInput') createPurchaseTransactionDetailInput: CreateNewPurchaseTransactionDetailInput,
     @CurrentUser() user: User
   ): Promise<PurchaseTransaction> {
-    console.log(createPurchaseTransactionDetailInput)
     return this.purchasingTransactionService.addNewDetailPT(id, createPurchaseTransactionDetailInput, user);
   }
 }

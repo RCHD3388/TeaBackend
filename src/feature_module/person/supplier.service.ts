@@ -1,8 +1,9 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Supplier } from './schema/supplier.schema';
+import { Supplier, SupplierStatus } from './schema/supplier.schema';
 import { CreateSupplierInput, UpdateSupplierInput } from './types/supplier.types';
+import { FilterInput } from '../types/global_input_types.types';
 
 @Injectable()
 export class SupplierService {
@@ -18,8 +19,11 @@ export class SupplierService {
     return supplier;
   }
 
-  async findAll(): Promise<Supplier[]> {
-    let employee = await this.supplierModel.find().exec();
+  async findAll(filter?: FilterInput): Promise<Supplier[]> {
+    let filt = {};
+    if (filter) filt = {status: SupplierStatus.ACTIVE};
+
+    let employee = await this.supplierModel.find(filt).exec();
     return employee
   }
 

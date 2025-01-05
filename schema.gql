@@ -337,6 +337,12 @@ type CustomOneRequestPO {
   skus: [Sku!]!
 }
 
+type CustomOneRequestPT {
+  purchase_transaction: [PurchaseTransaction!]!
+  materials: [Material!]!
+  tools: [Tool!]!
+}
+
 type Query {
   getHello: String!
   getAllUsers: [User!]!
@@ -350,7 +356,7 @@ type Query {
   getEmployeeById(id: String!): Employee!
   getAllRole: [EmployeeRole!]!
   getAllSkill: [EmployeeSkill!]!
-  getAllSuppliers: [Supplier!]!
+  getAllSuppliers(filter: FilterInput): [Supplier!]!
   getSupplierById(id: String!): Supplier!
   getAllWarehouses(filter: FilterInput): [Warehouse!]!
   getAllWarehousesByUser: [Warehouse!]!
@@ -382,7 +388,7 @@ type Query {
   getAllPurchaseOrders(filter: FilterInput): [PurchaseOrder!]!
   getPurchaseOrderByUser: [PurchaseOrder!]!
   getPurchaseOrderByID(id: String!): CustomOneRequestPO!
-  getRelatedPTfromPO(id: String!): [PurchaseTransaction!]!
+  getRelatedPTfromPO(id: String!): CustomOneRequestPT!
   getAllPurchaseTransactions: [PurchaseTransaction!]!
   getPurchaseTransactionByUser: [PurchaseTransaction!]!
   getPurchaseTransactionById(id: String!): PurchaseTransaction!

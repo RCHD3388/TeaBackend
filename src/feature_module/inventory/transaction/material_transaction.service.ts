@@ -86,7 +86,7 @@ export class MaterialTransactionService {
       let target_warehouse = await this.warehouseModel.findOne({ _id: warehouse_to, status: WarehouseStatus.ACTIVE }).session(session)
       let source_warehouse = await this.warehouseModel.findOne({ _id: warehouse_from }).session(session)
       if (targetTransactionCategory.id == "PUR" || targetTransactionCategory.id == "TRF" || targetTransactionCategory.id == "ADD") {
-        if (!target_warehouse) throw new NotFoundException(`Warehouse tujuan tidak ditemukan`);
+        if (!target_warehouse) throw new NotFoundException(`Warehouse tujuan yang aktif tidak ditemukan`);
       }
       if (targetTransactionCategory.id == "USE" || targetTransactionCategory.id == "TRF") {
         if (!source_warehouse) throw new NotFoundException(`Warehouse sumber tidak ditemukan`);

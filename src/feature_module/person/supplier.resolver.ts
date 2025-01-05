@@ -6,6 +6,7 @@ import { Supplier } from './schema/supplier.schema';
 import { RolesGuard } from 'src/common/guard/roles.guard';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { CreateSupplierInput, UpdateSupplierInput } from './types/supplier.types';
+import { FilterInput } from '../types/global_input_types.types';
 
 @Resolver()
 @UseGuards(AppAuthGuard)
@@ -15,8 +16,10 @@ export class SupplierResolver {
   @Query(() => [Supplier], { name: 'getAllSuppliers' })
   @UseGuards(RolesGuard)
   @Roles("owner", "admin", "staff_pembelian")
-  async getAllSuppliers() {
-    return this.supplierService.findAll();
+  async getAllSuppliers(
+    @Args('filter', { nullable: true }) filter?: FilterInput
+  ) {
+    return this.supplierService.findAll(filter);
   }
 
   @Query(() => Supplier, { name: 'getSupplierById' })
