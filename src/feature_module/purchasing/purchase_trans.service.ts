@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import { Connection, Model } from 'mongoose';
 import { PurchaseOrder, PurchaseTransaction, PurchaseTransactionDetail } from './schema/purchasing.schema';
-import { CreateNewPurchaseTransactionDetailInput, CreatePurchaseTransactionDetailInput, CreateRequestPOInput, CreateRequestPurchaseTransactionInput, UpdateRequestPurchaseTransactionInput } from './types/purchasing_types.types';
+import { CreateNewPurchaseTransactionDetailInput, CreatePurchaseTransactionDetailInput, CreateRequestPOInput, CreateRequestPurchaseTransactionInput, CustomOneRequestPT, UpdateRequestPurchaseTransactionInput } from './types/purchasing_types.types';
 import { User } from '../user/schema/user.schema';
 import { WarehouseService } from '../inventory/warehouse.service';
 import { RequestItem_ItemType, RequestStatus } from '../request/types/request.types';
@@ -47,8 +47,14 @@ export class PurchasingTransactionService {
   }
 
   // admin owner mandor staffpembelian
-  async getPurchaseTransactionById(id: string, user: User): Promise<PurchaseTransaction> {
-    let pt = await this.purchaseTransactionModel.findById(id).populate("purchasing_staff", "supplier").exec();
+  async getPurchaseTransactionById(id: string, user: User): Promise<CustomOneRequestPT> {
+    let pt = await this.purchaseTransactionModel.findById(id).populate(["purchasing_staff", "supplier", {
+      path: "purchase_transaction_detail",
+      populate: {
+        path: "purchase_order",
+        model: "PurchaseOrder"
+      }
+    }]).exec();
     if (!pt) throw new NotFoundException('Purchase transaction tidak ditemukan');
 
     // jika role adalah staff_pembelian maka purchasing staff harus user
@@ -57,7 +63,26 @@ export class PurchasingTransactionService {
       throw new BadRequestException('Anda tidak dapat mengakses Purchase Transaction ini');
     }
 
-    return pt;
+    let material_ids = pt.purchase_transaction_detail.filter((item: PurchaseTransactionDetail) => {
+      return item.item_type == RequestItem_ItemType.MATERIAL
+    }).map((item: PurchaseTransactionDetail) => {
+      return item.item.toString()
+    });
+
+    let materials = await this.materialService.findByIds(material_ids);
+
+    let tool_ids = pt.purchase_transaction_detail.filter((item: PurchaseTransactionDetail) => {
+      return item.item_type == RequestItem_ItemType.TOOL
+    }).map((item: PurchaseTransactionDetail) => {
+      return item.original_item.toString()
+    });
+
+    let tools = await this.toolService.findByIds(tool_ids);
+    return {
+      purchase_transaction: [pt],
+      materials: materials,
+      tools: tools
+    };
   }
 
   // admin owner staff pembelian

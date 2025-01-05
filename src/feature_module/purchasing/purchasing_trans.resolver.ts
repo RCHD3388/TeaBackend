@@ -8,7 +8,7 @@ import { PurchaseTransaction } from './schema/purchasing.schema';
 import { RolesGuard } from 'src/common/guard/roles.guard';
 import { CurrentUser } from 'src/common/decorators/auth_user.decorator';
 import { User } from '../user/schema/user.schema';
-import { CreateNewPurchaseTransactionDetailInput, CreatePurchaseTransactionDetailInput, CreateRequestPurchaseTransactionInput, UpdateRequestPurchaseTransactionInput } from './types/purchasing_types.types';
+import { CreateNewPurchaseTransactionDetailInput, CreatePurchaseTransactionDetailInput, CreateRequestPurchaseTransactionInput, CustomOneRequestPT, UpdateRequestPurchaseTransactionInput } from './types/purchasing_types.types';
 import { CreateToolInput } from '../inventory/types/tool.types';
 
 @Resolver()
@@ -35,13 +35,13 @@ export class PurchasingTransactionResolver {
   }
 
 
-  @Query(() => PurchaseTransaction)
+  @Query(() => CustomOneRequestPT)
   @UseGuards(RolesGuard)
   @Roles('admin', 'owner', 'staff_pembelian')
   async getPurchaseTransactionById(
     @Args('id') id: string,
     @CurrentUser() user: User
-  ): Promise<PurchaseTransaction> {
+  ): Promise<CustomOneRequestPT> {
     return this.purchasingTransactionService.getPurchaseTransactionById(id, user);
   }
 

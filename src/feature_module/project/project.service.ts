@@ -58,7 +58,6 @@ export class ProjectService {
     let project = await this.projectModel.find(filter).populate(["project_leader", "status", "priority"]).exec();
 
     project = project.map((proj) => {
-      (proj.project_leader as Employee).salary = null
       return proj
     })
 
@@ -376,7 +375,7 @@ export class ProjectService {
             price: remainMaterials.reduce((total, trfm) => total + (trfm.price * trfm.remain), 0),
             category: "Penggunaan Material",
             created_by: (user.employee as Employee)._id.toString(),
-            project: targetProject._id
+            project: targetProject._id.toString()
           });
           newProjectCostLog.save({ session });
 

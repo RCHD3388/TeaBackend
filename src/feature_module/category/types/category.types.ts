@@ -1,5 +1,5 @@
 import { Field, InputType } from "@nestjs/graphql";
-import { CategoryType } from "../schema/category.schema";
+import { CategoryType, CetegoryStatusType } from "../schema/category.schema";
 import { IsEnum, IsNotEmpty, IsOptional, isString, IsString, Matches } from "class-validator";
 
 @InputType()
@@ -30,6 +30,12 @@ export class UpdateCategoryInput {
   @IsOptional()
   @IsString()
   description?: string;
+
+  @Field(() => String, { nullable: true })
+  @IsOptional()
+  @IsString()
+  @IsEnum(CetegoryStatusType, { message: `Tipe invalid` })
+  status?: string;
 }
 
 @InputType()

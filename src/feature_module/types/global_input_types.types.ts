@@ -6,10 +6,10 @@ export class FilterInput {
   @Field({ nullable: true })
   @IsOptional()
   @IsString()
-  readonly name?: string;
+  name?: string;
 
   @Field({ nullable: true })
   @IsOptional()
   @IsBoolean()
-  readonly status?: boolean;
+  status?: boolean;
 }

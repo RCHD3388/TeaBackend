@@ -1,8 +1,9 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { CategoryData } from './schema/category.schema';
+import { CategoryData, CategoryType, CetegoryStatusType } from './schema/category.schema';
 import { CategoryFilter, CreateCategoryDto, UpdateCategoryInput } from './types/category.types';
+import { FilterInput } from '../types/global_input_types.types';
 
 @Injectable()
 export class CategoryService {
@@ -18,13 +19,17 @@ export class CategoryService {
     return false
   }
 
-  async findAll(categoryFilter: CategoryFilter): Promise<CategoryData[]> {
+  async findAll(categoryFilter: CategoryFilter, filter?: FilterInput): Promise<CategoryData[]> {
     let category_filter: any = {}
-    if(categoryFilter?.filter){
-      category_filter.type = {$in: categoryFilter.filter}
+    if (categoryFilter?.filter) {
+      category_filter.type = { $in: categoryFilter.filter }
     }
-    
-    return this.categoryModel.find(category_filter);
+      
+    if(!filter?.status){
+      category_filter.status = CetegoryStatusType.ACTIVE
+    }
+
+    return this.categoryModel.find({...category_filter}).exec();
   }
 
   async create(createCategoryDto: CreateCategoryDto): Promise<CategoryData> {

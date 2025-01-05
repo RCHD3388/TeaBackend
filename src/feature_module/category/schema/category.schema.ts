@@ -11,6 +11,11 @@ export enum CategoryType {
   TOOL_STATUS="status_alat"
 }
 
+export enum CetegoryStatusType {
+  ACTIVE= "Active",
+  INACTIVE= "Inactive",
+}
+
 @ObjectType()
 @Schema()
 export class CategoryData extends Document {
@@ -24,6 +29,10 @@ export class CategoryData extends Document {
   @Field(() => String, {nullable: true})
   @Prop({ type: String, default: "" })
   description: string;
+
+  @Field(() => String)
+  @Prop({ type: String, default: CetegoryStatusType.ACTIVE })
+  status: string;
 
   @Field(() => String)
   @Prop({ 

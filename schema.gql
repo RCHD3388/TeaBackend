@@ -15,6 +15,7 @@ type CategoryData {
   _id: ID!
   name: String!
   description: String
+  status: String!
   type: String!
 }
 
@@ -74,22 +75,6 @@ type Tool {
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
 scalar DateTime
-
-type RequestCost {
-  _id: String!
-  title: String!
-  description: String
-  project_cost_category: CategoryData!
-  requested_from: Project!
-  requested_by: Employee!
-  requested_at: DateTime!
-  status: String!
-  price: Float!
-  handled_date: DateTime
-  handled_by: Employee
-  createdAt: DateTime
-  updatedAt: DateTime
-}
 
 type Warehouse {
   _id: String!
@@ -185,6 +170,18 @@ type Project {
   project_closing: ProjectClosing
 }
 
+type ProjectCostLog {
+  _id: String!
+  title: String!
+  description: String
+  date: DateTime!
+  price: Float!
+  category: String!
+  created_by: Employee!
+  project: Project!
+  request_cost: String
+}
+
 type EmployeeProjectHistory {
   project: Project!
   join_at: DateTime!
@@ -240,6 +237,22 @@ type Supplier {
   name: String!
   person: Person!
   status: String!
+}
+
+type RequestCost {
+  _id: String!
+  title: String!
+  description: String
+  project_cost_category: CategoryData!
+  requested_from: Project!
+  requested_by: Employee!
+  requested_at: DateTime!
+  status: String!
+  price: Float!
+  handled_date: DateTime
+  handled_by: Employee
+  createdAt: DateTime
+  updatedAt: DateTime
 }
 
 type RequestItemDetail {
@@ -348,6 +361,7 @@ type Query {
   getAllUsers: [User!]!
   getUserById(id: String!): User!
   findAllProjects: [Project!]!
+  findAllProjectCostLogs(projectId: String!): [ProjectCostLog!]!
   findProjectById(id: String!): Project!
   getAllProjectEmployees(id: String!): GetAllProjectEmployeeDto!
   findAllAttendanceModules(projectId: String!): [AttendanceModule!]!
@@ -376,7 +390,7 @@ type Query {
   getToolsByIds(ids: [String!]!): [Tool!]!
   getWarehouseMaterials(warehouse_id: String!): [MaterialTransaction!]!
   getWarehouseTools(warehouse_id: String!): [ToolTransaction!]!
-  getCategories(categoryFilter: CategoryFilter): [CategoryData!]!
+  getCategories(categoryFilter: CategoryFilter, filter: FilterInput): [CategoryData!]!
   findOneRequestCost(id: String!): RequestCost!
   findAllRequestCosts: [RequestCost!]!
   findAllRequestClosing(projectId: String): [RequestProjectClosing!]!
@@ -391,7 +405,7 @@ type Query {
   getRelatedPTfromPO(id: String!): CustomOneRequestPT!
   getAllPurchaseTransactions: [PurchaseTransaction!]!
   getPurchaseTransactionByUser: [PurchaseTransaction!]!
-  getPurchaseTransactionById(id: String!): PurchaseTransaction!
+  getPurchaseTransactionById(id: String!): CustomOneRequestPT!
 }
 
 input EmployeeFilter {
@@ -687,6 +701,7 @@ input CreateCategoryInput {
 input UpdateCategoryInput {
   name: String
   description: String
+  status: String
 }
 
 input CreateRequestCostInput {

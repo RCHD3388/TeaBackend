@@ -7,15 +7,17 @@ import { RolesGuard } from "src/common/guard/roles.guard";
 import { Roles } from "src/common/decorators/roles.decorator";
 import { ValidationError } from "class-validator";
 import { ProjectService } from "./project.service";
-import { Project } from "./schema/project.schema";
+import { Project, ProjectCostLog } from "./schema/project.schema";
 import { CreateProjectInput, UpdateProjectInput } from "./types/project.types";
 import { UpdateProjectClosingInput } from "./types/project_sub.types";
+import { ProjectCostService } from "./project_att_cost/project_cost.service";
 
 @Resolver()
 @UseGuards(AppAuthGuard)
 export class ProjectResolver {
   constructor(
-    private readonly projectService: ProjectService
+    private readonly projectService: ProjectService,
+    private readonly projectCostService: ProjectCostService
   ) {}
 
   @Query(() => [Project], { name: 'findAllProjects' })
@@ -23,6 +25,18 @@ export class ProjectResolver {
   @Roles("owner", "admin", "mandor")
   async findAllProjects(@CurrentUser() user: User): Promise<Project[]> {
     return this.projectService.findAll(user);
+  }
+
+  
+  // Query untuk mendapatkan project cost berdasarkan ID project
+  @Query(() => [ProjectCostLog], { name: 'findAllProjectCostLogs' })
+  @UseGuards(RolesGuard)
+  @Roles("owner", "admin", "mandor")
+  async findAllProjectCostLogs(
+    @CurrentUser() user: User,
+    @Args('projectId', { type: () => String }) projectId: string
+  ): Promise<ProjectCostLog[]> {
+    return this.projectCostService.findAll(projectId, user);
   }
 
   // Query untuk mendapatkan project berdasarkan ID
