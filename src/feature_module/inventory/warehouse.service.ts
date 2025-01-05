@@ -6,6 +6,7 @@ import { Project } from '../project/schema/project.schema';
 import { CreateWarehouseInput, UpdateWarehouseInput } from './types/warehouse.types';
 import { User } from '../user/schema/user.schema';
 import { Employee, EmployeeRole } from '../person/schema/employee.schema';
+import { FilterInput } from '../types/global_input_types.types';
 
 @Injectable()
 export class WarehouseService {
@@ -15,11 +16,12 @@ export class WarehouseService {
     @InjectModel(Project.name) private projectModel: Model<Project>,
   ) { }
 
-  async findAll(user: User): Promise<Warehouse[]> {
-    if(((user.employee as Employee).role as EmployeeRole).name == "mandor"){
-      return await this.warehouseModel.find().exec();
+  async findAll(user: User, filter?: FilterInput): Promise<Warehouse[]> {
+    let filt = {}
+    if(filter){
+      filt = {status: WarehouseStatus.ACTIVE}
     }
-    return await this.warehouseModel.find().populate('project').exec() 
+    return await this.warehouseModel.find(filt).populate('project').exec() 
   }
 
   async findAllByProjectLeader(user: User): Promise<Warehouse[]> {

@@ -8,6 +8,7 @@ import { WarehouseService } from './warehouse.service';
 import { CreateWarehouseInput, UpdateWarehouseInput } from './types/warehouse.types';
 import { CurrentUser } from '../../common/decorators/auth_user.decorator';
 import { User } from '../user/schema/user.schema';
+import { FilterInput } from '../types/global_input_types.types';
 
 @Resolver()
 @UseGuards(AppAuthGuard)
@@ -21,8 +22,9 @@ export class WarehouseResolver {
   @Roles("owner", "admin", "staff_pembelian", "mandor")
   async getAllWarehouses(
     @CurrentUser() user: User,
+    @Args('filter', { nullable: true }) filter?: FilterInput,
   ) {
-    return this.warehouseService.findAll(user);
+    return this.warehouseService.findAll(user, filter);
   }
 
   @Query(() => [Warehouse], { name: 'getAllWarehousesByUser' })

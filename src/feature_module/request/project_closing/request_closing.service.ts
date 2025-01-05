@@ -25,13 +25,16 @@ export class RequestClosingService {
     let filter = {}
     if (projectId) {
       if (role == "mandor") {
-        let targetProject = await this.projectModel.findOne({ _id: projectId, project_leader: (user.employee as Employee)._id }).exec();
+        let targetProject = await this.projectModel.findOne({ _id: projectId, project_leader: (user.employee as Employee)._id.toString() }).exec();
         if (!targetProject) throw new BadRequestException('Anda tidak dapat mengakses proyek ini');
       }
       filter = { ...filter, requested_from: projectId }
     }
 
-    let targetRequestClosing = await this.requestClosingModel.find(filter).populate(["requested_by", "requested_from", "handled_by"]).exec()
+    let targetRequestClosing = await this.requestClosingModel.find(filter)
+      .populate(["requested_by", "requested_from", "handled_by"])
+      .sort({ requested_at: -1 })
+      .exec()
     return targetRequestClosing;
   }
 
@@ -40,11 +43,14 @@ export class RequestClosingService {
     let role = (currentEmployee.role as EmployeeRole).name;
 
     let filter: any = { _id: id }
+    let targetRequestClosing = await this.requestClosingModel.findOne(filter).populate(["requested_by", "requested_from", "handled_by"]).exec()
+
     if (role == "mandor") {
-      filter = { ...filter, requested_by: (user.employee as Employee)._id.toString() }
+      let projectId = (targetRequestClosing.requested_from as Project)._id.toString()
+      let targetProject = await this.projectModel.findOne({ _id: projectId, project_leader: (user.employee as Employee)._id.toString() }).exec();
+      if (!targetProject) throw new BadRequestException('Anda tidak dapat mengakses proyek ini');
     }
 
-    let targetRequestClosing = await this.requestClosingModel.findOne(filter).populate(["requested_by", "requested_from", "handled_by"]).exec()
     return targetRequestClosing;
   }
 

@@ -12,6 +12,7 @@ import { UpdateProjectClosingInput } from "./types/project_sub.types";
 import { MaterialTransactionService } from "../inventory/transaction/material_transaction.service";
 import { ToolTransactionService } from "../inventory/transaction/tool_transaction.service";
 import { Material, Tool } from "../inventory/schema/inventory.schema";
+import { populate } from "dotenv";
 
 @Injectable()
 export class ProjectService {
@@ -70,9 +71,40 @@ export class ProjectService {
       filter = { project_leader: (user.employee as Employee)._id.toString(), _id: id }
     }
 
-    const project = await this.projectModel.findOne(filter).populate([
-      "status", "priority", "project_leader"
-    ]).exec();
+    const project = await this.projectModel.findOne(filter).populate(
+      [
+        "status", "priority", "project_leader", {
+          path: "project_closing",
+          populate: {
+            path: "closed_by",
+            model: "Employee"
+          }
+        },
+        {
+          path: "project_closing",
+          populate: [
+            {
+              path: "request_project_closing",
+              model: "RequestProjectClosing",
+            },
+            {
+              path: "material_used", 
+              model: "MaterialTransaction",
+              populate: {
+                path: "material",
+                model: "Material",
+                populate: [
+                  {path: "merk", model: "Merk"},
+                  {path: "unit_measure", model: "UnitMeasure"},
+                  {path: "minimum_unit_measure", model: "UnitMeasure"},
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    ).exec();
+    
     if (!project) {
       throw new NotFoundException(`Project with ID ${id} not found for this user`);
     }
@@ -255,6 +287,8 @@ export class ProjectService {
     let target_employee = await this.employeeModel.find({ _id: { $in: worker_ids } }).session(session).exec();
 
     // SELESAIKAN PEGAWAI YANG SEDANG BEKERJA PADA PROJECT TERSEBUT.
+    targetProject.worker = [];
+    await targetProject.save({ session });
     for (let i = 0; i < target_employee.length; i++) {
       let current_employee = target_employee[i];
       const projectHistoryIndex = current_employee.project_history.findIndex((history: any) => history.project.toString() === project_id && !history.left_at);
@@ -265,7 +299,7 @@ export class ProjectService {
       } else {
         throw new BadRequestException(`Terjadi kesalahan data pegawai pada project tersebut.`);
       }
-    } 
+    }
 
     targetProject.finished_at = new Date();
     let targetWarehouse = await this.warehouseModel.findOne({ project: targetProject._id }).session(session).exec();
@@ -331,7 +365,7 @@ export class ProjectService {
             warehouse_from: currentWarehouse._id.toString(),
           }, session)
 
-          targetProject.project_closing.material_used = remainMaterials;
+          targetProject.project_closing.material_used = remainMaterials.map((materialtrf) => materialtrf._id.toString());
 
           await this.toolTransactionService.create({
             tool: tool_remain_formatted,

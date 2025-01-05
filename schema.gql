@@ -352,7 +352,7 @@ type Query {
   getAllSkill: [EmployeeSkill!]!
   getAllSuppliers: [Supplier!]!
   getSupplierById(id: String!): Supplier!
-  getAllWarehouses: [Warehouse!]!
+  getAllWarehouses(filter: FilterInput): [Warehouse!]!
   getAllWarehousesByUser: [Warehouse!]!
   getWarehouseById(id: String!): Warehouse!
   getAllUnitMeasures: [UnitMeasure!]!
