@@ -33,14 +33,14 @@ export class TransactionResolver {
     @Args('createMaterialTransactionInput') createMaterialTransactionInput: CreateMaterialTransactionInput
   ): Promise<MaterialTransaction[]> {
     createMaterialTransactionInput.transaction_category = "ADD";
-    
+
     let session = await this.connection.startSession();
 
     try {
       session.startTransaction();
 
       let return_value = await this.materialTransactionService.create(createMaterialTransactionInput, session);
-      
+
       await session.commitTransaction();
       return return_value
     } catch (error) {
@@ -63,7 +63,7 @@ export class TransactionResolver {
     return this.materialTransactionService.getRemainItems(warehouse_id);
   }
 
-  
+
   @Mutation(() => Boolean, { name: 'addInventoryTool' })
   @UseGuards(RolesGuard)
   @Roles("owner", "admin", "staff_pembelian")
@@ -78,7 +78,7 @@ export class TransactionResolver {
       session.startTransaction();
 
       let return_value = await this.toolTransactionService.addOnlyTool(addOnlyToolTransactionInput, session);
-      
+
       await session.commitTransaction();
       return return_value
     } catch (error) {
@@ -99,5 +99,15 @@ export class TransactionResolver {
     // check if user is project leader of the project
     await this.warehouseService.findWarehouseById(warehouse_id, user);
     return this.toolTransactionService.getRemainItems(warehouse_id);
+  }
+
+
+  @Query(() => [ToolTransaction], { name: 'getToolTransactions' })
+  @UseGuards(RolesGuard)
+  @Roles("owner", "admin", "staff_pembelian")
+  async getToolTransactions(
+    @Args('tool_id') tool_id: string
+  ): Promise<ToolTransaction[]> {
+    return this.toolTransactionService.getTransactionsByToolId(tool_id);
   }
 }

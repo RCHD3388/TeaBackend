@@ -108,7 +108,7 @@ type ToolTransaction {
   date: DateTime!
   in: Float!
   out: Float!
-  warehouse: String!
+  warehouse: Warehouse!
   transaction_code: String!
   transaction_category: TransactionCategory!
 }
@@ -390,6 +390,7 @@ type Query {
   getToolsByIds(ids: [String!]!): [Tool!]!
   getWarehouseMaterials(warehouse_id: String!): [MaterialTransaction!]!
   getWarehouseTools(warehouse_id: String!): [ToolTransaction!]!
+  getToolTransactions(tool_id: String!): [ToolTransaction!]!
   getCategories(categoryFilter: CategoryFilter, filter: FilterInput): [CategoryData!]!
   findOneRequestCost(id: String!): RequestCost!
   findAllRequestCosts: [RequestCost!]!

@@ -280,10 +280,10 @@ export class PurchasingTransactionService {
       }
     });
     if (po == null) {
-      throw new NotFoundException('Purchase order yang dituju tidak ditemukan atau tidak meminta item yang sama, dan juga pastikan PO sudah disetujui');
+      throw new BadRequestException('Purchase order yang dituju tidak ditemukan atau tidak meminta item yang sama, dan juga pastikan PO sudah disetujui');
     }
     if (item_type == RequestItem_ItemType.TOOL && !tool) {
-      throw new NotFoundException('Perlu memberikan informasi peralatan untuk setiap sku');
+      throw new BadRequestException('Perlu memberikan informasi peralatan untuk setiap sku');
     }
 
     const session = await this.connection.startSession();

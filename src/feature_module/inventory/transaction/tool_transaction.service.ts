@@ -50,6 +50,39 @@ export class ToolTransactionService {
     });
     return populatedData
   }
+
+  async getTransactionsByToolId(toolId: string, session?: ClientSession): Promise<ToolTransaction[]> {
+    const transactions = await this.toolTransactionModel.find({ tool: toolId })
+      .sort({ date: -1 }) // sort by date in descending order
+      .session(session || null)
+      .exec();
+
+    if (!transactions.length) throw new NotFoundException('No transactions found for the given tool ID');
+
+    const populatedTransactions = await this.toolTransactionModel.populate(transactions, [{
+      path: 'transaction_category',
+      model: 'TransactionCategory'
+    },{
+      path: "warehouse",
+      model: "Warehouse"
+    },{
+      path: 'tool', // Populate tool
+      populate: [
+        {
+          path: 'sku', model: 'Sku',
+          populate: [
+            { path: 'merk', model: 'Merk' },
+            { path: 'item_category', model: 'CategoryData' }
+          ]
+        },
+        { path: 'status', model: 'CategoryData' }
+      ]
+    }]);
+
+    return populatedTransactions;
+  }
+
+
   async create(
     createToolTransactionInput: CreateToolTransactionInput,
     session: ClientSession
@@ -271,7 +304,7 @@ export class ToolTransactionService {
 
       // ======================= PROSES START =======================
       let listOfNewTransaction: ToolTransaction[] = [];
-      
+
       for (let curTool of tool) {
         // GENERATE NEW TRANS CODE AND DATE
         let newTransCode = `${targetTransactionCategory.id}${targetTransactionCategory.counter + 1}`

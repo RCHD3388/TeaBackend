@@ -35,7 +35,13 @@ export class ToolService {
   }
 
   async findOne(id: string): Promise<Tool> {
-    let tool = await this.toolModel.findById(id).populate(["sku", "status"]).exec();
+    let tool = await this.toolModel.findById(id).populate(["sku", "status", {
+      path: "sku",
+      populate: {
+        path: "merk",
+        model: "Merk"
+      }
+    }]).exec();
     if (!tool) throw new NotFoundException('Tool tidak ditemukan');
     return tool;
   }

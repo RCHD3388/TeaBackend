@@ -71,7 +71,7 @@ export class ToolTransaction extends Document {
   @Prop({ type: Number, required: true, default: 0 })
   out: number;
 
-  @Field(() => String || Warehouse)
+  @Field(() => Warehouse || String)
   @Prop({ type: Types.ObjectId, required: true, ref: "Warehouse" })
   warehouse: string | Warehouse;
 
