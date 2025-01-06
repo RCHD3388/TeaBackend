@@ -8,6 +8,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './auth_related/auth.strategy';
 import { Employee, EmployeeSchema } from '../person/schema/employee.schema';
 import { UserResolver } from './user.resolver';
+import { MailerModule } from 'src/core/mailer/mailer.module';
 
 @Module({
   imports: [
@@ -18,7 +19,8 @@ import { UserResolver } from './user.resolver';
     JwtModule.register({
       secret: "random_jwt_secret",
       signOptions: {expiresIn: "2h"}
-    })
+    }),
+    MailerModule
   ],
   providers: [
     JwtStrategy, 

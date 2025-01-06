@@ -11,7 +11,7 @@ import { CurrentUser } from "src/common/decorators/auth_user.decorator";
 @Resolver()
 @UseGuards(AppAuthGuard)
 export class UserResolver {
-  constructor(private readonly userService: UserService) {}
+  constructor(private readonly userService: UserService) { }
 
   @Query(() => [User], { name: 'getAllUsers' })
   @UseGuards(RolesGuard)
@@ -24,8 +24,16 @@ export class UserResolver {
   @UseGuards(RolesGuard)
   @Roles("owner", "admin")
   async getUserById(@Args('id') id: string): Promise<User> {
-    return this.userService.findOneUser({id: id});
+    return this.userService.findOneUser({ id: id });
   }
+
+  @Query(() => User, { name: 'getProfile' })
+  async getProfile(
+    @CurrentUser() user: User
+  ): Promise<User> {
+    return this.userService.getProfile(user);
+  }
+
 
   @Mutation(() => User)
   @UseGuards(RolesGuard)

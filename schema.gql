@@ -360,6 +360,7 @@ type Query {
   getHello: String!
   getAllUsers: [User!]!
   getUserById(id: String!): User!
+  getProfile: User!
   findAllProjects: [Project!]!
   findAllProjectCostLogs(projectId: String!): [ProjectCostLog!]!
   findProjectById(id: String!): Project!
@@ -425,6 +426,7 @@ input CategoryFilter {
 
 type Mutation {
   login(data: LoginInput!): LoginResponse!
+  resetPassword(currentPassword: String!, newPassword: String!): Boolean!
   createUser(createUserInput: CreateUserInput!): User!
   updateUser(id: String!, updateUserInput: UpdateUserInput!): User!
   updateUserPassword(id: String!, password: String!): User!

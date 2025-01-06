@@ -5,12 +5,14 @@ import { model, Model } from "mongoose";
 import { Employee, EmployeeRole } from "../person/schema/employee.schema";
 import { CreateUserInput, UpdateUserInput } from "./types/user.types";
 import path from "path";
+import { MailerService } from "src/core/mailer/mailer.service";
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectModel(User.name) private userModel: Model<User>,
-    @InjectModel(Employee.name) private employeeModel: Model<Employee>
+    @InjectModel(Employee.name) private employeeModel: Model<Employee>,
+    private readonly mailerService: MailerService
   ) { }
 
   async findForAuth(username: string): Promise<User | null> {
@@ -34,6 +36,16 @@ export class UserService {
     return user;
   }
 
+
+  async getProfile(user: User): Promise<User> {
+    let targetUser = await this.userModel.findById(user._id, '-password').populate("employee");
+    if (!targetUser) {
+      throw new BadRequestException(`User tidak ditemukan`)
+    }
+
+    return targetUser;
+  }
+
   async findAll(): Promise<User[]> {
     let users = await this.userModel.find({}, '-password').populate("employee");
     return users;
@@ -51,7 +63,7 @@ export class UserService {
 
     if (!targetEmployee) throw new BadRequestException("Pegawai tidak ditemukan")
 
-    if(targetEmployee.status == "Inactive") throw new BadRequestException("Pegawai aktif yang dapat didaftarkan sebagai user")
+    if (targetEmployee.status == "Inactive") throw new BadRequestException("Pegawai aktif yang dapat didaftarkan sebagai user")
 
     let targetEmployee_role = (targetEmployee.role as EmployeeRole).name
     if (targetEmployee_role == "pegawai") throw new BadRequestException("Pegawai biasa tidak dapat dibuatkan data user")
@@ -70,6 +82,8 @@ export class UserService {
       employee: employee,
     });
     await newUser.save();
+
+    await this.mailerService.sendCompanyEmail(targetEmployee.person.email, targetEmployee.person.name);
 
     return await this.userModel.findById(newUser._id).populate("employee");
   }
@@ -102,7 +116,7 @@ export class UserService {
 
     // check status
     if (updateUserInput.status) {
-      if((targetUser.employee as Employee).status == "Inactive" && updateUserInput.status == "Active"){
+      if ((targetUser.employee as Employee).status == "Inactive" && updateUserInput.status == "Active") {
         throw new BadRequestException("Pegawai yang tidak aktif tidak dapat memiliki user dengan status aktif.")
       }
       targetUser.status = updateUserInput.status

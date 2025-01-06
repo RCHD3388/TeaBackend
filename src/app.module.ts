@@ -14,6 +14,7 @@ import { CategoryModule } from './feature_module/category/category.module';
 import { InventoryModule } from './feature_module/inventory/inventory.module';
 import { RequestModule } from './feature_module/request/request.module';
 import { PurchasingModule } from './feature_module/purchasing/purchasing.module';
+import { MailerModule } from './core/mailer/mailer.module';
 
 @Module({
   imports: [
@@ -31,7 +32,8 @@ import { PurchasingModule } from './feature_module/purchasing/purchasing.module'
     CategoryModule,
     InventoryModule,
     RequestModule,
-    PurchasingModule
+    PurchasingModule,
+    MailerModule
   ],
   providers: [AppResolver],
 })
