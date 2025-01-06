@@ -55,7 +55,10 @@ export class ProjectService {
       filter = { project_leader: (user.employee as Employee)._id.toString() }
     }
 
-    let project = await this.projectModel.find(filter).populate(["project_leader", "status", "priority"]).exec();
+    let project = await this.projectModel.find(filter)
+    .populate(["project_leader", "status", "priority"])
+    .sort({ createdAt: -1 })
+    .exec();
 
     project = project.map((proj) => {
       return proj
