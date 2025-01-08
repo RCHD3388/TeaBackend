@@ -31,7 +31,7 @@ export class PurchasingService {
   // admin owner 
   async getAllPurchaseOrders(filter: FilterInput): Promise<PurchaseOrder[]> {
     let filt = {}
-    if (filter) {
+    if (filter?.status == true) {
       filt = {
         $or: [{ status: RequestStatus.DISETUJUI }, { status: RequestStatus.SELESAI }]
       };
