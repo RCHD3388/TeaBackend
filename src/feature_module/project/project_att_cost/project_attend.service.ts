@@ -80,7 +80,7 @@ export class ProjectAttendService {
     let targetProject = await this.projectModel.findById(project_id).exec();
     if (!targetProject) throw new NotFoundException('Project tidak ditemukan');
 
-    if (((user.employee as Employee).role as EmployeeRole).name == "mandor" && targetProject.project_leader.toString() != user.employee.toString()) {
+    if (((user.employee as Employee).role as EmployeeRole).name == "mandor" && targetProject.project_leader.toString() != (user.employee as Employee)._id.toString()) {
       throw new ForbiddenException('User tidak diperbolehkan melakukan aksi tersebut');
     }
 
