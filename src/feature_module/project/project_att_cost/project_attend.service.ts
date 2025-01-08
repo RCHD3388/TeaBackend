@@ -18,26 +18,26 @@ export class ProjectAttendService {
     let { start_date, project_id } = createAttendanceModuleInput;
 
     // check if project exist
-    let targetProject = await this.projectModel.findById(project_id).select(["attendance", "worker"]).populate(["attendance"]).exec();
+    let targetProject = await this.projectModel.findById(project_id).select(["attendance", "worker", "project_leader"]).populate(["attendance"]).exec();
     if (!targetProject || !targetProject.attendance) throw new NotFoundException('Project tidak ditemukan');
 
     // check if user is project leader of the project
     if (((user.employee as Employee).role as EmployeeRole).name == "mandor"
-      && (targetProject.project_leader as Employee)._id.toString() != (user.employee as Employee)._id.toString()
+      && targetProject.project_leader.toString() != (user.employee as Employee)._id.toString()
     ) {
       throw new ForbiddenException('User tidak diperbolehkan melakukan aksi tersebut')
     }
 
     // check valid start date
     const existingModules: AttendanceModule[] = targetProject.attendance as AttendanceModule[];
-    if (existingModules.some((attendance) => {return attendance.start_date <= start_date && start_date <= attendance.end_date})) {
+    if (existingModules.some((attendance) => { return attendance.start_date <= start_date && start_date <= attendance.end_date })) {
       throw new BadRequestException('Tanggal mulai tidak valid, bertabrakan dengan module lain');
     }
 
     const existingWorker: String[] = targetProject.worker as String[];
     let actual_start_date = new Date(start_date.getTime());
     let end_date = new Date(start_date.getTime() + 6 * 24 * 60 * 60 * 1000);
-    if (existingModules.some((attendance) => {return attendance.start_date <= end_date && end_date <= attendance.end_date})) {
+    if (existingModules.some((attendance) => { return attendance.start_date <= end_date && end_date <= attendance.end_date })) {
       throw new BadRequestException('Tanggal mulai tidak valid, bertabrakan dengan module lain');
     }
 
@@ -135,13 +135,15 @@ export class ProjectAttendService {
     if (start_date) {
       const existingModules: AttendanceModule[] = targetProject.attendance as AttendanceModule[];
       if (existingModules.some((attendance) => {
-        return attendance._id.toString() != module_id && attendance.start_date <= start_date && start_date <= attendance.end_date})) {
+        return attendance._id.toString() != module_id && attendance.start_date <= start_date && start_date <= attendance.end_date
+      })) {
         throw new BadRequestException('Tanggal mulai tidak valid, bertabrakan dengan modul lain');
       }
 
       let end_date = new Date(start_date.getTime() + 6 * 24 * 60 * 60 * 1000);
       if (existingModules.some((attendance) => {
-        return attendance._id.toString() != module_id && attendance.start_date <= end_date && end_date <= attendance.end_date})) {
+        return attendance._id.toString() != module_id && attendance.start_date <= end_date && end_date <= attendance.end_date
+      })) {
         throw new BadRequestException('Tanggal mulai tidak valid, bertabrakan dengan module lain');
       }
 
