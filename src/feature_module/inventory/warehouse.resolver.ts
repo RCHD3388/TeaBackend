@@ -1,0 +1,68 @@
+import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
+import { UseGuards } from '@nestjs/common';
+import { AppAuthGuard } from '../user/auth_related/auth.guard';
+import { Warehouse, WarehouseType } from './schema/warehouse.schema';
+import { RolesGuard } from '../../common/guard/roles.guard';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { WarehouseService } from './warehouse.service';
+import { CreateWarehouseInput, UpdateWarehouseInput } from './types/warehouse.types';
+import { CurrentUser } from '../../common/decorators/auth_user.decorator';
+import { User } from '../user/schema/user.schema';
+import { FilterInput } from '../types/global_input_types.types';
+
+@Resolver()
+@UseGuards(AppAuthGuard)
+export class WarehouseResolver {
+  constructor(
+    private readonly warehouseService: WarehouseService
+  ) { }
+
+  @Query(() => [Warehouse], { name: 'getAllWarehouses' })
+  @UseGuards(RolesGuard)
+  @Roles("owner", "admin", "staff_pembelian", "mandor")
+  async getAllWarehouses(
+    @CurrentUser() user: User,
+    @Args('filter', { nullable: true }) filter?: FilterInput,
+  ) {
+    return this.warehouseService.findAll(user, filter);
+  }
+
+  @Query(() => [Warehouse], { name: 'getAllWarehousesByUser' })
+  @UseGuards(RolesGuard)
+  @Roles("owner", "admin", "staff_pembelian", "mandor")
+  async getAllWarehousesByUser(
+    @CurrentUser() user: User,
+  ) {
+    return this.warehouseService.findAllByProjectLeader(user);
+  }
+
+  @Query(() => Warehouse, { name: 'getWarehouseById' })
+  @UseGuards(RolesGuard)
+  @Roles("owner", "admin", "staff_pembelian", "mandor")
+  async getWarehouseById(
+    @Args('id') id: string,
+    @CurrentUser() user: User
+  ): Promise<Warehouse> {
+    return this.warehouseService.findWarehouseById(id, user);
+  }
+
+  @Mutation(() => Warehouse)
+  @UseGuards(RolesGuard)
+  @Roles("owner", "admin", "staff_pembelian")
+  async createWarehouse(
+    @Args('createWarehouseInput') createWarehouseInput: CreateWarehouseInput
+  ): Promise<Warehouse> {
+    createWarehouseInput.type = WarehouseType.INVENTORY
+    return this.warehouseService.create(createWarehouseInput);
+  }
+
+  @Mutation(() => Warehouse)
+  @UseGuards(RolesGuard)
+  @Roles("owner", "admin", "staff_pembelian")
+  async updateWarehouse(
+    @Args('id') id: string,
+    @Args('updateWarehouseInput') updateWarehouseInput: UpdateWarehouseInput
+  ): Promise<Warehouse> {
+    return this.warehouseService.update(id, updateWarehouseInput);
+  }
+}

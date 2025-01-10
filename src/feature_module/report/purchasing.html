@@ -1,0 +1,241 @@
+<!doctype html>
+<html>
+  <head>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="font-sans text-gray-800 max-w-4xl mx-auto my-10 p-6">
+    <div class="border border-green-300 p-8 rounded-lg shadow-lg">
+      <div
+        class="grid grid-cols-[200px_1fr] gap-10 mb-10 pb-6 border-b-2 border-green-300"
+      >
+        <div
+          class="flex items-center justify-center w-52 h-20 bg-gray-100 border-dashed border-gray-300 rounded-md"
+        >
+          Logo Perusahaan
+        </div>
+        <div class="grid grid-cols-[1fr_auto] gap-6">
+          <div>
+            <h1 class="text-2xl font-bold text-green-700">
+              Laporan Transaksi Pembelian
+            </h1>
+            <p class="text-gray-500 text-lg">PT. {{companyName}}</p>
+          </div>
+          <div
+            class="bg-green-50 border border-green-300 rounded-md p-4 min-w-[300px]"
+          >
+            <table class="w-full">
+              <tr>
+                <td class="font-semibold text-green-700">No. Transaksi:</td>
+                <td class="font-semibold">{{transaction_number}}</td>
+              </tr>
+              <tr>
+                <td class="font-semibold text-green-700">Tanggal:</td>
+                <td>{{transaction_date}}</td>
+              </tr>
+              <tr>
+                <td class="font-semibold text-green-700">Waktu:</td>
+                <td>{{transaction_time}}</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="mb-10 p-6 bg-white border border-green-100 rounded-lg">
+        <div class="grid grid-cols-2 gap-6">
+          <div>
+            <h3 class="text-lg font-bold text-green-700">Informasi Supplier</h3>
+            <div class="grid grid-cols-[auto_1fr] gap-2 text-sm">
+              <div class="font-semibold text-green-700">Nama Perusahaan:</div>
+              <div>{{supplier_name}}</div>
+              <div class="font-semibold text-green-700">Kontak Person:</div>
+              <div>{{supplier_contact}}</div>
+              <div class="font-semibold text-green-700">Email:</div>
+              <div>{{supplier_email}}</div>
+              <div class="font-semibold text-green-700">No. Telepon:</div>
+              <div>{{supplier_phone}}</div>
+              <div class="font-semibold text-green-700">Alamat:</div>
+              <div>{{supplier_address}}</div>
+            </div>
+          </div>
+          <div>
+            <h3 class="text-lg font-bold text-green-700">
+              Informasi Staff Pembelian
+            </h3>
+            <div class="grid grid-cols-[auto_1fr] gap-2 text-sm">
+              <div class="font-semibold text-green-700">Nama Staff:</div>
+              <div>{{staff_name}}</div>
+              <div class="font-semibold text-green-700">Jabatan:</div>
+              <div>{{staff_role}}</div>
+              <div class="font-semibold text-green-700">Email:</div>
+              <div>{{staff_email}}</div>
+              <div class="font-semibold text-green-700">No. Telepon:</div>
+              <div>{{staff_phone}}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mb-10 p-6 bg-white border border-green-100 rounded-lg">
+        <h3 class="text-lg font-bold text-green-700">Detail Material</h3>
+        <table class="w-full border-collapse mt-4">
+          <thead>
+            <tr class="bg-green-200">
+              <th
+                class="border border-green-100 px-4 py-2 text-left text-sm font-semibold"
+              >
+                Nama Material
+              </th>
+              <th
+                class="border border-green-100 px-4 py-2 text-left text-sm font-semibold"
+              >
+                ID Material
+              </th>
+              <th
+                class="border border-green-100 px-4 py-2 text-left text-sm font-semibold"
+              >
+                Merk
+              </th>
+              <th
+                class="border border-green-100 px-4 py-2 text-right text-sm font-semibold"
+              >
+                Kuantitas
+              </th>
+              <th
+                class="border border-green-100 px-4 py-2 text-right text-sm font-semibold"
+              >
+                Harga Satuan
+              </th>
+              <th
+                class="border border-green-100 px-4 py-2 text-right text-sm font-semibold"
+              >
+                Subtotal
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {{materials}}
+            
+            <tr class="bg-green-50">
+              <td
+                colspan="5"
+                class="border border-green-100 px-4 py-2 text-right font-bold"
+              >
+                Harga Pembelian Material
+              </td>
+              <td
+                class="border border-green-100 px-4 py-2 text-right font-bold"
+              >
+                Rp {{material_total}}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="mb-10 p-6 bg-white border border-green-100 rounded-lg">
+        <h3 class="text-lg font-bold text-green-700">Detail Alat</h3>
+        <table class="w-full border-collapse mt-4">
+          <thead>
+            <tr class="bg-green-200">
+              <th
+                class="border border-green-100 px-4 py-2 text-left text-sm font-semibold"
+              >
+                Nama Alat
+              </th>
+              <th
+                class="border border-green-100 px-4 py-2 text-left text-sm font-semibold"
+              >
+                ID Tool
+              </th>
+              <th
+                class="border border-green-100 px-4 py-2 text-left text-sm font-semibold"
+              >
+                Merk
+              </th>
+              <th
+                class="border border-green-100 px-4 py-2 text-right text-sm font-semibold"
+              >
+                Kuantitas
+              </th>
+              <th
+                class="border border-green-100 px-4 py-2 text-right text-sm font-semibold"
+              >
+                Harga Satuan
+              </th>
+              <th
+                class="border border-green-100 px-4 py-2 text-right text-sm font-semibold"
+              >
+                Subtotal
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {{tools}}
+            <tr>
+              <td class="border border-green-100 px-4 py-2 text-sm">
+                {{name}}
+              </td>
+              <td class="border border-green-100 px-4 py-2 text-sm">{{id}}</td>
+              <td class="border border-green-100 px-4 py-2 text-sm">
+                {{brand}}
+              </td>
+              <td class="border border-green-100 px-4 py-2 text-right text-sm">
+                {{quantity}}
+              </td>
+              <td class="border border-green-100 px-4 py-2 text-right text-sm">
+                Rp {{unit_price}}
+              </td>
+              <td class="border border-green-100 px-4 py-2 text-right text-sm">
+                Rp {{subtotal}}
+              </td>
+            </tr>
+            {{/each}}
+            <tr class="bg-green-50">
+              <td
+                colspan="5"
+                class="border border-green-100 px-4 py-2 text-right font-bold"
+              >
+                Harga Pembelian Alat
+              </td>
+              <td
+                class="border border-green-100 px-4 py-2 text-right font-bold"
+              >
+                Rp {{tool_total}}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="grid grid-cols-3 gap-6 mt-10">
+        <div
+          class="bg-green-50 border border-green-300 rounded-lg p-4 text-center"
+        >
+          <div class="text-sm font-semibold text-green-700">
+            Harga Pembelian Material
+          </div>
+          <div class="text-lg font-bold text-gray-800">
+            Rp {{material_total}}
+          </div>
+        </div>
+        <div
+          class="bg-green-50 border border-green-300 rounded-lg p-4 text-center"
+        >
+          <div class="text-sm font-semibold text-green-700">
+            Harga Pembelian Alat
+          </div>
+          <div class="text-lg font-bold text-gray-800">Rp {{tool_total}}</div>
+        </div>
+        <div
+          class="bg-green-50 border border-green-300 rounded-lg p-4 text-center"
+        >
+          <div class="text-sm font-semibold text-green-700">
+            Harga Total Pembelian
+          </div>
+          <div class="text-lg font-bold text-gray-800">Rp {{grand_total}}</div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,11 @@
+node_modules
+.npm
+
+.DS_Store
+
+Dockerfile
+docker-compose.yaml
+docker-compose.yml
+
+.git
+.gitignore

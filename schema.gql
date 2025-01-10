@@ -1,0 +1,832 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+directive @upper on FIELD_DEFINITION
+
+type Person {
+  name: String!
+  email: String!
+  phone_number: String!
+  address: String!
+}
+
+type CategoryData {
+  _id: ID!
+  name: String!
+  description: String
+  status: String!
+  type: String!
+}
+
+type TransactionCategory {
+  _id: ID!
+  id: String!
+  description: String
+  counter: Float!
+}
+
+type UnitMeasure {
+  _id: ID!
+  name: String!
+  description: String
+}
+
+type Merk {
+  _id: ID!
+  name: String!
+  description: String
+}
+
+type Sku {
+  _id: ID!
+  name: String!
+  description: String
+  status: String!
+  merk: Merk!
+  item_category: CategoryData!
+}
+
+type Material {
+  _id: ID!
+  id: String!
+  name: String!
+  description: String
+  merk: Merk!
+  unit_measure: UnitMeasure!
+  status: String!
+  minimum_unit_measure: UnitMeasure!
+  conversion: Float!
+  item_category: CategoryData!
+}
+
+type Tool {
+  _id: String!
+  id: String!
+  description: String
+  warranty_number: String
+  warranty_expired_date: DateTime
+  status: CategoryData!
+  price: Float!
+  sku: Sku!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Warehouse {
+  _id: String!
+  name: String!
+  description: String
+  type: String!
+  project: Project
+  project_leader: String
+  address: String!
+  status: String!
+  material_transaction: [MaterialTransaction!]!
+  tool_transaction: [ToolTransaction!]!
+}
+
+type MaterialTransaction {
+  _id: String!
+  material: Material!
+  in: Float!
+  out: Float!
+  remain: Float!
+  price: Float!
+  warehouse: String!
+  transaction_code: String!
+  transaction_category: TransactionCategory!
+  date: DateTime!
+}
+
+type ToolTransaction {
+  _id: String!
+  tool: Tool!
+  date: DateTime!
+  in: Float!
+  out: Float!
+  warehouse: Warehouse!
+  transaction_code: String!
+  transaction_category: TransactionCategory!
+}
+
+type RequestProjectClosing {
+  _id: String!
+  title: String!
+  description: String
+  requested_from: Project!
+  requested_by: Employee!
+  requested_at: DateTime!
+  status: String!
+  handled_date: DateTime
+  handled_by: Employee
+}
+
+type AttendanceDetail {
+  employee: Employee!
+  check_in: Boolean!
+  check_out: Boolean!
+}
+
+type Attendance {
+  date: DateTime!
+  attendance_detail: [AttendanceDetail!]!
+}
+
+type AttendanceModule {
+  _id: String!
+  start_date: DateTime!
+  end_date: DateTime!
+  submit_status: Boolean!
+  description: String!
+  attendance: [Attendance!]!
+}
+
+type ProjectClosing {
+  closed_by: Employee!
+  note: String
+  document: String
+  material_used: [MaterialTransaction!]!
+  request_project_closing: RequestProjectClosing!
+}
+
+type Project {
+  _id: String!
+  name: String!
+  location: String!
+  description: String!
+  createdAt: DateTime!
+  finished_at: DateTime
+  target_date: DateTime
+  priority: CategoryData!
+  status: CategoryData!
+  project_leader: Employee!
+  worker: [Employee!]!
+  attendance: [AttendanceModule!]!
+  warehouse: String!
+  project_closing: ProjectClosing
+}
+
+type ProjectCostLog {
+  _id: String!
+  title: String!
+  description: String
+  date: DateTime!
+  price: Float!
+  category: String!
+  created_by: Employee!
+  project: Project!
+  request_cost: String
+}
+
+type EmployeeProjectHistory {
+  project: Project!
+  join_at: DateTime!
+  left_at: DateTime
+  description: String!
+}
+
+type EmployeeRole {
+  _id: String!
+  name: String!
+  description: String!
+}
+
+type EmployeeSkill {
+  _id: String!
+  name: String!
+  description: String
+}
+
+type Employee {
+  _id: String!
+  person: Person!
+  hire_date: DateTime!
+  salary: Float
+  status: String!
+  role: EmployeeRole!
+  project_history: [EmployeeProjectHistory!]!
+  skill: [EmployeeSkill!]!
+}
+
+type User {
+  _id: String!
+  username: String!
+  status: String!
+  employee: Employee!
+}
+
+type LoginResponse {
+  _id: String!
+  username: String!
+  role: String!
+  access_token: String!
+  name: String!
+}
+
+type GetAllProjectEmployeeDto {
+  registered: [Employee!]!
+  unregistered: [Employee!]
+}
+
+type Supplier {
+  _id: String!
+  name: String!
+  person: Person!
+  status: String!
+}
+
+type RequestCost {
+  _id: String!
+  title: String!
+  description: String
+  project_cost_category: CategoryData!
+  requested_from: Project!
+  requested_by: Employee!
+  requested_at: DateTime!
+  status: String!
+  price: Float!
+  handled_date: DateTime
+  handled_by: Employee
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+type RequestItemDetail {
+  _id: String!
+  item: String!
+  tool: [Tool!]
+  quantity: Float!
+  price: Float
+  item_type: String!
+}
+
+type FinishingDetail {
+  sender_name: String
+  sender_phone: String
+  police_number: String
+  vehicle_detail: String
+  recipient_name: String
+  recipient_phone: String
+  recipient_description: String
+}
+
+type RequestItemHeader {
+  _id: String!
+  title: String!
+  type: String!
+  description: String
+  requested_from: Warehouse!
+  requested_by: Employee!
+  requested_at: DateTime!
+  requested_to: Warehouse!
+  status: String!
+  finishing_detail: FinishingDetail
+  request_item_detail: [RequestItemDetail!]!
+}
+
+type CustomOneRequestItem {
+  request_item_header: RequestItemHeader!
+  materials: [Material!]!
+  skus: [Sku!]!
+}
+
+type PurchaseOrderSubDetail {
+  purchase_transaction: String!
+  purchase_transaction_detail: String!
+  quantity: Float!
+}
+
+type PurchaseOrderDetail {
+  _id: String!
+  item: String!
+  item_type: String!
+  quantity: Float!
+  completed_quantity: Float!
+  sub_detail: [PurchaseOrderSubDetail!]!
+}
+
+type PurchaseOrder {
+  _id: String!
+  title: String!
+  description: String
+  requested_from: Warehouse!
+  requested_by: Employee!
+  date: DateTime!
+  status: String!
+  purchase_order_detail: [PurchaseOrderDetail!]!
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+type PurchaseTransactionDetail {
+  _id: String!
+  purchase_order: PurchaseOrder!
+  item: String!
+  original_item: String!
+  item_type: String!
+  quantity: Float!
+  price: Float!
+  subtotal: Float!
+}
+
+type PurchaseTransaction {
+  _id: String!
+  purchasing_staff: Employee!
+  transaction_number: String!
+  description: String
+  transaction_date: DateTime!
+  total: Float!
+  supplier: Supplier!
+  purchase_transaction_detail: [PurchaseTransactionDetail!]!
+}
+
+type CustomOneRequestPO {
+  purchase_order: PurchaseOrder!
+  materials: [Material!]!
+  skus: [Sku!]!
+}
+
+type CustomOneRequestPT {
+  purchase_transaction: [PurchaseTransaction!]!
+  materials: [Material!]!
+  tools: [Tool!]!
+}
+
+type Query {
+  getHello: String!
+  getAllUsers: [User!]!
+  getUserById(id: String!): User!
+  getProfile: User!
+  findAllProjects: [Project!]!
+  findAllProjectCostLogs(projectId: String!): [ProjectCostLog!]!
+  findProjectById(id: String!): Project!
+  getAllProjectEmployees(id: String!): GetAllProjectEmployeeDto!
+  findAllAttendanceModules(projectId: String!): [AttendanceModule!]!
+  findOneAttendanceModule(projectId: String!, moduleId: String!): AttendanceModule!
+  getAllEmployees(employeeFilter: EmployeeFilter): [Employee!]!
+  getEmployeeById(id: String!): Employee!
+  getAllRole: [EmployeeRole!]!
+  getAllSkill: [EmployeeSkill!]!
+  getAllSuppliers(filter: FilterInput): [Supplier!]!
+  getSupplierById(id: String!): Supplier!
+  getAllWarehouses(filter: FilterInput): [Warehouse!]!
+  getAllWarehousesByUser: [Warehouse!]!
+  getWarehouseById(id: String!): Warehouse!
+  getAllUnitMeasures: [UnitMeasure!]!
+  getUnitMeasureById(id: String!): UnitMeasure!
+  getAllMerks: [Merk!]!
+  getMerkById(id: String!): Merk!
+  getAllMaterials(filterInput: FilterInput): [Material!]!
+  getAllMaterialByIds(ids: [String!]!): [Material!]!
+  getMaterialById(id: String!): Material!
+  getAllSkus(filter: FilterInput): [Sku!]!
+  getSkuById(id: String!): Sku!
+  getAllSkusByIds(ids: [String!]!): [Sku!]!
+  getAllTools(sku: String): [Tool!]!
+  getToolById(id: String!): Tool!
+  getToolsByIds(ids: [String!]!): [Tool!]!
+  getWarehouseMaterials(warehouse_id: String!): [MaterialTransaction!]!
+  getWarehouseTools(warehouse_id: String!): [ToolTransaction!]!
+  getToolTransactions(tool_id: String!): [ToolTransaction!]!
+  getCategories(categoryFilter: CategoryFilter, filter: FilterInput): [CategoryData!]!
+  findOneRequestCost(id: String!): RequestCost!
+  findAllRequestCosts: [RequestCost!]!
+  findAllRequestClosing(projectId: String): [RequestProjectClosing!]!
+  findOneRequestClosing(id: String!): RequestProjectClosing!
+  findAllRequestItemTransaction: [RequestItemHeader!]!
+  findOneRequestItemTransaction(id: String!): CustomOneRequestItem!
+  findYourRequestItemTransaction: [RequestItemHeader!]!
+  findYourApprovalItemTransaction: [RequestItemHeader!]!
+  getAllPurchaseOrders(filter: FilterInput): [PurchaseOrder!]!
+  getPurchaseOrderByUser: [PurchaseOrder!]!
+  getPurchaseOrderByID(id: String!): CustomOneRequestPO!
+  getRelatedPTfromPO(id: String!): CustomOneRequestPT!
+  getAllPurchaseTransactions: [PurchaseTransaction!]!
+  getPurchaseTransactionByUser: [PurchaseTransaction!]!
+  getPurchaseTransactionById(id: String!): CustomOneRequestPT!
+
+  """Preview the report as Base64 string"""
+  previewReport(attendanceModuleData: String!): String!
+
+  """Preview Purchase Order Report as Base64"""
+  previewPurchaseOrder(purchaseOrderData: String!): String!
+
+  """Preview Project Cost Log Report as Base64"""
+  previewProjectCostLogReport(projectId: String!, startDate: String!, endDate: String!): String!
+
+  """Generate Purchasing Report as Base64 PDF"""
+  generateReportPurchasing(transactionId: String!): String!
+}
+
+input EmployeeFilter {
+  filter: [String!]
+  status: Boolean
+}
+
+input FilterInput {
+  name: String
+  status: Boolean
+}
+
+input CategoryFilter {
+  filter: [String!]
+}
+
+type Mutation {
+  login(data: LoginInput!): LoginResponse!
+  resetPassword(currentPassword: String!, newPassword: String!): Boolean!
+  createUser(createUserInput: CreateUserInput!): User!
+  updateUser(id: String!, updateUserInput: UpdateUserInput!): User!
+  updateUserPassword(id: String!, password: String!): User!
+  deleteUserPassword(id: String!): User!
+  createProject(createProjectInput: CreateProjectInput!): Project!
+  updateProject(id: String!, updateProjectInput: UpdateProjectInput!): Project!
+  updateProjectClosing(id: String!, updateProjectClosingInput: UpdateProjectClosingInput!): Project!
+  addNewProjectEmployee(id: String!, employees: [String!]!): [Employee!]!
+  removeProjectEmployee(id: String!, employee: String!, description: String!): Employee!
+  createAttendance(createAttendanceInput: CreateAttendanceModuleInput!): AttendanceModule!
+  submitAttendanceModule(projectId: String!, moduleId: String!): AttendanceModule!
+  deleteAttendanceModule(projectId: String!, moduleId: String!): AttendanceModule!
+  updateAttendanceModule(projectId: String!, moduleId: String!, updateAttendanceModuleInput: UpdateAttendanceModuleInput!): AttendanceModule!
+  createEmployee(createEmployeeInput: CreateEmployeeInput!): Employee!
+  updateEmployee(id: String!, updateEmployeeInput: UpdateEmployeeInput!): Employee!
+  createEmployeeSkill(createEmployeeSkillInput: CreateEmployeeSkillInput!): EmployeeSkill!
+  updateEmployeeSkill(id: String!, updateEmployeeSkillInput: CreateEmployeeSkillInput!): EmployeeSkill!
+  deleteEmployeeSkill(id: String!): EmployeeSkill!
+  createSupplier(createSupplierInput: CreateSupplierInput!): Supplier!
+  updateSupplier(id: String!, updateSupplierInput: UpdateSupplierInput!): Supplier!
+  createWarehouse(createWarehouseInput: CreateWarehouseInput!): Warehouse!
+  updateWarehouse(id: String!, updateWarehouseInput: UpdateWarehouseInput!): Warehouse!
+  createUnitMeasure(createInventoryCategoryInput: CreateInventoryCategoryInput!): UnitMeasure!
+  updateUnitMeasure(id: String!, updateInventoryCategoryInput: UpdateInventoryCategoryInput!): UnitMeasure!
+  deleteUnitMeasure(id: String!): UnitMeasure!
+  createMerk(createInventoryCategoryInput: CreateInventoryCategoryInput!): Merk!
+  updateMerk(id: String!, updateInventoryCategoryInput: UpdateInventoryCategoryInput!): Merk!
+  deleteMerk(id: String!): Merk!
+  createMaterial(createMaterialInput: CreateMaterialInput!): Material!
+  updateMaterial(id: String!, updateMaterialInput: UpdateMaterialInput!): Material!
+  createSku(createSkuInput: CreateSkuInput!): Sku!
+  updateSku(id: String!, updateSkuInput: UpdateSkuInput!): Sku!
+  updateTool(id: String!, updateToolInput: UpdateToolInput!): Tool!
+  addInventoryMaterial(createMaterialTransactionInput: CreateMaterialTransactionInput!): [MaterialTransaction!]!
+  addInventoryTool(addOnlyToolTransactionInput: AddOnlyToolTransactionInput!): Boolean!
+  createCategory(createCategoryInput: CreateCategoryInput!): CategoryData!
+  updateCategory(id: String!, updateCategoryInput: UpdateCategoryInput!): CategoryData!
+  deleteCategory(id: String!): CategoryData!
+  createRequestCost(createRequestCostInput: CreateRequestCostInput!): RequestCost!
+  updateRequestCost(id: String!, updateRequestCostStatusInput: UpdateRequestCostStatusInput!): RequestCost!
+  updateRequestCostDetail(id: String!, updateRequestInput: UpdateRequestInput!): RequestCost!
+  createRequestClosing(createRequestClosingInput: CreateRequestClosingInput!): RequestProjectClosing!
+  updateRequestClosing(id: String!, updateRequestStatusInput: UpdateRequestStatusInput!): RequestProjectClosing!
+  createRequestItemTransaction(createRequestItemInput: CreateRequestItemInput!): RequestItemHeader!
+  cancelItemRequest(id: String!): RequestItemHeader!
+  processingItemRequest(id: String!, createProcessingDetailInput: CreateProcessingDetailInput!): RequestItemHeader!
+  updateAvailableStatusItemRequest(id: String!, status: String!): RequestItemHeader!
+  closingItemRequest(id: String!, createFinishingDetailInput: CreateFinishingDetailInput!): RequestItemHeader!
+  createPurchaseOrder(createPurchaseOrderInput: CreateRequestPOInput!): PurchaseOrder!
+  handleWaitingPO(id: String!, status: String!): PurchaseOrder!
+  cancelPurchaseOrder(id: String!): PurchaseOrder!
+  handleReceivedPODetail(id: String!, receiveItemInput: ReceiveItemInput!): PurchaseOrder!
+  createPurchaseTransaction(createPurchaseTransactionInput: CreateRequestPurchaseTransactionInput!): PurchaseTransaction!
+  updatePurchaseTransaction(id: String!, updatePurchaseTransactionInput: UpdateRequestPurchaseTransactionInput!): PurchaseTransaction!
+  removePurchaseTransactionDetail(id: String!, id_detail: String!): PurchaseTransaction!
+  addNewDetailPT(id: String!, createPurchaseTransactionDetailInput: CreateNewPurchaseTransactionDetailInput!): PurchaseTransaction!
+  generateReport(attendanceModuleData: String!): String!
+
+  """Generate Purchase Order Report"""
+  generatePurchaseOrder(purchaseOrderData: String!): String!
+}
+
+input LoginInput {
+  username: String!
+  password: String!
+}
+
+input CreateUserInput {
+  username: String!
+  password: String!
+  employee: String!
+}
+
+input UpdateUserInput {
+  username: String
+  status: String
+}
+
+input CreateProjectInput {
+  name: String!
+  location: String!
+  description: String
+  target_date: DateTime
+  priority: String!
+  status: String!
+  project_leader: String!
+}
+
+input UpdateProjectInput {
+  name: String
+  location: String
+  description: String
+  target_date: DateTime
+  priority: String
+  status: String
+  project_leader: String
+}
+
+input UpdateProjectClosingInput {
+  note: String
+  material_left: [MaterialDetailInput!]
+  warehouse_to: String
+}
+
+input MaterialDetailInput {
+  material: String!
+  qty: Float!
+  price: Float
+}
+
+input CreateAttendanceModuleInput {
+  start_date: DateTime!
+  project_id: String!
+}
+
+input UpdateAttendanceModuleInput {
+  description: String
+  attendance: [UpdateAttendanceInput!]!
+  start_date: DateTime!
+}
+
+input UpdateAttendanceInput {
+  date: DateTime!
+  attendance_detail: [UpdateAttendanceDetailInput!]!
+}
+
+input UpdateAttendanceDetailInput {
+  employee: String!
+  check_in: Boolean
+  check_out: Boolean
+}
+
+input CreateEmployeeInput {
+  person: PersonInput!
+  hire_date: String!
+  salary: Float!
+  status: String!
+  role: String!
+  skill: String!
+}
+
+input PersonInput {
+  name: String!
+  email: String!
+  phone_number: String!
+  address: String!
+}
+
+input UpdateEmployeeInput {
+  name: String
+  email: String
+  phone_number: String
+  address: String
+  status: String
+  salary: Float
+  hire_date: String
+  skills: [String!]
+  role: String
+}
+
+input CreateEmployeeSkillInput {
+  name: String!
+  description: String
+}
+
+input CreateSupplierInput {
+  name: String!
+  person: PersonInput!
+  status: String!
+}
+
+input UpdateSupplierInput {
+  company_name: String
+  name: String
+  email: String
+  phone_number: String
+  address: String
+  status: String
+}
+
+input CreateWarehouseInput {
+  name: String!
+  description: String
+  project: String
+  project_leader: String
+  address: String!
+  status: String
+}
+
+input UpdateWarehouseInput {
+  name: String
+  description: String
+  address: String
+  status: String
+}
+
+input CreateInventoryCategoryInput {
+  name: String!
+  description: String
+}
+
+input UpdateInventoryCategoryInput {
+  name: String
+  description: String
+}
+
+input CreateMaterialInput {
+  name: String!
+  description: String
+  merk: String!
+  unit_measure: String!
+  status: String!
+  minimum_unit_measure: String!
+  conversion: Float!
+  item_category: String!
+}
+
+input UpdateMaterialInput {
+  name: String!
+  description: String
+  merk: String!
+  unit_measure: String!
+  status: String!
+  minimum_unit_measure: String!
+  conversion: Float!
+  item_category: String!
+}
+
+input CreateSkuInput {
+  name: String!
+  description: String
+  merk: String!
+  item_category: String!
+}
+
+input UpdateSkuInput {
+  name: String
+  description: String
+  status: String!
+  merk: String
+  item_category: String!
+}
+
+input UpdateToolInput {
+  description: String
+  warranty_number: String
+  warranty_expired_date: DateTime
+  status: String
+  price: Float
+  sku: String
+}
+
+input CreateMaterialTransactionInput {
+  materials: [MaterialDetailInput!]!
+  warehouse_to: String
+  warehouse_from: String
+}
+
+input AddOnlyToolTransactionInput {
+  tool: [CreateToolInput!]!
+  warehouse_to: String
+}
+
+input CreateToolInput {
+  description: String
+  warranty_number: String
+  warranty_expired_date: DateTime
+  status: String!
+  price: Float
+  sku: String!
+}
+
+input CreateCategoryInput {
+  name: String!
+  description: String
+  type: String!
+}
+
+input UpdateCategoryInput {
+  name: String
+  description: String
+  status: String
+}
+
+input CreateRequestCostInput {
+  title: String!
+  description: String
+  project_cost_category: String!
+  requested_from: String!
+  price: Float!
+}
+
+input UpdateRequestCostStatusInput {
+  status: String!
+}
+
+input UpdateRequestInput {
+  title: String
+  description: String
+  price: Float
+}
+
+input CreateRequestClosingInput {
+  title: String!
+  description: String
+  requested_from: String!
+}
+
+input UpdateRequestStatusInput {
+  status: String!
+}
+
+input CreateRequestItemInput {
+  title: String!
+  type: String!
+  description: String
+  requested_from: String!
+  requested_to: String!
+  request_item_detail: [CreateRequestItemDetailInput!]!
+}
+
+input CreateRequestItemDetailInput {
+  item: String!
+  quantity: Float!
+  item_type: String!
+}
+
+input CreateProcessingDetailInput {
+  sender_name: String!
+  sender_phone: String!
+  police_number: String
+  vehicle_detail: String
+  processing_tool_detail: [ProcessingToolDetailInput!]
+}
+
+input ProcessingToolDetailInput {
+  sku: String!
+  tool: [String!]!
+}
+
+input CreateFinishingDetailInput {
+  recipient_name: String!
+  recipient_phone: String!
+  recipient_description: String
+}
+
+input CreateRequestPOInput {
+  title: String!
+  description: String
+  requested_from: String!
+  purchase_order_detail: [CreatePODetailInput!]!
+}
+
+input CreatePODetailInput {
+  item: String!
+  quantity: Float!
+  item_type: String!
+}
+
+input ReceiveItemInput {
+  item_transaction: String!
+  item_transaction_detail: String!
+}
+
+input CreateRequestPurchaseTransactionInput {
+  description: String
+  transaction_number: String!
+  transaction_date: DateTime!
+  supplier: String!
+  purchase_transaction_detail: [CreatePurchaseTransactionDetailInput!]!
+}
+
+input CreatePurchaseTransactionDetailInput {
+  purchase_order: String!
+  item: String!
+  quantity: Float!
+  item_type: String!
+  tool: CreateToolInput
+  price: Float!
+}
+
+input UpdateRequestPurchaseTransactionInput {
+  description: String
+  transaction_number: String
+  transaction_date: DateTime
+  supplier: String
+}
+
+input CreateNewPurchaseTransactionDetailInput {
+  input: CreatePurchaseTransactionDetailInput!
+}
