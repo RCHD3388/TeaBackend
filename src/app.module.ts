@@ -16,6 +16,7 @@ import { RequestModule } from './feature_module/request/request.module';
 import { PurchasingModule } from './feature_module/purchasing/purchasing.module';
 import { MailerModule } from './core/mailer/mailer.module';
 import { ReportModule } from './feature_module/report/report.module';
+import { FileUploadModule } from './feature_module/upload-feature/File.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { ReportModule } from './feature_module/report/report.module';
     PurchasingModule,
     MailerModule,
     ReportModule,
+    FileUploadModule,
   ],
   providers: [AppResolver],
 })

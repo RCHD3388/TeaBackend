@@ -26,7 +26,7 @@ export class ReportService {
     private readonly purchaseTransactionModel: Model<PurchaseTransaction>,
     @InjectModel(Supplier.name)
     private readonly supplierModel: Model<Supplier>,
-    
+
     @InjectModel(Merk.name) private readonly merkModel: Model<Merk>,
   ) {}
 
@@ -121,7 +121,7 @@ export class ReportService {
                   new Date(att.date).toDateString() === date.toDateString(),
               );
               return record
-                ? `<td class="p-3 text-center">${
+                ? `<td class="p-3 text-center ">${
                     record.check_in
                       ? '<span class="text-green-500">V</span>'
                       : '<span class="text-red-500">X</span>'
@@ -198,10 +198,10 @@ export class ReportService {
         style: 'currency',
         currency: 'IDR',
       })}</td>
-      <td class="p-3 text-right">${row.completeCheckInOuts}</td>
-      <td class="p-3 text-right">${row.completeAbsence}</td>
-      <td class="p-3 text-right">${row.missingCheckOuts}</td>
-      <td class="p-3 text-right font-bold bg-blue-50">
+      <td class="p-3 text-right text-xs">${row.completeCheckInOuts}</td>
+      <td class="p-3 text-right text-xs">${row.completeAbsence}</td>
+      <td class="p-3 text-right text-xs">${row.missingCheckOuts}</td>
+      <td class="p-3 text-right text-xs font-bold bg-blue-50">
         ${weeklyEarnings.toLocaleString('id-ID', {
           style: 'currency',
           currency: 'IDR',
@@ -353,15 +353,15 @@ export class ReportService {
           const material = materialMap.get(item.item.toString()) as any;
           return `
         <tr class="hover:bg-gray-50 transition-colors">
-          <td class="p text-center">${index + 1}</td>
-          <td class="p">${material?.name || 'Unknown Material'}</td>
-          <td class="p">${material?.merk?.name || '-'}</td>
-          <td class="p text-center">${item.quantity}</td>
-          <td class="p text-center">${material?.unit_measure?.name || '-'}</td>
-          <td class="p text-center">${material?.conversion || '-'}</td>
-          <td class="p text-center">${material?.minimum_unit_measure?.name || '-'}</td>
-          <td class="p text-center">${item.completed_quantity}</td>
-          <td class="p text-right">${item.completed_quantity}</td>
+          <td class="p text-center text-xs">${index + 1}</td>
+          <td class="p text-xs">${material?.name || 'Unknown Material'}</td>
+          <td class="p text-xs">${material?.merk?.name || '-'}</td>
+          <td class="p text-center text-xs">${item.quantity}</td>
+          <td class="p text-center text-xs">${material?.unit_measure?.name || '-'}</td>
+          <td class="p text-center text-xs">${material?.conversion || '-'}</td>
+          <td class="p text-center text-xs">${material?.minimum_unit_measure?.name || '-'}</td>
+          <td class="p text-center text-xs">${item.completed_quantity}</td>
+          <td class="p text-right text-xs">${item.completed_quantity}</td>
         </tr>`;
         })
         .join('');
@@ -505,19 +505,19 @@ export class ReportService {
         .map(
           (log, index) => `
     <tr>
-      <td class="p-3">${index + 1}</td>
-      <td class="p-3">${log.title}</td>
-      <td class="p-3">${new Date(log.date).toLocaleDateString('id-ID', {
+      <td class="p-3 text-xs">${index + 1}</td>
+      <td class="p-3 text-xs">${log.title}</td>
+      <td class="p-3 text-xs">${new Date(log.date).toLocaleDateString('id-ID', {
         day: 'numeric',
         month: 'long',
         year: 'numeric',
       })}</td>
-      <td class="p-3">${
+      <td class="p-3 text-xs">${
         employeeMap[log.created_by.toString()] || 'Unknown'
       }</td>
-      <td class="p-3 text-right">Rp ${(log.price as number).toLocaleString(
-        'id-ID',
-      )}</td>
+      <td class="p-3 text-right text-xs">Rp ${(
+        log.price as number
+      ).toLocaleString('id-ID')}</td>
     </tr>
   `,
         )
@@ -527,8 +527,27 @@ export class ReportService {
       // Replace placeholders in the HTML template
       htmlTemplate = htmlTemplate
         .replace('{{projectTitle}}', projectTitle)
-        .replace('{{reportPeriod}}', `${startDate} - ${endDate}`)
-        .replace('{{printedDate}}', new Date().toLocaleDateString('id-ID'))
+        .replace(
+          '{{reportPeriod}}',
+          `${new Intl.DateTimeFormat('id-ID', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
+          }).format(new Date(startDate))} - ${new Intl.DateTimeFormat('id-ID', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
+          }).format(new Date(endDate))}`,
+        )
+
+        .replace(
+          '{{printedDate}}',
+          new Intl.DateTimeFormat('id-ID', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
+          }).format(new Date()),
+        )
         .replace('{{totalPrice}}', `Rp ${totalPrice.toLocaleString('id-ID')}`)
         .replace('{{totalTransactions}}', totalTransactions.toString())
         .replace('./company_logo.png', logoBase64)
@@ -559,17 +578,15 @@ export class ReportService {
     try {
       // Fetch transaction and supplier data
       const transaction = await this.purchaseTransactionModel
-  .findById(transactionId)
-  .populate('supplier')
-  .populate({
-    path: 'purchase_transaction_detail.item',
-    model: 'Material',
-    populate: { path: 'merk', model: 'Merk' },
-  })
-  
-  .populate('purchasing_staff')
-  .lean();
-
+        .findById(transactionId)
+        .populate('supplier')
+        .populate({
+          path: 'purchase_transaction_detail.item',
+          model: 'Material',
+          populate: { path: 'merk', model: 'Merk' },
+        })
+        .populate('purchasing_staff')
+        .lean();
 
       if (!transaction) {
         throw new Error('Transaction not found');
@@ -582,63 +599,65 @@ export class ReportService {
       const materials = purchase_transaction_detail.filter(
         (detail) => detail.item_type === 'Material',
       );
+
       const transaction2 = await this.purchaseTransactionModel
         .findById(transactionId)
         .populate({
           path: 'purchase_transaction_detail.original_item',
-          model: 'Tool', // Populate original_item as Tool// Include merk if applicable
+          model: 'Tool',
         })
         .lean();
-       
+
       const tools = transaction2.purchase_transaction_detail.filter(
         (detail) => detail.item_type === 'Tool',
       );
-      console.log(transaction2.purchase_transaction_detail);  
-      const sku = await this.skuModel.find({ _id: { $in: tools.map((tool) => tool.item) } });
-    
+
+      const sku = await this.skuModel
+        .find({
+          _id: { $in: tools.map((tool) => tool.item) },
+        })
+        .populate('merk');
+
       const toolsWithSku = tools.map((tool) => {
-        const matchingSku = sku.find((s) => s._id.toString() === tool.item.toString());
+        const matchingSku = sku.find(
+          (s) => s._id.toString() === tool.item.toString(),
+        );
         return {
           ...tool,
-          sku: matchingSku || null, // Attach SKU or null if not found
+          sku: matchingSku || null,
         };
       });
-      
-      console.log('Tools with SKU:', toolsWithSku);
+
       const groupedTools = toolsWithSku.reduce((acc, tool) => {
         const skuId = tool.sku?._id.toString();
-        if (!skuId) return acc; // Skip tools without SKU
-      
+        if (!skuId) return acc;
+
         if (!acc[skuId]) {
           acc[skuId] = {
             id: tool.original_item,
             sku: tool.sku,
             quantity: 0,
             subtotal: 0,
-            price: tool.price, // Assuming price remains constant for tools with the same SKU
+            price: tool.price,
           };
         }
-      
+
         acc[skuId].quantity += tool.quantity;
         acc[skuId].subtotal += tool.subtotal;
-      
+
         return acc;
       }, {});
-      
-      // Convert grouped tools to an array
+
       const groupedToolsArray = Object.values(groupedTools);
-      
-      console.log('Grouped Tools by SKU:', tools);
+
       // Calculate totals
       const materialTotal = materials.reduce(
         (sum, mat) => sum + mat.subtotal,
         0,
       );
       const toolTotal = tools.reduce((sum, tool) => sum + tool.subtotal, 0);
-
       const grandTotal = materialTotal + toolTotal;
 
-      // Path to the HTML template
       const templatePath = path.join(
         process.cwd(),
         'src',
@@ -650,13 +669,21 @@ export class ReportService {
 
       const logoBase64 = await this.getBase64FromUrl('./company_logo.png');
 
+      // Format currency consistently
+      const formatCurrency = (amount: number) =>
+        `Rp ${amount.toLocaleString('id-ID')}`;
+
       // Replace placeholders in the HTML template
       htmlTemplate = htmlTemplate
         .replace('{{companyName}}', 'Nama Perusahaan')
         .replace('{{transaction_number}}', transaction.transaction_number)
         .replace(
           '{{transaction_date}}',
-          new Date(transaction.transaction_date).toLocaleDateString('id-ID'),
+          new Intl.DateTimeFormat('id-ID', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
+          }).format(new Date(transaction.transaction_date)),
         )
         .replace(
           '{{transaction_time}}',
@@ -671,23 +698,24 @@ export class ReportService {
         .replace('{{staff_role}}', 'Staff Purchasing')
         .replace('{{staff_email}}', purchasing_staff['person']['email'])
         .replace('{{staff_phone}}', purchasing_staff['person']['phone_number'])
-        .replace('{{material_total}}', materialTotal.toLocaleString('id-ID'))
-        .replace('{{tool_total}}', toolTotal.toLocaleString('id-ID'))
-        .replace('{{grand_total}}', grandTotal.toLocaleString('id-ID'))
+        .replace('{{material_total}}', formatCurrency(materialTotal))
+        .replace('{{tool_total}}', formatCurrency(toolTotal))
+        .replace('{{grand_total}}', formatCurrency(grandTotal))
         .replace('./company_logo.png', logoBase64)
+        .replace('{{material_total}}', materials.length.toString())
+        .replace('{{tool_total}}', tools.length.toString())
         .replace(
           '{{materials}}',
           materials
             .map(
               (mat) => `
           <tr>
-             <td class="border border-green-100 px-4 py-2 text-sm">${mat.item['name']}</td>
-            <td class="border border-green-100 px-4 py-2 text-sm">${mat.item['id']}</td>
-            <td class="border border-green-100 px-4 py-2 text-sm">${mat.item['merk'].name}</td>
-            
-            <td class="border border-green-100 px-4 py-2 text-right text-sm">${mat.quantity}</td>
-            <td class="border border-green-100 px-4 py-2 text-right text-sm">Rp ${mat.price.toLocaleString('id-ID')}</td>
-            <td class="border border-green-100 px-4 py-2 text-right text-sm">Rp ${mat.subtotal.toLocaleString('id-ID')}</td>
+            <td class="border border-green-100 px-4 py-2 text-xs">${mat.item['name']}</td>
+            <td class="border border-green-100 px-4 py-2 text-xs">${mat.item['id']}</td>
+            <td class="border border-green-100 px-4 py-2 text-xs">${mat.item['merk'].name}</td>
+            <td class="border border-green-100 px-4 py-2 text-right text-xs">${mat.quantity}</td>
+            <td class="border border-green-100 px-4 py-2 text-right text-xs">${formatCurrency(mat.price)}</td>
+            <td class="border border-green-100 px-4 py-2 text-right text-xs">${formatCurrency(mat.subtotal)}</td>
           </tr>`,
             )
             .join(''),
@@ -696,27 +724,43 @@ export class ReportService {
           '{{tools}}',
           groupedToolsArray
             .map(
-              (tool) => `
+              (alat) => `
           <tr>
-            
-            <td class="border border-green-100 px-4 py-2 text-right text-sm">halo</td>
-              
+            <td class="border border-green-100 px-4 py-2 text-xs">${(alat as any).id.id}</td>
+            <td class="border border-green-100 px-4 py-2 text-xs">${(alat as any).sku.name}</td>
+            <td class="border border-green-100 px-4 py-2 text-xs">${(alat as any).sku.merk.name}</td>
+            <td class="border border-green-100 px-4 py-2 text-right text-xs">${formatCurrency((alat as any).price)}</td>
+            <td class="border border-green-100 px-4 py-2 text-right text-xs">${(alat as any).quantity}</td>
+            <td class="border border-green-100 px-4 py-2 text-right text-xs">${formatCurrency((alat as any).subtotal)}</td>
           </tr>`,
             )
             .join(''),
         );
 
-      // Generate PDF
-      const browser = await puppeteer.launch({ headless: true });
+      // Generate PDF with adjusted settings
+      const browser = await puppeteer.launch({
+        headless: true,
+        args: ['--no-sandbox'],
+      });
       const page = await browser.newPage();
 
+      // Set viewport and content
+      await page.setViewport({ width: 1200, height: 1600 });
       await page.setContent(htmlTemplate, {
         waitUntil: ['load', 'networkidle0', 'domcontentloaded'],
       });
 
+      // Generate PDF with adjusted margins and scale
       const pdfBuffer = await page.pdf({
         format: 'A4',
         printBackground: true,
+        margin: {
+          top: '20px',
+          right: '20px',
+          bottom: '20px',
+          left: '20px',
+        },
+        scale: 0.8, // Slightly reduce scale to fit content better
       });
 
       await browser.close();
