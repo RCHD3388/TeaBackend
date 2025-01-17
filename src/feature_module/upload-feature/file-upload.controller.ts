@@ -135,6 +135,7 @@ function getMimeType(filename: string): string {
     pdf: 'application/pdf',
     doc: 'application/msword',
     docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    zip: "application/zip",
     // Tambahkan mime type lain sesuai kebutuhan
   };
   return mimeTypes[ext] || 'application/octet-stream';

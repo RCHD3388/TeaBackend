@@ -81,7 +81,7 @@ export class ProjectEmployeeService {
         employeesToAdd.push(employee);
       }
       // supaya hasil populate tersimpan dengan benar setelah save()
-      let targetReturnValue = employeesToAdd.map((emp) => emp.toObject())
+      let targetReturnValue = await Promise.all(employeesToAdd.map((emp) => emp.toObject()))
 
       // Buat employeeProjectHistory baru
       const projectHistory = {
@@ -90,16 +90,16 @@ export class ProjectEmployeeService {
         left_at: null,
         description: "",
       };
-      employeesToAdd.forEach(async (employee) => {
+      for (const employee of employeesToAdd) {
         employee.project_history.push(projectHistory)
         await employee.save({ session })
-      })
+      }
       // Tambahkan semua employee baru ke dalam project
-      project.worker.push(...employeesToAdd.map((employee) => employee._id));
+      project.worker.push(...await Promise.all(employeesToAdd.map((employee) => employee._id)));
       await project.save({ session });
 
       // add employee to attendance
-      await this.projectAttendService.addNewEmployee(project._id, employeesToAdd.map((employee) => employee._id), session);
+      await this.projectAttendService.addNewEmployee(project._id, await Promise.all(employeesToAdd.map((employee) => employee._id)), session);
 
       await session.commitTransaction();
 
@@ -140,7 +140,7 @@ export class ProjectEmployeeService {
 
       // Hapus employee dari daftar worker di project
       project.worker = project.worker.filter((value, index) => index != removeIndex);
-      await project.save({session});
+      await project.save({ session });
 
       // Perbarui project history pada employee
       const projectHistoryIndex = target_employee.project_history.findIndex((history: any) => history.project.toString() === id && !history.left_at);
@@ -154,13 +154,13 @@ export class ProjectEmployeeService {
       let return_value = target_employee.toObject()
       delete return_value.salary
       // Simpan perubahan pada employee
-      await target_employee.save({session});
+      await target_employee.save({ session });
 
       // remove employee from attendance detail
       await this.projectAttendService.removeEmployee(project._id, employee, session);
 
       // ============= PROSES START TRANSACTION =============
-      
+
       await session.commitTransaction();
       return return_value;
     } catch (error) {

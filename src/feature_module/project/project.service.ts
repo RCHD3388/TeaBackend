@@ -173,7 +173,7 @@ export class ProjectService {
         left_at: null,
         description: ""
       })
-      employee_data.save({ session });
+      await employee_data.save({ session });
 
       let project = await this.projectModel.findById(new_project._id).populate("project_leader").session(session).exec();
       (project.project_leader as Employee).salary = null
@@ -298,7 +298,7 @@ export class ProjectService {
       if (projectHistoryIndex != -1) {
         current_employee.project_history[projectHistoryIndex].left_at = new Date();
         current_employee.project_history[projectHistoryIndex].description = "Project sudah selesai, telah melakukan penutupan project";
-        current_employee.save({ session });
+        await current_employee.save({ session });
       } else {
         throw new BadRequestException(`Terjadi kesalahan data pegawai pada project tersebut.`);
       }
@@ -308,8 +308,7 @@ export class ProjectService {
     let targetWarehouse = await this.warehouseModel.findOne({ project: targetProject._id }).session(session).exec();
     targetWarehouse.status = WarehouseStatus.INACTIVE
     await targetWarehouse.save({ session })
-
-    targetProject.save({ session })
+    await targetProject.save({ session })
     return true;
   }
 

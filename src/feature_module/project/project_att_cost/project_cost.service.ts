@@ -22,7 +22,7 @@ export class ProjectCostService {
 
     // check if user is project leader of the project
     if (((user.employee as Employee).role as EmployeeRole).name == "mandor"
-      && (targetProject.project_leader as Employee)._id.toString() != (user.employee as Employee)._id.toString()
+      && targetProject.project_leader != (user.employee as Employee)._id.toString()
     ) {
       throw new ForbiddenException('User tidak diperbolehkan melakukan aksi tersebut')
     }

@@ -125,8 +125,10 @@ export class RequestClosingService {
       targetRequestClosing.status = status;
       await targetRequestClosing.save({ session });
 
+      let target_return_data = await this.requestClosingModel.findById(id).populate(["requested_by", "requested_from", "handled_by"])
+
       await session.commitTransaction();
-      return await this.requestClosingModel.findById(id).populate(["requested_by", "requested_from", "handled_by"])
+      return target_return_data
     } catch (error) {
       await session.abortTransaction();
       throw error
