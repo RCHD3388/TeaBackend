@@ -23,11 +23,6 @@
       </div>
 
       <div class="p-6">
-        <div class="text-black mb-4">
-          <p class="font-medium text-black">
-            Total Pegawai: {{total_employees}}
-          </p>
-        </div>
         <div class="overflow-x-auto">
           <table class="w-full text-sm text-gray-600">
             <thead>
@@ -59,6 +54,22 @@
       <!-- New Salary Table Section -->
       <div class="p-6">
         <h2 class="text-2xl font-bold text-black mb-4">Pembagian gaji</h2>
+        <div class="p-4">
+          <div
+            class="flex justify-between items-center p-4 bg-gray-50 rounded-lg"
+          >
+            <div class="text-center">
+              <p class="text-lg font-bold text-green-600">
+                {{total_employees}}
+              </p>
+              <p class="text-xs text-gray-600">Total pegawai</p>
+            </div>
+            <div class="text-center">
+              <p class="text-lg font-bold text-blue-600"> {{totalWeeklySalary}}</p>
+              <p class="text-xs text-gray-600">Total gaji mingguan</p>
+            </div>
+          </div>
+        </div>
         <div class="overflow-x-auto">
           <table class="w-full text-sm text-gray-600">
             <thead>
@@ -83,15 +94,7 @@
             </thead>
             <tbody>
               {{salaryRows}}
-            </tbody>
-            <tfoot>
-              <tr class="font-bold bg-gray-100">
-                <td colspan="5" class="p-3 text-right">Total Gaji Mingguan:</td>
-                <td class="p-3 text-right bg-green-100">
-                  {{totalWeeklySalary}}
-                </td>
-              </tr>
-            </tfoot>
+            </tbody> 
           </table>
         </div>
       </div>

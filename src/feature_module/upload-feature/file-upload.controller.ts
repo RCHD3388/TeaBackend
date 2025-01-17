@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 import {
   Controller,
   Get,
@@ -10,6 +9,7 @@ import {
   NotFoundException,
   Body,
   BadRequestException,
+  UseGuards,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -19,6 +19,10 @@ import { Response } from 'express';
 import { InjectModel } from '@nestjs/mongoose'; // Correct import
 import { Model } from 'mongoose'; // Correct import
 import { Project } from 'src/feature_module/project/schema/project.schema';
+import { AppAuthGuard } from '../user/auth_related/auth.guard'; // Import AppAuthGuard
+import { RolesGuard } from 'src/common/guard/roles.guard'; // Import RolesGuard
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { zip } from 'rxjs';
 
 @Controller('upload')
 export class FileUploadController {
@@ -27,6 +31,8 @@ export class FileUploadController {
   ) {}
 
   @Post()
+  @UseGuards( AppAuthGuard)
+  @Roles('admin','mandor','owner')
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({
@@ -42,6 +48,8 @@ export class FileUploadController {
       }),
     }),
   )
+  @UseGuards(AppAuthGuard, RolesGuard)
+  @Roles('admin', 'mandor', 'owner')
   async uploadFile(
     @UploadedFile() file: Express.Multer.File,
     @Body('projectID') projectID: string,
@@ -65,6 +73,8 @@ export class FileUploadController {
   }
 
   @Get()
+  @UseGuards(AppAuthGuard, RolesGuard)
+  @Roles('admin', 'mandor', 'owner')
   getAllFiles() {
     try {
       const directoryPath = join(process.cwd(), 'uploads');
@@ -86,6 +96,8 @@ export class FileUploadController {
   }
 
   @Get('download/:id')
+  @UseGuards(AppAuthGuard, RolesGuard)
+  @Roles('admin', 'mandor', 'owner')
   async downloadProjectDocument(@Param('id') id: string, @Res() res: Response) {
     try {
       const project = await this.projectModel.findById(id).exec();
