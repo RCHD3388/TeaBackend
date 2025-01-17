@@ -50,7 +50,7 @@ export class AttendanceModule {
   end_date: Date;
 
   @Field(() => Boolean)
-  @Prop({ type: Boolean, default: true })
+  @Prop({ type: Boolean, default: false })
   submit_status: Boolean;
 
   @Field(() => String)

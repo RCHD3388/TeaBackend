@@ -15,6 +15,8 @@ import { InventoryModule } from './feature_module/inventory/inventory.module';
 import { RequestModule } from './feature_module/request/request.module';
 import { PurchasingModule } from './feature_module/purchasing/purchasing.module';
 import { MailerModule } from './core/mailer/mailer.module';
+import { ReportModule } from './feature_module/report/report.module';
+import { FileUploadModule } from './feature_module/upload-feature/File.module';
 
 @Module({
   imports: [
@@ -22,7 +24,8 @@ import { MailerModule } from './core/mailer/mailer.module';
       driver: ApolloDriver,
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => createGraphqlConfig(configService),
+      useFactory: (configService: ConfigService) =>
+        createGraphqlConfig(configService),
     }),
     DatabaseModule,
     CustomLoggerModule,
@@ -33,17 +36,19 @@ import { MailerModule } from './core/mailer/mailer.module';
     InventoryModule,
     RequestModule,
     PurchasingModule,
-    MailerModule
+    MailerModule,
+    ReportModule,
+    FileUploadModule,
   ],
   providers: [AppResolver],
 })
 export class AppModule implements OnModuleInit {
   constructor(
     private readonly logger: CustomLoggerService,
-    private readonly configService: ConfigService
-  ) { }
+    private readonly configService: ConfigService,
+  ) {}
   onModuleInit() {
-    let appEnv: string = this.configService.get<string>("APP_ENV");
+    let appEnv: string = this.configService.get<string>('APP_ENV');
     this.logger.log(`App is running in \"${appEnv}\" mode`);
   }
 }

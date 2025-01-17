@@ -46,7 +46,7 @@ export class PurchasingResolver {
 
   @Query(() => CustomOneRequestPT, { name: 'getRelatedPTfromPO' })
   @UseGuards(RolesGuard)
-  @Roles("owner", "admin", "mandor")
+  @Roles("owner", "admin", "mandor", "staff_pembelian")
   async getRelatedPTfromPO(
     @Args('id') id: string,
     @CurrentUser() user: User

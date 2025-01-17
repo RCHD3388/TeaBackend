@@ -44,7 +44,7 @@ export class AuthService {
   async resetPassword(currentPassword: string, newPassword: string, user: User): Promise<Boolean> {
     let currentUser = await this.userModel.findById(user._id).populate("employee");
     if (!currentUser || !(await bcrypt.compare(currentPassword, currentUser.password))) {
-      throw new BadRequestException("Current password is incorrect");
+      throw new BadRequestException("Password user tidak sesuai");
     }
     if ((currentUser.employee as Employee).status == EmployeeStatus.INACTIVE) {
       throw new BadRequestException("User telah tidak aktif, tidak dapat mengubah password")

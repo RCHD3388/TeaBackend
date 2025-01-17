@@ -408,6 +408,18 @@ type Query {
   getAllPurchaseTransactions: [PurchaseTransaction!]!
   getPurchaseTransactionByUser: [PurchaseTransaction!]!
   getPurchaseTransactionById(id: String!): CustomOneRequestPT!
+
+  """Preview the report as Base64 string"""
+  previewReport(attendanceModuleData: String!): String!
+
+  """Preview Purchase Order Report as Base64"""
+  previewPurchaseOrder(purchaseOrderData: String!): String!
+
+  """Preview Project Cost Log Report as Base64"""
+  previewProjectCostLogReport(projectId: String!, startDate: String!, endDate: String!): String!
+
+  """Generate Purchasing Report as Base64 PDF"""
+  generateReportPurchasing(transactionId: String!): String!
 }
 
 input EmployeeFilter {
@@ -483,6 +495,10 @@ type Mutation {
   updatePurchaseTransaction(id: String!, updatePurchaseTransactionInput: UpdateRequestPurchaseTransactionInput!): PurchaseTransaction!
   removePurchaseTransactionDetail(id: String!, id_detail: String!): PurchaseTransaction!
   addNewDetailPT(id: String!, createPurchaseTransactionDetailInput: CreateNewPurchaseTransactionDetailInput!): PurchaseTransaction!
+  generateReport(attendanceModuleData: String!): String!
+
+  """Generate Purchase Order Report"""
+  generatePurchaseOrder(purchaseOrderData: String!): String!
 }
 
 input LoginInput {
