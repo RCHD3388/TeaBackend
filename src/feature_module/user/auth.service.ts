@@ -21,7 +21,7 @@ export class AuthService {
   async login(data: LoginDto): Promise<LoginResponse> {
     const user = await this.userService.findForAuth(data.username);
     if (!user || !(await bcrypt.compare(data.password, user.password))) {
-      throw new BadRequestException("Invalid Credentials");
+      throw new BadRequestException("Password atau Username salah");
     }
     if (user.status == "Inactive") {
       throw new BadRequestException("User aktif tidak ditemukan")
