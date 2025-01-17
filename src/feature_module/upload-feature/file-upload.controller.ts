@@ -31,8 +31,7 @@ export class FileUploadController {
   ) {}
 
   @Post()
-  @UseGuards( AppAuthGuard)
-  @Roles('admin','mandor','owner')
+  
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({
@@ -48,8 +47,7 @@ export class FileUploadController {
       }),
     }),
   )
-  @UseGuards(AppAuthGuard, RolesGuard)
-  @Roles('admin', 'mandor', 'owner')
+  
   async uploadFile(
     @UploadedFile() file: Express.Multer.File,
     @Body('projectID') projectID: string,
@@ -73,9 +71,7 @@ export class FileUploadController {
   }
 
   @Get()
-  @UseGuards(AppAuthGuard, RolesGuard)
-  @Roles('admin', 'mandor', 'owner')
-  getAllFiles() {
+    getAllFiles() {
     try {
       const directoryPath = join(process.cwd(), 'uploads');
       const files = readdirSync(directoryPath);
@@ -96,8 +92,7 @@ export class FileUploadController {
   }
 
   @Get('download/:id')
-  @UseGuards(AppAuthGuard, RolesGuard)
-  @Roles('admin', 'mandor', 'owner')
+  
   async downloadProjectDocument(@Param('id') id: string, @Res() res: Response) {
     try {
       const project = await this.projectModel.findById(id).exec();

@@ -360,8 +360,7 @@ export class ReportService {
           <td class="p text-center text-xs">${material?.unit_measure?.name || '-'}</td>
           <td class="p text-center text-xs">${material?.conversion || '-'}</td>
           <td class="p text-center text-xs">${material?.minimum_unit_measure?.name || '-'}</td>
-          <td class="p text-center text-xs">${item.completed_quantity}</td>
-          <td class="p text-right text-xs">${item.completed_quantity}</td>
+          <td class="p text-center text-xs">${item.completed_quantity}/${item.quantity}</td>
         </tr>`;
         })
         .join('');
@@ -393,10 +392,10 @@ export class ReportService {
           const tool = toolMap.get(item.item.toString()); // Retrieve tool using `item.item`
           return `
       <tr class="hover:bg-gray-50 transition-colors">
-        <td class="p-3 text-center">${index + 1}</td>
-        <td class="p-3">${tool?.name || '-'}</td>
-        <td class="p-3 text-right">${item.quantity}</td>
-        <td class="p-3 text-right">${item.completed_quantity}</td>
+        <td class="p-3 text-center text-xs">${index + 1}</td>
+        <td class="p-3 text-xs">${tool?.name || '-'}</td>
+        <td class="p-3 text-right text-xs">${item.quantity}</td>
+        <td class="p-3 text-right text-xs">${item.completed_quantity}</td>
       </tr>`;
         })
         .join('');

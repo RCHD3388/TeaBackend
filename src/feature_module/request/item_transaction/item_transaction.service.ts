@@ -129,7 +129,7 @@ export class ItemTransactionService {
       }))
 
       // check user adalah penerima atau pembuat request
-      if (!user_warehouse.includes(targetRequest.requested_to.toString())
+      if (!user_warehouse.includes((targetRequest.requested_to as Warehouse)._id.toString())
         && (targetRequest.requested_by as Employee)._id.toString() != (user.employee as Employee)._id.toString()) {
         throw new BadRequestException('User tidak diperbolehkan melakukan aksi tersebut');
       }
