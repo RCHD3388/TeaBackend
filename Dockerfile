@@ -1,17 +1,23 @@
-# Base image
-FROM node:18
+# Gunakan base image Node.js
+FROM node:18-alpine
 
+# Direktori kerja dalam container
 WORKDIR /app
 
-# Copy package files and install dependencies
+# Salin file package.json dan package-lock.json
 COPY package.json package-lock.json ./
+
+# Install dependencies produksi
 RUN npm install
 
-# Copy application source code
+# Salin seluruh source code ke container
 COPY . .
 
-# Expose the development server port
+# Build aplikasi untuk produksi
+RUN npm run build
+
+# Expose port backend
 EXPOSE 3000
 
-# Start the development server
-CMD ["npm", "run", "start:dev"]
+# Jalankan aplikasi dalam mode produksi
+CMD ["npm", "run", "start:prod"]
